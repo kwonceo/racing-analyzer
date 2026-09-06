@@ -1,0 +1,134 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_09_04_제주_4경주",
+ "race_info": {
+  "date": "2026-09-04",
+  "track": "제주",
+  "round": 4,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "15:47:58",
+    "quinella": {
+     "1+2": 109.1,
+     "1+4": 46.2,
+     "4+5": 53.6,
+     "4+6": 8.3,
+     "4+7": 3.3,
+     "4+8": 10.1,
+     "4+9": 79.7,
+     "5+6": 139.6,
+     "5+7": 58.5,
+     "5+8": 146.8,
+     "5+9": 539.7,
+     "6+7": 8.9,
+     "6+8": 23.8,
+     "6+9": 204.4,
+     "7+8": 7.5,
+     "7+9": 106.5,
+     "8+9": 171.9,
+     "3+9": 337.1,
+     "3+8": 60.1,
+     "3+7": 24.7,
+     "1+5": 381.0,
+     "1+6": 148.8,
+     "1+7": 54.1,
+     "1+8": 119.3,
+     "1+9": 517.1,
+     "2+3": 63.7,
+     "2+4": 11.3,
+     "2+5": 207.3,
+     "2+6": 20.7,
+     "2+7": 13.3,
+     "2+8": 27.4,
+     "2+9": 295.6,
+     "3+4": 22.9,
+     "3+5": 216.1,
+     "3+6": 59.0,
+     "1+3": 160.1
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.764,
+  "quinella_mismatch": null,
+  "refund_rate": 0.732,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   4,
+   6,
+   7,
+   8,
+   3
+  ],
+  "eliminated": [
+   1,
+   5,
+   9
+  ],
+  "recommend": "4+7",
+  "strategy": "BMED_역배열형",
+  "confidence": 11.9,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 1,
+  "2nd": 6,
+  "3rd": 8,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 1,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": 2,
+  "reversal_horse_placed": false,
+  "reversal_ratio": 0.764,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-09-04 15:53:30",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

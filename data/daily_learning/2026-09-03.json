@@ -1,0 +1,170 @@
+{
+ "date": "2026-09-03",
+ "results_summary": {
+  "total_races": 111,
+  "hits": 84,
+  "hit_rate": 75.7,
+  "profit": {
+   "net": 183800,
+   "settled": 111
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 5789,
+  "quality_score": 73,
+  "ai_ready_races": 74,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "나고야": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "다치카와": {
+    "n": 12,
+    "hits": 12,
+    "hit_rate": 100.0
+   },
+   "다케오": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "몬베츠": {
+    "n": 12,
+    "hits": 8,
+    "hit_rate": 66.7
+   },
+   "사가": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "소노다": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "아오모리": {
+    "n": 12,
+    "hits": 8,
+    "hit_rate": 66.7
+   },
+   "마쓰도": {
+    "n": 11,
+    "hits": 9,
+    "hit_rate": 81.8
+   },
+   "도야마": {
+    "n": 7,
+    "hits": 7,
+    "hit_rate": 100.0
+   },
+   "다마노": {
+    "n": 3,
+    "hits": 2,
+    "hit_rate": 66.7
+   },
+   "야히코": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   },
+   "이토": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   }
+  },
+  "by_field_size": {
+   "소두수(≤8)": {
+    "n": 59,
+    "hits": 53,
+    "hit_rate": 89.8
+   },
+   "중두수(9~12)": {
+    "n": 48,
+    "hits": 27,
+    "hit_rate": 56.2
+   },
+   "미상": {
+    "n": 4,
+    "hits": 4,
+    "hit_rate": 100.0
+   }
+  },
+  "by_time_zone": {
+   "저녁": {
+    "n": 49,
+    "hits": 35,
+    "hit_rate": 71.4
+   },
+   "오후": {
+    "n": 47,
+    "hits": 36,
+    "hit_rate": 76.6
+   },
+   "오전": {
+    "n": 15,
+    "hits": 13,
+    "hit_rate": 86.7
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 111,
+    "hits": 84,
+    "hit_rate": 75.7
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 111,
+    "hits": 84,
+    "hit_rate": 75.7
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 111,
+    "hits": 84,
+    "hit_rate": 75.7
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 50,
+   "n": 60,
+   "rate": 83.3
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 5,
+   "n": 22,
+   "rate": 22.7
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 333,
+   "n": 564,
+   "rate": 59.0
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 740,
+   "n": 1710,
+   "rate": 43.3
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-09-03 22:02:00"
+}

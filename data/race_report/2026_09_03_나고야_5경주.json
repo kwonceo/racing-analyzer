@@ -1,0 +1,748 @@
+{
+ "race": "나고야 5경주",
+ "raceKey": "나고야 5경주",
+ "date": "2026-09-03",
+ "result": {
+  "1st": 5,
+  "2nd": 10,
+  "3rd": 1,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": "복승 메인",
+ "odds": "저배당",
+ "win_odds": 2.5,
+ "why_recommended": {
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    5,
+    10
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:25:21",
+     "minutes_before": 10,
+     "odds": 2.5,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:26:17",
+     "minutes_before": 9,
+     "odds": 2.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:04",
+     "minutes_before": 8,
+     "odds": 2.7,
+     "change": 8.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:49",
+     "minutes_before": 7,
+     "odds": 2.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:28:28",
+     "minutes_before": 7,
+     "odds": 2.5,
+     "change": -7.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:04",
+     "minutes_before": 6,
+     "odds": 2.6,
+     "change": 4.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:45",
+     "minutes_before": 5,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:30:22",
+     "minutes_before": 5,
+     "odds": 2.5,
+     "change": -3.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:01",
+     "minutes_before": 4,
+     "odds": 2.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:36",
+     "minutes_before": 3,
+     "odds": 2.6,
+     "change": 4.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:11",
+     "minutes_before": 3,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:55",
+     "minutes_before": 2,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:33:38",
+     "minutes_before": 1,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:15",
+     "minutes_before": 1,
+     "odds": 2.9,
+     "change": 11.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:53",
+     "minutes_before": 0,
+     "odds": 2.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:35:32",
+     "minutes_before": null,
+     "odds": 2.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 100.0,
+   "confidence": 25.0,
+   "reason": "전적상위"
+  },
+  "signal_10": {
+   "horse": 10,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    5,
+    10
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:25:21",
+     "minutes_before": 10,
+     "odds": 2.5,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:26:17",
+     "minutes_before": 9,
+     "odds": 2.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:04",
+     "minutes_before": 8,
+     "odds": 2.7,
+     "change": 8.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:49",
+     "minutes_before": 7,
+     "odds": 2.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:28:28",
+     "minutes_before": 7,
+     "odds": 2.5,
+     "change": -7.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:04",
+     "minutes_before": 6,
+     "odds": 2.6,
+     "change": 4.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:45",
+     "minutes_before": 5,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:30:22",
+     "minutes_before": 5,
+     "odds": 2.5,
+     "change": -3.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:01",
+     "minutes_before": 4,
+     "odds": 2.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:36",
+     "minutes_before": 3,
+     "odds": 2.6,
+     "change": 4.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:11",
+     "minutes_before": 3,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:55",
+     "minutes_before": 2,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:33:38",
+     "minutes_before": 1,
+     "odds": 2.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:15",
+     "minutes_before": 1,
+     "odds": 2.9,
+     "change": 11.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:53",
+     "minutes_before": 0,
+     "odds": 2.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:35:32",
+     "minutes_before": null,
+     "odds": 2.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 78.0,
+   "confidence": 32.0,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:25:21",
+     "minutes_before": 10,
+     "odds": 20.8,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:26:17",
+     "minutes_before": 9,
+     "odds": 22.1,
+     "change": 6.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:04",
+     "minutes_before": 8,
+     "odds": 21.2,
+     "change": -4.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:49",
+     "minutes_before": 7,
+     "odds": 24.8,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:28:28",
+     "minutes_before": 7,
+     "odds": 24.8,
+     "change": 17.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:04",
+     "minutes_before": 6,
+     "odds": 24.6,
+     "change": -0.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:45",
+     "minutes_before": 5,
+     "odds": 24.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:30:22",
+     "minutes_before": 5,
+     "odds": 25.3,
+     "change": 2.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:01",
+     "minutes_before": 4,
+     "odds": 25.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:36",
+     "minutes_before": 3,
+     "odds": 24.9,
+     "change": -1.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:11",
+     "minutes_before": 3,
+     "odds": 27.4,
+     "change": 10.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:55",
+     "minutes_before": 2,
+     "odds": 27.4,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:33:38",
+     "minutes_before": 1,
+     "odds": 27.4,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:15",
+     "minutes_before": 1,
+     "odds": 37.9,
+     "change": 38.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:53",
+     "minutes_before": 0,
+     "odds": 61.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:35:32",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 45.0,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    7,
+    10
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:25:21",
+     "minutes_before": 10,
+     "odds": 7.7,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:26:17",
+     "minutes_before": 9,
+     "odds": 7.5,
+     "change": -2.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:04",
+     "minutes_before": 8,
+     "odds": 7.8,
+     "change": 4.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:27:49",
+     "minutes_before": 7,
+     "odds": 8.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:28:28",
+     "minutes_before": 7,
+     "odds": 8.0,
+     "change": 2.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:04",
+     "minutes_before": 6,
+     "odds": 7.3,
+     "change": -8.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:29:45",
+     "minutes_before": 5,
+     "odds": 7.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:30:22",
+     "minutes_before": 5,
+     "odds": 7.1,
+     "change": -2.7,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:01",
+     "minutes_before": 4,
+     "odds": 7.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:31:36",
+     "minutes_before": 3,
+     "odds": 6.6,
+     "change": -7.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:11",
+     "minutes_before": 3,
+     "odds": 6.1,
+     "change": -7.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:32:55",
+     "minutes_before": 2,
+     "odds": 6.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:33:38",
+     "minutes_before": 1,
+     "odds": 6.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:15",
+     "minutes_before": 1,
+     "odds": 4.0,
+     "change": -34.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:34:53",
+     "minutes_before": 0,
+     "odds": 5.1,
+     "change": null,
+     "excluded": true,
+     "exclReason": "배당 열 밀림 의심(인접 조합 값 일치) - 제외됨"
+    },
+    {
+     "time": "16:35:32",
+     "minutes_before": null,
+     "odds": 5.1,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 38.0,
+   "confidence": 0.0,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  5,
+  10,
+  7
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 5번 100.0점",
+  "2. 배당 수집 시작 16:25:21",
+  "5. 종합 신뢰도 25.0점(하) 판정",
+  "6. BMED 전략: 보험형 적용",
+  "7. 최종 추천: 복승 메인 5+10"
+ ],
+ "confidence_breakdown": {
+  "horse": 5,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 25,
+  "record_score": 100.0,
+  "total": 25.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "복승불일치_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 100.0,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [
+   5
+  ],
+  "inverseHit": [
+   5
+  ],
+  "confidence": 32.0,
+  "reason": "전적유력마 10번 적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "16:32:11",
+    "minutes_before": 3,
+    "previous_signal": "10번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -37.0%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   2,
+   4,
+   8,
+   9,
+   10
+  ],
+  "events": {
+   "2": {
+    "first": {
+     "time": "16:27:04",
+     "minutes_before": 8
+    },
+    "count": 1,
+    "last": {
+     "time": "16:27:04",
+     "minutes_before": 8
+    },
+    "vanished": {
+     "time": "16:28:28",
+     "minutes_before": 7
+    }
+   },
+   "9": {
+    "first": {
+     "time": "16:29:04",
+     "minutes_before": 6
+    },
+    "count": 1,
+    "last": {
+     "time": "16:29:04",
+     "minutes_before": 6
+    },
+    "vanished": {
+     "time": "16:29:45",
+     "minutes_before": 5
+    }
+   },
+   "10": {
+    "first": {
+     "time": "16:31:36",
+     "minutes_before": 3
+    },
+    "count": 1,
+    "last": {
+     "time": "16:31:36",
+     "minutes_before": 3
+    }
+   },
+   "4": {
+    "first": {
+     "time": "16:32:11",
+     "minutes_before": 3
+    },
+    "count": 1,
+    "last": {
+     "time": "16:32:11",
+     "minutes_before": 3
+    },
+    "vanished": {
+     "time": "16:32:55",
+     "minutes_before": 2
+    }
+   },
+   "8": {
+    "first": {
+     "time": "16:34:15",
+     "minutes_before": 1
+    },
+    "count": 1,
+    "last": {
+     "time": "16:34:15",
+     "minutes_before": 1
+    }
+   }
+  },
+  "finalSignal": 8,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 1,
+   "next_race": 0
+  },
+  "validCount": 13
+ },
+ "pnl": 1500,
+ "stake": 1000,
+ "generated_at": "2026-09-03 16:55:14"
+}
