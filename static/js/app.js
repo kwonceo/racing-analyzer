@@ -2642,7 +2642,7 @@
     S.push(`<div style="margin:4px 0;padding:12px 14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.13),rgba(20,28,43,.92))">
       <div style="font-size:16px;font-weight:900;color:#38d39f">🎯 최종 추천 ${_oddsGradeLegend(sport)}</div>
       ${qRows || '<div class="hint" style="margin:4px 0">추천 조합 형성 전 — 신호 대기</div>'}
-      ${tRow}${spRow}
+      ${tRow}${spRow}${_keyPairsRefHtml(cp)}
     </div>`);
     // ── 3. 핵심 신호(3줄 이하) ──
     const sig = [];
@@ -7466,6 +7466,16 @@
 
   // [핵심 추천·추천 과다 근본정리] 최종 복승 ≤2 · 삼복승 ≤2 (총 4개)만 크게 표시 — 딱 이것만.
   //   서버 _final_picks가 모든 파생추천(확신도·복병·급락보존·스마트머니·밀집박스)을 4개로 압축(나머지 숨김·데이터는 보존).
+  // [⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 회원 수신 명단에 없는 유력마끼리의 짝 — 표시 전용(판정·저장 무관)
+  function _keyPairsRefHtml(cp) {
+    try {
+      const kp = ((cp && cp.keyPairsRef) || []).filter((x) => x && !x.inList);
+      if (!kp.length) return '';
+      const body = kp.slice(0, 3).map((x) => `${esc((x.combo || []).join('+'))}${x.odds != null ? ` (${esc(x.odds)}배)` : ' (배당 없음)'}`).join(' · ');
+      return `<div style="font-size:13px;font-weight:800;color:#93c5fd;margin:4px 0 0;padding:6px 9px;border:1px dashed #60a5fa;border-radius:8px;background:rgba(96,165,250,.08)">⭐ 유력마끼리 빠진 짝 · 참고: ${body}<div style="font-size:11px;font-weight:400;color:#94a3b8">※ 참고만 — 매번 다 사면 손해(8월 3제외 회수 57%)</div></div>`;
+    } catch (_) { return ''; }
+  }
+
   function renderCorePicks(a) {
     const cp = a && a.corePicks;
     if (!cp || a.recommendClosed) return '';
@@ -7693,7 +7703,7 @@
     return `<div style="margin:4px 0 8px;padding:12px 14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.13),rgba(20,28,43,.92))">
       <div style="font-size:16px;font-weight:900;color:#38d39f">🎯 최종 추천 <span class="hint" style="font-weight:400;font-size:11px">${esc(a.raceKey || '')}</span> ${_oddsGradeLegend('cycle')}</div>
       ${qRows || '<div class="hint" style="margin:4px 0">추천 조합 형성 전 — 신호 대기</div>'}
-      ${tRow}${spRow}${smLine}${sigLine}${elimLine}
+      ${tRow}${spRow}${_keyPairsRefHtml(cp)}${smLine}${sigLine}${elimLine}
     </div>`;
   }
 

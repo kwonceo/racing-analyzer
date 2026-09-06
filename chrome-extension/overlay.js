@@ -20,7 +20,7 @@
   //   아예 안 붙은 것이거나 확장이 재로드되지 않은 것이다.
   //   ⚠ 종전 로그는 파일 2000행 뒤에 있어서, 그 앞에서 예외가 나면 한 줄도 안 나왔다.
   try {
-    console.log('%c[오버레이] overlay.js 진입 · v2.1.167 · ' + location.host,
+    console.log('%c[오버레이] overlay.js 진입 · v2.1.168 · ' + location.host,
       'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
   try {
@@ -1870,6 +1870,16 @@
                 ctBox.appendChild(_dt);
               }
               cpBox.appendChild(ctBox);
+            }
+            // [⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 회원 수신 명단에 없는 유력마끼리의 짝 — 표시 전용
+            var _kpr = ((cp && cp.keyPairsRef) || []).filter(function (x) { return x && !x.inList; });
+            if (_kpr.length) {
+              var kpBox = mk('div', 'margin-top:6px;padding:6px 9px;border:1px dashed #60a5fa;border-radius:8px;background:rgba(96,165,250,.08)');
+              kpBox.appendChild(mk('div', 'font-weight:800;font-size:13px;color:#93c5fd',
+                '⭐ 유력마끼리 빠진 짝 · 참고: ' + _kpr.slice(0, 3).map(function (x) {
+                  return (x.combo || []).join('+') + (x.odds != null ? ' (' + x.odds + '배)' : ' (배당 없음)'); }).join(' · ')));
+              kpBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8', '※ 참고만 — 매번 다 사면 손해(8월 3제외 회수 57%)'));
+              cpBox.appendChild(kpBox);
             }
           } catch (_ce) { /* 표시 실패는 무시 — 추천 본문에 영향 주지 않는다 */ }
           // 🔴 [빠진 조합] 부산 4R 5+8 이 4초만 본선이었고 96배였는데 대표가 물어보고서야 알았다.

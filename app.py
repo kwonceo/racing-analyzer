@@ -14640,6 +14640,13 @@ def _triple_analyze(rk, rec):
         print("[T5동결] 적용 실패(무시·원본 표시):", _t5e)
     # [T-2 화면 잠금 (2026-09-06 대표 승인)] 최종 명단이 확정된 **마지막** 자리 — 이 뒤로는 표시 필드를 건드리는 단계가 없다.
     #   실패 시 원본 그대로(잠금 없음). 🔧 되돌리기: T2_DISPLAY_LOCK_ENABLED = False
+    # [⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 표시 전용 — T-2 잠금 **앞**에 계산해 함께 잠긴다(_T2_LOCK_KEYS).
+    try:
+        _kpr = _key_pairs_ref(_an_out, curQ)
+        if _kpr is not None and isinstance(_an_out.get("corePicks"), dict):
+            _an_out["corePicks"]["keyPairsRef"] = _kpr
+    except Exception as _kpe:
+        print("[유력마 전조합 참고] 실패(무시):", _kpe)
     try:
         _apply_t2_display_lock(rk, _an_out, cur_mb, after_close, curQ)
     except Exception as _t2le:
@@ -14883,7 +14890,7 @@ def _t5_items(fq):
 T2_DISPLAY_LOCK_ENABLED = True   # [2026-09-06 대표 승인] 🔧 되돌리기: False (한 줄)
 T2_DISPLAY_LOCK_MB = 2.0         # 마감 2분 전부터 회원 화면 명단을 잠근다(카톡 T-2 번복 차단과 같은 기준)
 _T2_LOCK = {}                    # rk → {"day", "at", "mb", "keys": {필드: 사본}}  (메모리 · 날짜 바뀌면 소멸)
-_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra")   # 회원이 받는 것 전부(8/29 정의)
+_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra", "keyPairsRef")   # 회원이 받는 것 전부(8/29 정의)
 
 
 def _t2_combos(v):
@@ -14971,6 +14978,53 @@ def _apply_t2_display_lock(rk, an, cur_mb, after_close, curQ=None):
             _gate_hit("t2_display_lock_hold", rk, None, reach_only=True)
     except Exception:
         pass
+
+
+def _key_pairs_ref(an, curQ=None):
+    """[⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 유력마 상위 3두의 세 짝을 **참고 표시용**으로 만든다.
+
+    실물: 서울 10경주(결과 8-7 · 복승 61.5배) — 유력마 8·4·7 이었는데 7+8 이 **50배 상한**에 걸려 어느 자리에도 못 들어갔다
+      (4+8 21.7 본선 · 4+7 46.3 💎 · 7+8 56.0 제외). 급락도 아니어서(12.8→56 상승) 시간 축도 못 잡는다.
+      9/01 분해의 「E · 제거에 걸림」(정답 배당 중앙 94.7배) 유형이다.
+    🔴 **표시 전용이다.** displayedCombos(판정)·finalQuinellas(회원 수신)·저장·학습에 넣지 않는다.
+      유력마 전조합을 **사는** 안은 8월 소급 3제외 회수 57% 로 기각됐다(9/01) — 그래서 「참고」이고 그 문구를 같이 단다.
+    반환 [{combo, odds, inList}] 3개(유력마 3두 미만이면 None). odds 는 그 시점 배당판(curQ · 100배 이상은 None).
+    inList = 이미 회원 수신 명단(finalQuinellas·bmedSpecial·kakaoExtra)에 있는 짝 — 화면은 빠진 짝만 보여준다.
+    """
+    try:
+        kh = []
+        for x in (an.get("keyHorses") or []):
+            try:
+                kh.append(int(x))
+            except (TypeError, ValueError):
+                continue
+        kh = kh[:3]
+        if len(kh) < 3:
+            return None
+        cp = an.get("corePicks") or {}
+        have = set()
+        for k in ("finalQuinellas", "bmedSpecial", "kakaoExtra"):
+            for q in (cp.get(k) or []):
+                c = q.get("combo") if isinstance(q, dict) else q
+                if isinstance(c, (list, tuple)) and len(c) >= 2:
+                    try:
+                        have.add((min(int(c[0]), int(c[1])), max(int(c[0]), int(c[1]))))
+                    except (TypeError, ValueError):
+                        pass
+        out = []
+        for i in range(3):
+            for j in range(i + 1, 3):
+                pair = (min(kh[i], kh[j]), max(kh[i], kh[j]))
+                o = None
+                try:
+                    _v = curQ.get(pair) if isinstance(curQ, dict) else None
+                    o = round(float(_v), 1) if (_v is not None and 0 < float(_v) < 100) else None
+                except (TypeError, ValueError):
+                    o = None
+                out.append({"combo": list(pair), "odds": o, "inList": pair in have})
+        return out
+    except Exception:
+        return None
 
 
 def _apply_t5_freeze(rk, an):
@@ -41309,6 +41363,18 @@ def _kakao_rich_message(rk, phase, an):
         for s in (cp.get("bmedSpecial") or [])[:1]:
             _o = (" (%s배)" % s.get("odds")) if s.get("odds") else ""
             lines.append("💎복병 %s%s ★★ 참고" % ("+".join(map(str, s.get("combo") or [])), _o))
+    # [⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 회원 수신 명단에 없는 유력마끼리의 짝을 **참고**로 붙인다.
+    #   서울 10경주 7+8(61.5배·결과 8-7)이 50배 상한에 잘려 어디에도 안 보였다. 사라는 것이 아니다 — 문구에 그 근거를 단다.
+    try:
+        _kpr = [x for x in (cp.get("keyPairsRef") or []) if isinstance(x, dict) and not x.get("inList")]
+        if _kpr:
+            lines.append("⭐ 유력마끼리 빠진 짝 · 참고: " + " · ".join(
+                "%s%s" % ("+".join(map(str, x.get("combo") or [])),
+                          (" (%s배)" % x.get("odds")) if x.get("odds") else "")
+                for x in _kpr[:3]))
+            lines.append("  ※ 참고만 — 매번 다 사면 손해(8월 3제외 회수 57%)")
+    except Exception:
+        pass
     if not lines:
         lines.append("추천 조합 미형성 — 신호 대기(패스 권장)")
     else:
