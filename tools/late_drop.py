@@ -158,11 +158,32 @@ def replay_live(ticks, exclude=None, mb_max=MB_MAX):
 
 
 def lines(ps):
-    """카톡 문구 — 없으면 빈 리스트."""
+    """카톡 문구 — 없으면 빈 리스트.
+
+    [2026-09-06 대표: 「t2 급락 신호는 강조해야 한다」] 한눈에 **다른 종류의 알림**임이 보이게 한다.
+      · 첫 줄 🚨 — T-5 정규 추천(★★★)과 구분 · 마감까지 2분이라 읽는 시간이 없다
+      · 🔴 후보가 **한 말에 몰리면 그 말을 먼저** 말한다 — 실물 오비히로 3경주(9/06): 후보 5개가 전부 8번(전적 없는 말)이었고
+        결과 7-8. 조합은 빗나가도 「돈이 몰린 말」은 맞았다 — 회원이 짝을 스스로 고를 수 있게 말 단위를 앞세운다
+      · 급락 표기는 ▼N% 로 통일(카톡은 굵게가 안 되므로 기호로 강조)
+    ⚠ 판정·상한·조합 선정은 여기서 바꾸지 않는다 — 문구뿐이다.
+    """
     if not ps:
         return []
-    out = ["⚡ 마감 직전 신호 — 방금 돈이 몰렸습니다"]
+    out = ["🚨 마감 2분 급락 — 방금 돈이 몰렸습니다 🚨"]
+    try:
+        cnt = {}
+        for c, o, d, mb in ps:
+            for h in c:
+                cnt[int(h)] = cnt.get(int(h), 0) + 1
+        if len(ps) >= 2:
+            h, n = max(cnt.items(), key=lambda kv: kv[1])
+            if n >= 2:
+                out.append("💰 %d번에 돈이 몰렸습니다 (신호 %d개 %s %d번)"
+                           % (h, len(ps), "모두" if n == len(ps) else "중 %d개가" % n, h))
+    except Exception:
+        pass
     for c, o, d, mb in ps:
-        out.append(" 복승 %s (%.1f배) · %.0f%% 급락" % ("+".join(map(str, c)), o, abs(d)))
-    out.append(" ※ 기존 추천은 그대로입니다. 이건 **추가**입니다")
+        out.append("⚡ 복승 %s · %.1f배 · ▼%.0f%%" % ("+".join(map(str, c)), o, abs(d)))
+    out.append("⏱ 마감 임박 — 지금 결정하셔야 합니다")
+    out.append("※ 기존 추천은 그대로입니다. 이건 **추가**입니다")
     return out
