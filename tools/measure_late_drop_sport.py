@@ -40,6 +40,15 @@ BAD = ("odds_suspect", "baseline_reset", "next_race_blocked")
 BOOT_N = 2000
 SEED = 20260901
 
+# 🔴🔴 [2026-09-05] 실전 재현 스위치 — **look-ahead 차단**(원칙 27)
+#   종전엔 `LD.picks(전체 히스토리)` 를 **한 번** 불렀다. 그러면 반등 판정이 급락 시점
+#   **이후 틱**까지 보게 되어 「진성 vs 페이크」가 미래 정보로 갈렸다.
+#   실전은 마감 2.5분 이내 **매 폴링**마다 부르고 **최근 12틱**만 보며 **첫 발동에서 잠근다.**
+#   ⇒ `LD.replay_live` 가 그 셋을 재현한다(정의는 late_drop.py 에 둔다 — 여기서 재구현하지 않는다).
+#   실측 영향: 경마 엣지 1.576(종전) → **1.445**(실전 재현). 측정이 8% 낙관적이었다.
+#   🔧 되돌리기: LIVE_REPLAY = False (그러면 종전 수치가 그대로 재현된다)
+LIVE_REPLAY = True
+
 # 🔴 현행 실전 문턱 — `late_drop.py` 에서 읽어 온다(여기에 손으로 적지 않는다).
 CUR = {"drop": LD.DROP_MIN, "reb": LD.REBOUND_MAX,
        "lo": LD.ODDS_LO, "hi": LD.ODDS_HI, "mb": LD.MB_MAX, "cap": LD.MAX_PICKS}
@@ -137,12 +146,16 @@ def races(pattern):
 
 
 def signals(rc, mb=None, **kw):
-    """문턱을 적용해 신호를 뽑는다 — **실전 `LD.picks` 그대로.**"""
+    """문턱을 적용해 신호를 뽑는다 — **실전 호출을 그대로 재현**한다(LIVE_REPLAY)."""
     out = []
     with thresholds(**kw):
         _mb = CUR["mb"] if mb is None else mb
         for r in rc:
-            for combo, odds, drop, m in LD.picks(r["ticks"], r["ex"], _mb):
+            if LIVE_REPLAY:
+                _ps, _fire = LD.replay_live(r["ticks"], r["ex"], _mb)
+            else:                              # 🔧 종전(전체 히스토리 1회 · 미래 틱 포함)
+                _ps, _fire = LD.picks(r["ticks"], r["ex"], _mb), None
+            for combo, odds, drop, m in _ps:
                 if combo not in r["fin"] or r["fin"][combo] <= 0:
                     continue
                 out.append({"rk": r["rk"], "sport": r["sport"], "combo": combo,

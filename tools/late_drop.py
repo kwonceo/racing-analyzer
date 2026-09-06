@@ -31,6 +31,14 @@ ODDS_LO, ODDS_HI = 10.0, 80.0   # 배당대 — 10배 미만은 표본이 얇고
 MB_MAX = 2.0           # 마감 몇 분 이내인가
 MAX_PICKS = 2          # 경주당 상한(실측 경주당 0.70개라 사실상 여유)
 
+# 🔴🔴 [2026-09-05] 실전 호출 조건 — **소급 측정이 이것을 재현해야 한다**(원칙 27)
+#   app.py 41262  `if left is not None and 0 <= left <= 150: _late_drop_alert(...)`
+#     ⇒ 마감 2.5분 이내에 **매 폴링마다** 부른다. 첫 성공에서 `_LATE_DROP_SENT` 로 잠근다.
+#   app.py 40580  `hist = list(doc.get("history") or [])`
+#     ⇒ 그 `history` 는 **활성 캐시라 최근 12틱 상한**이다(CLAUDE.md 2026-08-11).
+POLL_MB = 2.5          # 실전이 호출을 시작하는 시점(마감 N분 전)
+HIST_CAP = 12          # 실전이 보는 활성 캐시 틱 상한
+
 
 def _qmap(q):
     """{(a,b): odds} 정규화 — 리스트/딕트 두 형식."""
@@ -62,12 +70,21 @@ def _qmap(q):
     return out
 
 
-def picks(ticks, exclude=None, mb_max=MB_MAX):
+def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None):
     """마감 전 틱 목록 → 진성 급락 조합.
 
     ticks: [{minutes_before, quinella, ...}] (오염 틱은 호출부에서 이미 걸렀다고 본다)
     exclude: 이미 회원에게 나간 조합 집합(중복 발송 방지)
+    now_mb: 🔴 **판정 시각**(마감 N분 전). 주면 그 시각 이후 틱을 **입력에서 제거**한다.
+            None 이면 종전과 완전히 같다 — 실전 호출부(app.py)는 안 넘기므로 **동작 무변경**이다.
     반환 [(combo, odds, drop%, mb)] — 급락이 큰 순. 없으면 [].
+
+    🔴 [2026-09-05] `now_mb` 를 넣은 이유 — 아래 **반등 판정**이 `ser` 전체를 훑는다.
+      실전에서는 `ser` 가 "지금까지 온 틱"이라 미래가 애초에 없다(그래서 실전은 문제없다).
+      그런데 **소급 측정이 전체 히스토리를 한 번에 넘기면** 급락 시점 이후 틱까지 보게 되어
+      「진성 vs 페이크」가 **미래 정보로 판정**된다 — 원칙 27 위반이고, 그만큼 성적이 부풀려진다.
+      실측: 경마 엣지 1.576(미래 봄) ↔ **1.445**(실전 재현). 측정이 8% 낙관적이었다.
+    ⚠ 이 인자는 **막는 장치**이지 판정식이 아니다. 문턱·반등·상한은 한 줄도 안 바꿨다.
     """
     ser = []
     for t in (ticks or []):
@@ -76,6 +93,8 @@ def picks(ticks, exclude=None, mb_max=MB_MAX):
         mb = t.get("minutes_before")
         if mb is None or mb < 0 or not t.get("quinella"):
             continue
+        if now_mb is not None and float(mb) < float(now_mb):
+            continue                          # 🔴 판정 시각 이후 = 아직 안 일어난 일
         ser.append((float(mb), _qmap(t["quinella"])))
     ser.sort(key=lambda x: -x[0])            # 시간순(mb 큰 것 = 이른 것)
     if len(ser) < 3:
@@ -109,6 +128,33 @@ def picks(ticks, exclude=None, mb_max=MB_MAX):
         if c not in best or d < best[c][2]:
             best[c] = (c, o, d, mb)
     return sorted(best.values(), key=lambda x: x[2])[:MAX_PICKS]
+
+
+def replay_live(ticks, exclude=None, mb_max=MB_MAX):
+    """🔴 실전 호출을 **그대로 재현**한다 — 소급 측정은 `picks` 가 아니라 이 함수를 쓴다.
+
+    실전(app.py 41262 · 40580)이 하는 일:
+      ① 마감 POLL_MB 분 이내에 **매 폴링마다** `_late_drop_alert` 를 부른다
+      ② 그때 넘기는 `history` 는 활성 캐시라 **최근 HIST_CAP 틱**뿐이다
+      ③ 처음으로 결과가 나오면 발송하고 `_LATE_DROP_SENT` 로 **경주당 1회 잠근다**
+    ⇒ 셋 다 재현하지 않으면 소급 측정이 실전과 다른 것을 잰다(원칙 3).
+
+    반환 (picks, fire_mb) — 발동 없으면 ([], None).
+    """
+    ser = [t for t in (ticks or [])
+           if isinstance(t, dict) and t.get("quinella")
+           and isinstance(t.get("minutes_before"), (int, float))
+           and float(t["minutes_before"]) >= 0]
+    ser.sort(key=lambda t: -float(t["minutes_before"]))     # 이른 것 → 늦은 것
+    for j, t in enumerate(ser):
+        mb = float(t["minutes_before"])
+        if mb > POLL_MB:                      # 아직 호출 창에 안 들어왔다
+            continue
+        avail = ser[:j + 1][-HIST_CAP:]       # ② 그 시점까지 · 최근 12틱
+        ps = picks(avail, exclude, mb_max, now_mb=mb)
+        if ps:
+            return ps, mb                     # ③ 첫 발동에서 잠근다
+    return [], None
 
 
 def lines(ps):
