@@ -14638,6 +14638,12 @@ def _triple_analyze(rk, rec):
         _apply_t5_freeze(rk, _an_out)
     except Exception as _t5e:
         print("[T5동결] 적용 실패(무시·원본 표시):", _t5e)
+    # [T-2 화면 잠금 (2026-09-06 대표 승인)] 최종 명단이 확정된 **마지막** 자리 — 이 뒤로는 표시 필드를 건드리는 단계가 없다.
+    #   실패 시 원본 그대로(잠금 없음). 🔧 되돌리기: T2_DISPLAY_LOCK_ENABLED = False
+    try:
+        _apply_t2_display_lock(rk, _an_out, cur_mb, after_close, curQ)
+    except Exception as _t2le:
+        print("[T-2 화면잠금] 적용 실패(무시·원본 표시):", _t2le)
     # [경주 등급 배지 (2026-07-22 권대표 요청)] 예측 확신을 경주당 1개 등급으로 — 오버레이·카드·카톡
     #   공통 표시(모든 경주가 같은 무게로 보이던 문제 해소). 기준 = 승부 계층·카톡 알림과 동일 축.
     #   🔥 강력승부: 신호 2+ & 확신도 65+ / ✅ 추천: 신호 1+ & 확신도 50+ / ⚖️ 관찰: 신호 or 확신도 40+
@@ -14872,6 +14878,99 @@ def _t5_items(fq):
         except (TypeError, ValueError):
             continue
     return out
+
+
+T2_DISPLAY_LOCK_ENABLED = True   # [2026-09-06 대표 승인] 🔧 되돌리기: False (한 줄)
+T2_DISPLAY_LOCK_MB = 2.0         # 마감 2분 전부터 회원 화면 명단을 잠근다(카톡 T-2 번복 차단과 같은 기준)
+_T2_LOCK = {}                    # rk → {"day", "at", "mb", "keys": {필드: 사본}}  (메모리 · 날짜 바뀌면 소멸)
+_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra")   # 회원이 받는 것 전부(8/29 정의)
+
+
+def _t2_combos(v):
+    """비교용 — 조합 목록만 뽑는다(배당은 갱신되므로 비교에서 뺀다)."""
+    try:
+        if isinstance(v, list):
+            out = []
+            for x in v:
+                if isinstance(x, dict):
+                    out.append(list(x.get("combo") or []))
+                else:
+                    out.append(list(x) if isinstance(x, (list, tuple)) else x)
+            return json.dumps(out, sort_keys=True, default=str)
+        return json.dumps(v, sort_keys=True, default=str)
+    except Exception:
+        return str(v)
+
+
+def _apply_t2_display_lock(rk, an, cur_mb, after_close, curQ=None):
+    """[2026-09-06 대표 승인] T-2 이후 **회원 화면 명단을 잠근다**(순서 포함) — 표시 계층.
+
+    실물: 오비히로 4경주(9/06) 발주 14초 전부터 명단이 **12초 사이 세 번** 바뀌었다
+      (4+7·2+7·1+7 → 순서 뒤집힘 → 5+7 추가 → 마감 동결에서 4+7 탈락·1+5 추가).
+      히스테리시스는 1순위만 붙들고 2순위 이하는 매 틱 재정렬되며, T-5 「삭제 금지」는 추가를 막지 않는다.
+      카톡은 T-2 뒤 번복이 차단돼 있는데 **화면만 계속 바뀌어** 회원이 받은 것과 보는 것이 갈렸다.
+    근거: 마감 뒤 추가된 조합의 성적은 표본 7건 · 3제외 36.5%(8/10) 로 근거가 없고, 8/28 두 경주가 마지막 틱에 뒤집혔다.
+    규칙: mb ≤ 2 첫 도달 시점의 회원 수신 필드 4종을 사본으로 잠그고, 이후 틱은 **명단·순서를 그 사본으로 되돌린다.**
+      · 배당만 현재 배당판(curQ)으로 갱신한다(회원이 보는 숫자 = 지금 배당판 · 9/06 ② 와 같은 취지)
+      · 마감 후에도 잠긴 사본을 유지한다(화면 아래 「최종 추천」이 마감 후 재계산으로 갈리던 것 — 2026-07-30 결함 — 도 같이 멎는다)
+      · T-2 이후 새로 잡히는 것은 🚨 마감 2분 급락 알림(별도 채널)으로만 간다 — 「기존 추천은 그대로, 이건 추가」
+    ⚠ `_apply_t5_freeze` **뒤**(최종 표시 명단이 확정된 뒤)에 불러야 한다. 판정·저장·학습 경로는 이 함수가 만든
+      finalQuinellas 를 그대로 읽는다 → 받은 것 = 재는 것(JUDGE_MATCH_MEMBER 와 같은 방향).
+    원칙 23 — t2_display_lock_set(잠금 시점) · t2_display_lock_hold(도달) · fire = 실제로 되돌린 틱.
+    """
+    if not T2_DISPLAY_LOCK_ENABLED or not isinstance(an, dict):
+        return
+    cp = an.get("corePicks")
+    if not isinstance(cp, dict):
+        return
+    today = time.strftime("%Y-%m-%d")
+    st = _T2_LOCK.get(rk)
+    if st and st.get("day") != today:
+        _T2_LOCK.pop(rk, None)
+        st = None
+    mb_ok = isinstance(cur_mb, (int, float)) and 0 <= float(cur_mb) <= T2_DISPLAY_LOCK_MB
+    if st is None:
+        if after_close or not mb_ok:
+            return                                    # T-2 전이거나(자유) · 잠금 없이 마감된 경주(기존 동결 경로 그대로)
+        keys = {}
+        for k in _T2_LOCK_KEYS:
+            if cp.get(k) is not None:
+                keys[k] = json.loads(json.dumps(cp.get(k), default=str))
+        st = {"day": today, "at": time.time(), "mb": cur_mb, "keys": keys}
+        _T2_LOCK[rk] = st
+        an["t2DisplayLock"] = {"locked": True, "since": st["at"], "mb": cur_mb, "held": False}
+        try:
+            _gate_hit("t2_display_lock_set", rk, "mb=%s · 복승 %d · 삼복승 %d" % (
+                cur_mb, len(keys.get("finalQuinellas") or []), len(keys.get("finalTrifectas") or [])))
+        except Exception:
+            pass
+        return
+    changed = []
+    for k, v in st["keys"].items():
+        cur = cp.get(k)
+        vv = json.loads(json.dumps(v, default=str))
+        if k == "finalQuinellas" and isinstance(curQ, dict) and curQ:
+            for q in vv:
+                try:
+                    c = q.get("combo")
+                    pair = (min(int(c[0]), int(c[1])), max(int(c[0]), int(c[1])))
+                    o = curQ.get(pair)
+                    if o is not None and 0 < float(o) < 100:
+                        q["odds"] = round(float(o), 1)
+                except Exception:
+                    continue
+        if _t2_combos(cur) != _t2_combos(v):
+            changed.append(k)
+        cp[k] = vv
+    an["t2DisplayLock"] = {"locked": True, "since": st["at"], "mb": st["mb"], "held": True,
+                           "changedKeys": changed, "afterClose": bool(after_close)}
+    try:
+        if changed:
+            _gate_hit("t2_display_lock_hold", rk, "되돌림 %s" % ",".join(changed))
+        else:
+            _gate_hit("t2_display_lock_hold", rk, None, reach_only=True)
+    except Exception:
+        pass
 
 
 def _apply_t5_freeze(rk, an):
