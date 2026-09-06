@@ -3362,6 +3362,87 @@ def _twin_same_race(a, b):
     return bool(pa and pb and pa == pb)
 
 
+FOREIGN_GRID_GUARD = True        # 🔧 되돌리기: False (한 줄)
+FOREIGN_GRID_MIN_N = 6
+FOREIGN_GRID_GAP = 2             # 격자 두수가 명단 최대 마번보다 이만큼 이상 작을 때만
+FOREIGN_GRID_AGREE = 0.5         # 신뢰 틱과 공통 조합의 ±30% 일치율이 이 미만이면 외부 판
+
+
+def _foreign_grid_verdict(rk, q, source):
+    """[2026-09-06 ① · 대표 승인] 확장 틱이 **다른 두수의 완전 격자**이고 값도 안 맞으면 다른 경주 판이다.
+
+    실물: 부산 5경주(11두·55조합)에 14:38~14:39 **8두 28조합**(=카나자와 4경주 판)이 7틱 들어와
+      1+5 가 1.8배로 굳고 T-5 카톡 본선①로 나갔다(실제 1+5 는 100 껍데기 · 3+6 적중).
+    종전 가드가 못 잡은 이유: 두수 검증(_arity_guard)은 28/55=51% 로 허용 범위(40~150%) 안 ·
+      지문 대조는 활성 캐시 안의 상대와 100% 일치만 본다(카나자와는 서버 수집이라 상한 처리가 달랐다).
+    판정 — **둘 다** 성립해야 폐기(원칙 20 · 8/20~9/06 소급 2,384경주·확장 4,752틱: 차단 80틱/12경주 ·
+      값이 맞는 작은 격자 34틱은 통과 · 8/20 카와사키 7두 격자 9경주 = 경륜 판 혼입 · 8/30·9/06 부산 5경주):
+      ⓐ 격자: 조합 수 == C(mx,2) 인 완전 격자(mx ≥ 6) 이고 mx ≤ (명단 최대 마번 − 2)
+      ⓑ 값  : 가장 최근 **신뢰 틱**(oddspark·kra_api·netkeiba·nar)과 공통 조합(양쪽 <100) 5개+ 중 ±30% 일치가 절반 미만
+    ⚠ 신뢰 틱이 없으면 판정하지 않는다(추측 금지). 신뢰 소스 자체는 절대 폐기하지 않는다(_twin_src_trusted).
+    ⚠ 취소마(격자에 구멍)·부분수집(격자 아님)은 ⓐ에서 빠진다. 원칙 23 — 도달(foreign_grid_reach)·발동(foreign_grid_drop) 따로.
+    """
+    if not FOREIGN_GRID_GUARD or _twin_src_trusted(source):
+        return None
+    m = _as_qmap(q)
+    if not m:
+        return None
+    mx = max(max(k) for k in m)
+    if mx < FOREIGN_GRID_MIN_N or len(m) != mx * (mx - 1) // 2:
+        return None
+    _gate_hit("foreign_grid_reach", rk, None, reach_only=True)
+    R = 0
+    try:
+        for h in (((_starters_load() or {}).get(rk) or {}).get("horses") or []):
+            try:
+                R = max(R, int(h.get("no")))
+            except (TypeError, ValueError):
+                pass
+    except Exception:
+        pass
+    try:
+        R = max([R] + [int(z) for z in (_oddspark_seen_get(rk) or ())])
+    except Exception:
+        pass
+    ticks = []
+    try:
+        ticks = list((((_triple_load() or {}).get(rk) or {}).get("history") or []))
+    except Exception:
+        ticks = []
+    for t in ticks:
+        if isinstance(t, dict) and _twin_src_trusted(t.get("src")) and t.get("quinella"):
+            _tm = _as_qmap(t.get("quinella"))
+            if _tm:
+                R = max(R, max(max(k) for k in _tm))
+    if R >= FOREIGN_GRID_MIN_N and mx > R - FOREIGN_GRID_GAP:
+        return None                                   # 대부분 여기서 끝난다(파일을 안 읽는다)
+    ref = None
+    try:                                              # 드문 경로에서만 odds_history 를 읽는다
+        _lp = _analysis_log_path(rk)
+        _lp = _lp[0] if isinstance(_lp, tuple) else _lp
+        _od = _hist_read_any(_lp.replace(os.sep + "analysis_log" + os.sep,
+                                         os.sep + "odds_history" + os.sep)) or {}
+        ticks = list(_od.get("snapshots") or []) + ticks
+    except Exception:
+        pass
+    for t in ticks:
+        if isinstance(t, dict) and _twin_src_trusted(t.get("src")) and t.get("quinella"):
+            _tm = _as_qmap(t.get("quinella"))
+            if _tm:
+                ref = _tm
+                R = max(R, max(max(k) for k in _tm))
+    if R < FOREIGN_GRID_MIN_N or mx > R - FOREIGN_GRID_GAP or not ref:
+        return None
+    common = [k for k in m if k in ref and 0 < m[k] < 100 and 0 < ref[k] < 100]
+    if len(common) < 5:
+        return None
+    agree = sum(1 for k in common if abs(m[k] - ref[k]) / ref[k] <= 0.3)
+    if agree / float(len(common)) >= FOREIGN_GRID_AGREE:
+        return None
+    return "%d두 완전 격자(%d조합)인데 명단 최대 %d번 · 신뢰 틱과 공통 %d 중 일치 %d" % (
+        mx, len(m), R, len(common), agree)
+
+
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None, scratched=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
@@ -3546,6 +3627,18 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         _gate_hit("odds_twin_drop", rk, "%s 와 %d/%d 일치" % (_to, _ts, _tn))
         return {"ok": True, "skipped": True, "raceKey": rk, "twinDropped": True,
                 "reason": "다른 경주 배당과 완전 일치 — 오염으로 판단해 폐기"}
+    # ── [2026-09-06 ① · 대표 승인] 다른 두수의 완전 격자 = 다른 경주 판 → 확장 틱만 폐기(위 함수 참조) ──
+    if FOREIGN_GRID_GUARD:
+        _fg = None
+        try:
+            _fg = _foreign_grid_verdict(rk, q, source)
+        except Exception as _fge:
+            print("[외부 격자 가드] 실패(무시):", str(_fge)[:80])
+        if _fg:
+            print("🔴 [외부 격자·폐기] %s: %s (발신 %s)" % (rk, _fg, source))
+            _ingest_reject_log(rk, "외부 격자 — payload 폐기", source, {"why": _fg, "combos": len(q or [])})
+            _gate_hit("foreign_grid_drop", rk, _fg[:90])
+            return {"ok": True, "skipped": True, "raceKey": rk, "foreignGridDropped": True, "reason": _fg}
     # [경륜 종목 강제·세이부엔 등] 경륜 전용 지명(경정장 없음) → sport=cycle 강제. 확장이 boat 로 오분류해 보내도 서버 최종 방어.
     #   한국경마 아니고(위에서 이미 처리), 종목이 미지정/boat/bike/horse 로 온 경우 정정(정상 cycle 은 그대로).
     #   [플립 원천 차단 (2026-07-19)] 조건에 "horse" 추가 — 새 ks1 배당판은 본문에 타 종목 메뉴·배너의
@@ -13746,13 +13839,13 @@ def _triple_analyze(rk, rec):
                         #   🔧 되돌리기: CANCELLED_FRESHEST_TICK = False → 종전 합집합으로 돌아간다.
                         _by_tick = []
                         for _s in _csn:
-                            _q = _s.get("quinella") or {}
+                            _sq = _s.get("quinella") or {}   # [2026-09-06] `_q` 는 배당 조회 함수다 — 덮어쓰면 혼전복승박스가 죽는다(152회/일)
                             _ns = set()
-                            for _k in _q:
+                            for _k in _sq:
                                 for _x in str(_k).replace("-", "+").split("+"):
                                     if _x.isdigit():
                                         _ns.add(int(_x))
-                            _by_tick.append((len(_q), _ns))
+                            _by_tick.append((len(_sq), _ns))
                         _union = set()
                         for _n, _ns in _by_tick:
                             _union |= _ns
@@ -14511,7 +14604,7 @@ def _triple_analyze(rk, rec):
     #   시뮬(오늘 실데이터 31경주): 적중 8/31 → 8/31 동일(정확도 무손실) · 회원에게 보인 추천 교체
     #   40회 → 5회 (88% 감소·기후 3R A/B 12초 플래핑 등 제거). 실패 시 원본 그대로(안전).
     try:
-        _apply_rec_hysteresis(rk, _an_out)
+        _apply_rec_hysteresis(rk, _an_out, curQ)     # [2026-09-06 ②] 그 시점 배당 맵을 넘긴다(리프라이스용)
     except Exception as _hye:
         print("[히스테리시스] 적용 실패(무시·원본 표시):", _hye)
     # [② 삼복승 히스테리시스 (2026-07-28 나고야 4R)] 복승은 안정적인데 삼복승 3번째 자리만 매 틱
@@ -15088,7 +15181,11 @@ def _curq_observe(rk, an, curQ, cur_mb, after_close):
             pass
 
 
-def _apply_rec_hysteresis(rk, an):
+HYST_REPRICE_ENABLED = True      # [2026-09-06 ② · 대표 승인] 🔧 되돌리기: False (한 줄)
+HYST_DEAD_ODDS = 100.0           # 이 이상(확장 상한·한국 껍데기)이거나 없으면 「죽은 배당」으로 본다
+
+
+def _apply_rec_hysteresis(rk, an, curQ=None):
     today = time.strftime("%Y-%m-%d")
     st = _REC_HYST.get(rk)
     if st and st.get("day") != today:
@@ -15193,7 +15290,42 @@ def _apply_rec_hysteresis(rk, an):
         except (TypeError, ValueError):
             continue
     if _held is None:
+        # 🔴 [2026-09-06 ② · 대표 승인] 보류 조합이 이번 명단에 없으면 st["item"] 의 **옛 배당**이 딸려 온다(9/05 진단 · 이월 715/5,476경주).
+        #   실물: 부산 5경주 1+5 가 외부 판 값 1.8 로 굳어 T-5 카톡 본선①로 나갔다(실제 100 껍데기 · 시스템 제안은 3+6 이었고 적중).
+        #   ⇒ 그 시점 배당 맵(curQ)으로 ⓐ 없거나 죽은 배당(≥HYST_DEAD_ODDS)이면 **보류를 풀고 제안을 받는다**
+        #     ⓑ 있으면 **현재 배당으로 고쳐 쓴다**(회원이 보는 숫자 = 지금 배당판).
+        #   ⚠ 보류 조합이 fq 안에 있을 때(위 pop)는 배당이 이미 현재값이라 손대지 않는다.
+        #   ⚠ curQ 가 없으면(호출부가 안 넘김) 종전 동작 그대로. 원칙 23 — hyst_release_dead · hyst_reprice 계수.
+        _cur, _cur_known = None, False
+        try:
+            if HYST_REPRICE_ENABLED and isinstance(curQ, dict) and curQ:
+                _cur_known = True
+                _cv = curQ.get(tuple(st["main"]))
+                _cur = float(_cv) if _cv is not None else None
+        except (TypeError, ValueError):
+            _cur = None
+        if _cur_known and (_cur is None or _cur >= HYST_DEAD_ODDS):
+            _dead = "+".join(str(x) for x in st["main"])
+            try:
+                _gate_hit("hyst_release_dead", rk, "%s 실제 %s → 보류 해제 · 제안 %s" % (
+                    _dead, _cur, "+".join(str(x) for x in prop)))
+            except Exception:
+                pass
+            st["main"], st["item"] = prop, dict(fq[0])
+            st["streak_m"], st["streak_n"] = None, 0
+            cp["finalQuinellas"] = fq
+            an["recHysteresis"] = {"held": False, "switches": st["switches"], "released": "dead_odds",
+                                   "droppedMain": _dead, "proposal": "+".join(str(x) for x in prop)}
+            return
         _held = dict(st["item"])
+        if _cur_known and _cur is not None:
+            _old = _held.get("odds")
+            _held["odds"] = round(_cur, 1)
+            _held["repriced"] = True
+            try:
+                _gate_hit("hyst_reprice", rk, "%s %s → %.1f" % ("+".join(str(x) for x in st["main"]), _old, _cur))
+            except Exception:
+                pass
         _held["reason"] = (_held.get("reason") or "") + " · 유지(히스테리시스)"
     fq.insert(0, _held)
     cp["finalQuinellas"] = fq
@@ -29720,9 +29852,14 @@ def _keiba_schedule(ymd, force=False):
                                    "?raceDy=%s&opTrackCd=%s&sponsorCd=%s" % (ymd, op, sp))
                 mt = re.search(r'<title>(.*?)</title>', rl, re.S)
                 title = _kstrip(mt.group(1)) if mt else ""
-                mv = re.search(r'([一-龯]{2,4})競馬', title)   # '…園田競馬 1R…'
+                # 🔴 [2026-09-06] 제목이 「地方競馬教養センター…佐賀競馬 1R…」 처럼 **地方競馬 로 시작**하면
+                #   첫 매칭이 '地方' 이 되어 사가 9경주가 「地方 N경주」로 저장됐다(8/13 카사마츠도 같은 사고).
+                #   ⇒ 매칭 중 '地方' 이 아닌 첫 것을 쓴다. 없으면 종전대로 첫 매칭.
+                _mvs = re.findall(r'([一-龯]{2,4})競馬', title)   # '…園田競馬 1R…'
+                _mvs = [g for g in _mvs if g != "地方"] or _mvs
+                mv = _mvs[0] if _mvs else None
                 if mv:
-                    out[mv.group(1)] = (op, sp)
+                    out[mv] = (op, sp)
             except Exception:
                 continue
     except Exception as e:
@@ -40786,7 +40923,8 @@ def _late_drop_ctx(rk):
 
 def _late_drop_alert(rk, an, db):
     """마감 직전 진성 급락을 **별도 알림**으로 보낸다. 판정·추천 경로 무개입."""
-    if not LATE_DROP_ALERT_ENABLED or _LATE_DROP is None or rk in _LATE_DROP_SENT:
+    if not LATE_DROP_ALERT_ENABLED or _LATE_DROP is None or (time.strftime("%Y%m%d"), rk) in _LATE_DROP_SENT:
+        # ⚠ [2026-09-06] 종전 rk 단독 키 — 같은 경기장·경주번호가 **다음 날** 재기동 전까지 막혔다
         return
     # 🔴 `an` 이 없거나 **다른 경주 것**이면 저장분에서 다시 읽는다(호출부 주석 참조).
     if not isinstance(an, dict) or str(an.get("raceKey") or "") != str(rk):
@@ -40798,9 +40936,24 @@ def _late_drop_alert(rk, an, db):
         return
     try:
         _gate_hit("late_drop", rk, "도달", reach_only=True)
-        doc = (db or {}).get(rk) or {}
-        hist = list(doc.get("history") or [])
+        # 🔴 [2026-09-06 A1 · 대표 승인] 종전 `doc["history"]`(활성 캐시) 틱에는 minutes_before 가 **없다**
+        #   (키 = t·quinella·exacta·trio·win·src) → picks() 가 전 틱을 건너뛰어 8/28~9/06 실전 발동 0.
+        #   측정 도구(measure_late_drop_sport)와 **같은 입력**(odds_history 스냅샷)을 읽는다 — 원칙 5.
+        #   오염 틱 제외 규칙도 도구와 같다. 🔧 되돌리기: LATE_DROP_ALERT_ENABLED = False(기존 스위치).
+        hist = []
+        try:
+            _lp = _analysis_log_path(rk)
+            _lp = _lp[0] if isinstance(_lp, tuple) else _lp          # ⚠ 튜플(path, date, race) — 8/27 사고
+            _od = _hist_read_any(_lp.replace(os.sep + "analysis_log" + os.sep,
+                                             os.sep + "odds_history" + os.sep)) or {}
+            hist = [t for t in (_od.get("snapshots") or [])
+                    if isinstance(t, dict) and t.get("minutes_before") is not None
+                    and not t.get("odds_suspect") and not t.get("baseline_reset")
+                    and not t.get("next_race_blocked")]
+        except Exception as _lhe:
+            _gate_hit("late_drop_nomb", rk, "odds_history 읽기 실패 %s" % str(_lhe)[:40], reach_only=True)
         if len(hist) < 3:
+            _gate_hit("late_drop_nomb", rk, "mb 틱 %d개" % len(hist), reach_only=True)   # 원칙 24 — 폴백은 센다
             return
         _cp = (an.get("corePicks") or {})
         ex = set()
@@ -40814,7 +40967,7 @@ def _late_drop_alert(rk, an, db):
         _ln = _LATE_DROP.lines(ps)
         _txt = "[적중왕] " + _disp_rk(rk) + "\n" + "\n".join(_ln)   # 표시 전용(저장키 무변경)
         _sr = _kakao_send_to_me(_txt)
-        _LATE_DROP_SENT.add(rk)
+        _LATE_DROP_SENT.add((time.strftime("%Y%m%d"), rk))
         _gate_hit("late_drop", rk, "발송 %d개" % len(ps), once_key=rk)
         try:
             os.makedirs(LATE_DROP_DIR, exist_ok=True)

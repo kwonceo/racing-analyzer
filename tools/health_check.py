@@ -1203,6 +1203,45 @@ def _scan_daemons():
     return long_, low
 
 
+def check_verified_axis():
+    """I9 검증축 실발동 — 🔴 판정 4단계를 통과해 켠 축이 **실전에서 실제로 도는가**.
+
+    왜: 마감 2분 진성 급락(late_drop)이 2026-08-28 승인 후 **8/28~9/06 실전 발동 0** 이었는데
+      아무 항목도 그것을 세지 않았다(캐시 틱에 minutes_before 가 없어 picks() 가 늘 빈 결과).
+      원칙 23·24 를 사람 기억이 아니라 체크리스트에 건다.
+    분모: 당일 `late_drop` 도달(reach) — 경마 경주가 마감 150초 안에 폴링된 횟수.
+      도달 0 = 경마 개최 없음/시간 전 → 판정 보류(⏳). 도달 있고 18시 이후에도 발동 0 → 🔴.
+    """
+    denom = "당일 late_drop 도달(reach) — 경마 마감 150초 내 폴링 횟수 · 도달 0 이면 판정 보류"
+    p = os.path.join(BASE, "data", "_gate_hits.json")
+    try:
+        gh = json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        return _mk("I9", "🔴 무결성", "검증축 실발동(late_drop)", denom, current=None, target=">0",
+                   ok=None, reason="계수기 읽기 실패: %s" % str(e)[:60])
+    today = time.strftime("%Y-%m-%d")
+    ld = gh.get("late_drop") or {}
+    nomb = gh.get("late_drop_nomb") or {}
+    if str(ld.get("day")) != today:
+        ld = {}
+    reach = int(ld.get("reach") or 0)
+    fire = int(ld.get("fire") or 0)
+    nomb_n = int(nomb.get("reach") or 0) if str(nomb.get("day")) == today else 0
+    note = "도달 %d · 발동 %d · mb없음 %d" % (reach, fire, nomb_n)
+    if reach == 0:
+        return _mk("I9", "🔴 무결성", "검증축 실발동(late_drop)", denom, current=0, target=">0",
+                   ok=None, n=0, note=note + " — 경마 도달 0(개최 없음·시간 전) · 판정 보류")
+    if fire > 0:
+        return _mk("I9", "🔴 무결성", "검증축 실발동(late_drop)", denom, current=fire, target=">0",
+                   ok=True, n=reach, note=note)
+    late = int(time.strftime("%H")) >= 18
+    return _mk("I9", "🔴 무결성", "검증축 실발동(late_drop)", denom, current=0, target=">0",
+               ok=(False if late else None), n=reach,
+               note=note + (" — 🔴 도달했는데 하루 종일 발동 0 — 입력 배선을 의심한다(원칙 24)" if late
+                            else " — 아직 이른 시각 · 판정 보류"),
+               reason=("도달 %d 인데 발동 0 · nomb %d" % (reach, nomb_n)) if late else "")
+
+
 def check_daemon_alive():
     """[I3] 🔴 **긴 주기(≥5분) sleep-first 데몬**의 실행시각 스탬프 보유.
 
@@ -1412,6 +1451,7 @@ def build_checklist():
              # 🔴 무결성 감시(매일·자동) — 성능 측정과 성격이 다르다. 절대 줄이지 않는다.
              check_payout_coverage(), check_backup_alive(), check_daemon_alive(),
              check_server_log_alive(),   # I7 — 로그가 지금도 쌓이는가(검증 신뢰성의 전제)
+             check_verified_axis(),      # I9 — 검증 통과해 켠 축이 실전에서 실제로 도는가(2026-09-06)
              # 🔴 [2026-08-23] I8 — 리로더를 끈 운영의 **유일한 위험**을 잡는다.
              #   debug=False 로 돌리면 고쳐도 반영이 안 되는데 아무도 모른다(405 사고 유형).
              #   app.py mtime ↔ 부팅 스탬프 대조로 그 조용한 실패를 시끄럽게 만든다.
