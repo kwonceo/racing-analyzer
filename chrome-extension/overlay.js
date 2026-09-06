@@ -20,7 +20,7 @@
   //   아예 안 붙은 것이거나 확장이 재로드되지 않은 것이다.
   //   ⚠ 종전 로그는 파일 2000행 뒤에 있어서, 그 앞에서 예외가 나면 한 줄도 안 나왔다.
   try {
-    console.log('%c[오버레이] overlay.js 진입 · v2.1.161 · ' + location.host,
+    console.log('%c[오버레이] overlay.js 진입 · v2.1.167 · ' + location.host,
       'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
   try {
@@ -592,6 +592,48 @@
         });
         // 화면 깜빡임(startBlink) 미사용 — 배당판 방해 없이 조용히 패널 배지로만 표시
       } catch (_) { /* 강조 배지 실패는 무시 */ }
+    }
+
+    // ── [2026-09-06 대표 승인] 🚨 마감 2분 급락 팝업 — 화면 중앙 모달 ─────────────────
+    //   서버 analyze 응답의 `lateDrop`(logs/late_drop 적재분 · 카톡과 같은 문구 late_drop.lines)을 그린다.
+    //   🔴 여기서 판정하지 않는다 — 서버가 실제로 카톡을 보낸 그 알림만 띄운다(같은 순간·같은 picks).
+    //   180초 지나면 서버가 안 실어 주고(팝업은 마감 뒤 의미가 없다) 화면에서도 자동으로 닫힌다. 클릭으로 닫힘.
+    //   소리는 알림당 1회(soundOn 무관 — 대표 지시 「강조해야 한다」).
+    var ID_LDPOP = 'kbOvLateDrop', _ldShownKey = '', _ldDismissed = '';
+    function renderLateDropPopup(d) {
+      try {
+        var ld = d && d.lateDrop;
+        var el = byId(ID_LDPOP);
+        if (!ld || !ld.key || !enabled || killed || _ldDismissed === ld.key
+            || (ld.ageSec != null && ld.ageSec > 180)) { if (el) el.remove(); return; }
+        if (el && el.getAttribute('data-key') === ld.key) return;   // 같은 알림 → 재렌더 안 함(깜빡임 방지)
+        if (el) el.remove();
+        if (!byId('kbLdPulseCss')) {
+          var stl = document.createElement('style'); stl.id = 'kbLdPulseCss';
+          stl.textContent = '@keyframes kbLdPulse{0%,100%{box-shadow:0 12px 40px rgba(0,0,0,.6)}50%{box-shadow:0 0 0 16px rgba(239,68,68,.55)}}';
+          root().appendChild(stl);
+        }
+        el = mk('div', 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;'
+          + 'width:min(92vw,520px);padding:18px 22px;border-radius:14px;background:#b91c1c;color:#fff;'
+          + 'box-shadow:0 12px 40px rgba(0,0,0,.6);border:3px solid #fecaca;cursor:pointer;'
+          + 'font:800 16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;animation:kbLdPulse 1s ease-in-out 5');
+        el.id = ID_LDPOP; el.setAttribute('data-key', ld.key);
+        el.appendChild(mk('div', 'font-size:13px;opacity:.85;margin-bottom:4px', '[적중왕] ' + (ld.dispRk || ld.rk || '')));
+        (ld.lines || []).forEach(function (ln, i) {
+          var big = (i === 0) || (String(ln).indexOf('💰') === 0);
+          el.appendChild(mk('div', big ? 'font-size:20px;font-weight:900;margin:2px 0' : 'font-size:16px;margin:2px 0',
+            String(ln).replace(/\*\*/g, '')));
+        });
+        var left = Math.max(5, 180 - (ld.ageSec || 0));
+        el.appendChild(mk('div', 'margin-top:8px;font-size:12px;opacity:.7', '클릭하면 닫힘 · ' + left + '초 뒤 자동으로 닫힘'));
+        el.addEventListener('click', function () { _ldDismissed = ld.key; var e2 = byId(ID_LDPOP); if (e2) e2.remove(); });
+        root().appendChild(el);
+        if (_ldShownKey !== ld.key) {
+          _ldShownKey = ld.key;
+          try { beep(); setTimeout(beep, 400); setTimeout(beep, 800); } catch (_) { /* */ }
+        }
+        setTimeout(function () { var e3 = byId(ID_LDPOP); if (e3 && e3.getAttribute('data-key') === ld.key) e3.remove(); }, left * 1000);
+      } catch (_) { /* 팝업 실패는 무시 — 패널 렌더를 막지 않는다 */ }
     }
 
     // ── [강한 신호 8유형] 강조 박스 + 막판 보존(경주 종료 후 유지) ──────────
@@ -1540,6 +1582,7 @@
         while (panel.firstChild) panel.removeChild(panel.firstChild);
         var d = (st.analyzeStatus && st.analyzeStatus.data) || null;
         var deadline = st.timerDeadline || 0;
+        try { renderLateDropPopup(d); } catch (_) { /* [2026-09-06] 급락 팝업 */ }
 
         // 헤더 + 종목 배지 + 닫기(✕) — [보완#2] 헤더를 잡고 드래그하면 패널 이동
         var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;cursor:move');

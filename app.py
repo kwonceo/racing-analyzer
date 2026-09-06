@@ -16796,6 +16796,14 @@ def triple_analyze():
                          rk, _sus))
     except Exception as _s3e:
         print("[3층·표시차단] 실패(무시·기존 동작 유지):", str(_s3e)[:100])
+    # [2026-09-06 대표 승인 · 팝업] 최근 마감 2분 급락 알림을 **응답에만** 싣는다(오버레이가 이 응답을 그린다).
+    #   저장은 위에서 이미 끝났다(_history_save_analysis·_analysis_log_save) → 스키마 무변경. 실패해도 응답은 그대로.
+    try:
+        _ldr = _late_drop_recent(rk, LATE_DROP_POPUP_AGE)
+        if _ldr:
+            an["lateDrop"] = _ldr[0]
+    except Exception:
+        pass
     return jsonify(an)
 
 
@@ -40902,6 +40910,69 @@ LATE_DROP_ALERT_ENABLED = True
 LATE_DROP_SPORTS = ("horse",)        # 🔴 경마부터 — 경륜은 CI 하한 0.874 로 미달
 LATE_DROP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "late_drop")
 _LATE_DROP_SENT = set()              # 경주당 1회
+
+
+LATE_DROP_POPUP_AGE = 180            # 팝업 유지(초) — 회원이 살 수 있는 시간은 2분이다. 그 뒤는 정보일 뿐이다
+_LD_RECENT_CACHE = {"mtime": 0, "path": "", "rows": []}
+
+
+def _late_drop_recent(rk=None, max_age=LATE_DROP_POPUP_AGE):
+    """[2026-09-06 대표 승인 · 팝업] 오늘 `logs/late_drop/<날짜>.jsonl` 적재분을 읽어 최근 발동을 돌려준다.
+
+    🔴 완전 읽기 전용 — 알림 파일이 **유일한 진실**이다(카톡 발송과 같은 순간·같은 picks). 재계산하지 않는다.
+    문구는 `late_drop.lines` 한 곳에서 만든다(카톡과 같은 글자). 파일 mtime 캐시라 폴링 부하가 없다.
+    반환 [{rk, t, ageSec, ok, picks, lines}] — 최신이 앞. max_age 초를 넘긴 것은 뺀다(팝업은 마감 뒤엔 의미가 없다).
+    """
+    try:
+        path = os.path.join(LATE_DROP_DIR, time.strftime("%Y%m%d") + ".jsonl")
+        if not os.path.exists(path):
+            return []
+        mt = os.path.getmtime(path)
+        if _LD_RECENT_CACHE["path"] != path or _LD_RECENT_CACHE["mtime"] != mt:
+            rows = []
+            with io.open(path, encoding="utf-8") as _f:
+                for line in _f:
+                    try:
+                        rows.append(json.loads(line))
+                    except Exception:
+                        continue
+            _LD_RECENT_CACHE.update({"path": path, "mtime": mt, "rows": rows})
+        now = time.time()
+        out = []
+        for r in reversed(_LD_RECENT_CACHE["rows"]):
+            if not isinstance(r, dict):
+                continue
+            if rk and str(r.get("rk")) != str(rk):
+                continue
+            age = now - float(r.get("t") or 0)
+            if max_age and age > float(max_age):
+                continue
+            ps = [((int(p["combo"][0]), int(p["combo"][1])), p.get("odds"), float(p.get("drop") or 0), p.get("mb"))
+                  for p in (r.get("picks") or []) if isinstance(p, dict) and p.get("combo")]
+            try:
+                lines = _LATE_DROP.lines(ps) if _LATE_DROP is not None else []
+            except Exception:
+                lines = []
+            out.append({"rk": r.get("rk"), "dispRk": _disp_rk(str(r.get("rk") or "")), "t": r.get("t"),
+                        "ageSec": round(age), "ok": bool(r.get("ok")), "picks": r.get("picks") or [],
+                        "lines": lines, "key": "%s@%s" % (r.get("rk"), int(float(r.get("t") or 0)))})
+        return out
+    except Exception as _lre:
+        print("[late_drop 조회] 실패(무시):", str(_lre)[:80])
+        return []
+
+
+@app.route("/api/late-drop/latest", methods=["GET"])
+def late_drop_latest():
+    """[읽기 전용] 최근 마감 2분 급락 알림(팝업용). ?raceKey= 로 한 경주만 · ?maxAge=초(기본 180)."""
+    rk = (request.args.get("raceKey") or "").strip() or None
+    try:
+        max_age = float(request.args.get("maxAge") or LATE_DROP_POPUP_AGE)
+    except (TypeError, ValueError):
+        max_age = LATE_DROP_POPUP_AGE
+    items = _late_drop_recent(_canon_rk(rk) if rk else None, max_age)
+    return jsonify({"ok": True, "items": items, "count": len(items), "serverTime": time.time(),
+                    "popupAge": LATE_DROP_POPUP_AGE})
 
 
 def _late_drop_ctx(rk):

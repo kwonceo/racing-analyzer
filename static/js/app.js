@@ -9682,6 +9682,35 @@
     setInterval(poll, 30000);   // 30초 폴링
   }
 
+  // ── [2026-09-06 대표 승인] 🚨 마감 2분 급락 팝업(웹) — 5초 폴링 · 서버 /api/late-drop/latest(카톡과 같은 문구) ──
+  //   판정은 서버(logs/late_drop 적재 = 실제 카톡 발송분)만 본다. 180초 뒤 자동 닫힘 · 클릭으로 닫힘 · 소리 3회(알림당 1회).
+  const _lateDrop = { shown: '', dismissed: '' };
+  async function lateDropTick() {
+    try {
+      const el = document.getElementById('lateDropAlert'); if (!el) return;
+      const r = await (await fetch('/api/late-drop/latest?maxAge=180')).json();
+      const it = r && r.items && r.items[0];
+      if (!it || !it.key || _lateDrop.dismissed === it.key) {
+        if (el.style.display !== 'none' && (!it || el.dataset.key !== it.key)) el.style.display = 'none';
+        return;
+      }
+      if (el.dataset.key === it.key && el.style.display !== 'none') return;
+      el.dataset.key = it.key;
+      const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(/\*\*/g, '');
+      const left = Math.max(5, 180 - (it.ageSec || 0));
+      el.innerHTML = `<div style="font-size:13px;opacity:.85;margin-bottom:4px">[적중왕] ${esc(it.dispRk || it.rk || '')}</div>`
+        + (it.lines || []).map((ln, i) => `<div style="${(i === 0 || String(ln).indexOf('💰') === 0) ? 'font-size:20px;font-weight:900' : 'font-size:16px'};margin:2px 0">${esc(ln)}</div>`).join('')
+        + `<div style="margin-top:8px;font-size:12px;opacity:.7">클릭하면 닫힘 · ${left}초 뒤 자동으로 닫힘</div>`;
+      el.style.display = 'block';
+      if (_lateDrop.shown !== it.key) {
+        _lateDrop.shown = it.key;
+        try { beepTimes(3, 880); } catch (_) { /* */ }
+        try { notify('🚨 마감 2분 급락 — ' + (it.dispRk || it.rk), false); } catch (_) { /* */ }
+      }
+      setTimeout(() => { if (el.dataset.key === it.key) el.style.display = 'none'; }, left * 1000);
+    } catch (_) { /* 서버 없어도 조용히 */ }
+  }
+
   function initClosingWatch() {
     if (document.getElementById('anomalyFeedPanel')) return;
     const feed = document.createElement('div');
@@ -9697,6 +9726,14 @@
       + 'font:700 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;cursor:pointer';
     overlay.addEventListener('click', () => { overlay.style.display = 'none'; });
     document.body.appendChild(overlay);
+    // [2026-09-06 대표 승인] 🚨 마감 2분 급락 팝업 — 화면 중앙 모달(위 lateDropTick)
+    { const ldp = document.createElement('div'); ldp.id = 'lateDropAlert';
+      ldp.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;width:min(92vw,520px);display:none;'
+        + 'padding:18px 22px;border-radius:14px;background:#b91c1c;color:#fff;border:3px solid #fecaca;box-shadow:0 12px 40px rgba(0,0,0,.6);'
+        + 'font:800 16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer';
+      ldp.addEventListener('click', () => { ldp.style.display = 'none'; _lateDrop.dismissed = ldp.dataset.key || ''; });
+      document.body.appendChild(ldp);
+      setInterval(lateDropTick, 5000); setTimeout(lateDropTick, 1500); }
     // [보완] 한국 수동 발주시각 컨트롤 배선
     { const b = document.getElementById('koreaDeadlineSet'); if (b) b.addEventListener('click', setKoreaManualDeadline); }
     { const b = document.getElementById('koreaDeadlineClear'); if (b) b.addEventListener('click', clearKoreaManualDeadline); }
