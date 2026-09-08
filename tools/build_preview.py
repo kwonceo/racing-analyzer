@@ -407,6 +407,88 @@ def _pace_usable(hs):
     return lead >= 1 and known >= (len(hs) + 1) // 2
 
 
+# ══════════ [전적표 태그 (2026-09-08 대표 「다 붙여」)] ══════════
+#   대표가 전적표(착순 나열·인기)만 보고 고른 말이 같은 날 두 번 시장·분석기를 이겼다(카나자와 10R 2번 · 미즈사와 11R 1번).
+#   그 읽는 법 넷을 **표시 전용** 태그로 옮긴다. 추천·판정·점수에는 넣지 않는다(7주 측정: 전적은 시장 상위 층에서는 값이 없다).
+#   🔴 넷 다 「시장이 차가울 때만 값이 있다」 — 시장 순위를 함께 붙인다. 문턱은 아래에 고정(스윕 금지).
+#   실측(경마지방 1,326경주 · 시장 단승 순위 층 고정 · 2026-09-08):
+#     꾸준함(최근 4전 모두 5착 이내)          세 층 모두 +3.6~+6.0pp(냉대층 202두·입상 25)
+#     회복형(3착내 이력→8착↓ 대패→직전 개선)  시장 3~5층 +3.7pp(209두·입상 54) · 냉대층 +1.8 · 상위층 −8.7
+#     반복착순(직전=2전전 · 2~6착)            냉대층 +3.1pp(251두·입상 24) · 상위층 −6.8
+#     상승세(직전이 5전 최고·3착↓ + 인기이김 3+) 냉대층 −3.3(n<30 판정 불가) — 표시만 · 재측정 대상
+#   ⚠ 태그는 「저장된 값」으로만 만든다(recentPlacings · pastPops). 없으면 안 붙인다(환각 금지).
+FORM_TAGS_ENABLED = True
+FORM_TAG_MAX_EXTRA = 3          # 상위 3두 밖에서 태그 붙은 말을 몇 두까지 한 줄로 보여줄까
+
+
+def _placings_of(h, ent=None):
+    rp = (h or {}).get("recentPlacings") or (h or {}).get("pastPlacings") or (ent or {}).get("pastPlacings") or []
+    out = []
+    for x in rp if isinstance(rp, (list, tuple)) else []:
+        try:
+            v = int(x)
+        except (TypeError, ValueError):
+            continue
+        if v >= 1:
+            out.append(v)
+    return out
+
+
+def _pops_of(h, ent=None):
+    for src in ((h or {}).get("pastPops"), (ent or {}).get("pastPops"), (ent or {}).get("debaPastPops"), (h or {}).get("debaPastPops")):
+        if isinstance(src, (list, tuple)) and any(x is not None for x in src):
+            return src
+    return None
+
+
+def form_tags(h, ent=None):
+    """전적표 태그 목록(문자열) — 최신이 맨 앞인 착순 배열만 쓴다. 없으면 []."""
+    if not FORM_TAGS_ENABLED:
+        return []
+    rp = _placings_of(h, ent)
+    tags = []
+    if len(rp) >= 4 and all(x <= 5 for x in rp[:4]):
+        tags.append("꾸준함")
+    if len(rp) >= 3 and rp[0] < rp[1] and rp[1] >= 8 and min(rp[2:5]) <= 3:
+        tags.append("회복형")
+    if len(rp) >= 2 and rp[0] == rp[1] and 2 <= rp[0] <= 6:
+        tags.append("반복%d-%d" % (rp[0], rp[0]))
+    if rp and rp[0] <= 3 and rp[0] <= min(rp[:5]):
+        pops = _pops_of(h, ent)
+        beat = 0
+        if pops:
+            pl_raw = (h or {}).get("pastPlacings") or (ent or {}).get("pastPlacings") or rp
+            for a, b in zip(pl_raw, pops):
+                try:
+                    if a is not None and b is not None and int(a) < int(b):
+                        beat += 1
+                except (TypeError, ValueError):
+                    pass
+        if (pops and beat >= 3) or (not pops and len(rp) >= 2 and rp[0] < rp[1]):
+            tags.append("상승세")
+    return tags
+
+
+def form_tag_line(hs, ents, mrank, exclude=(), maxn=FORM_TAG_MAX_EXTRA):
+    """「🧭 전적표: 6번 꾸준함(시장 6위) · 1번 회복형(5위)」 — 상위 3두 밖 태그 말. 없으면 None."""
+    items = []
+    for no in sorted(hs):
+        if no in exclude:
+            continue
+        t = form_tags(hs.get(no) or {}, ents.get(no))
+        if not t:
+            continue
+        r = mrank.get(no)
+        items.append((r if r else 99, no, t))
+    items.sort()
+    if not items:
+        return None
+    parts = []
+    for r, no, t in items[:maxn]:
+        parts.append("%d번 %s%s" % (no, "·".join(t), (" (시장 %d위)" % r) if r and r < 99 else ""))
+    return " 🧭 전적표: " + " · ".join(parts)
+
+
 def kakao_lines(hs, ents=None, dist=None, mrank=None, pace=None, topn=3):
     """카톡용 **짧은 예상문** — 「어떻게 봤나」 블록.
     주목마 topn 두를 한 줄씩 + 관전 포인트 한 줄. 만들 게 없으면 빈 리스트.
@@ -425,10 +507,24 @@ def kakao_lines(hs, ents=None, dist=None, mrank=None, pace=None, topn=3):
             continue
         r = mrank.get(no)
         tag = " (시장 %d위)" % r if r and r <= 3 else ""
+        # [전적표 태그] 상위 3두에도 붙인다(있을 때만) — 「직전 2착·꾸준함」 식
+        try:
+            _ft = form_tags(hs.get(no) or {}, ents.get(no))
+        except Exception:
+            _ft = []
+        if _ft:
+            f = f + "·" + "·".join(_ft)
         out.append(" %d번 %s%s" % (no, f, tag))
         used.append(no)
     if not out:
         return []
+    # [전적표 태그] 상위 3두 밖의 태그 말 — 대표가 보는 자리(시장 냉대)는 여기에 나온다
+    try:
+        _tl = form_tag_line(hs, ents, mrank, exclude=set(used))
+        if _tl:
+            out.append(_tl)
+    except Exception:
+        pass
     tail = ""
     if pace and _pace_usable(hs):
         tail += str(pace).replace("페이스", "").strip() + " 페이스"
