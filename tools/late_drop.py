@@ -39,6 +39,59 @@ MAX_PICKS = 2          # 경주당 상한(실측 경주당 0.70개라 사실상 
 POLL_MB = 2.5          # 실전이 호출을 시작하는 시점(마감 N분 전)
 HIST_CAP = 12          # 실전이 보는 활성 캐시 틱 상한
 
+# 🔴🔴 [2026-09-08 대표 승인] 오독 게이트 — 실전 40건(9/06~08) 중 66조합의 36%가 마감 전 되돌아간 노이즈였다.
+#   실물: 카사마츠 2R 2+4 「578→51배 −91%」 — 같은 시각 쌍승 2>4 는 1,694→2,655(변동 없음) · 단승 4번 43→145(상승).
+#   복승만 −91% 이고 쌍승·단승이 안 움직이면 돈이 아니라 **배당판 오독**이다.
+#   소급(경마지방 8/20~9/08 · 595경주 · 원칙 20): 현행 알림 279경주 적중 19 회수 88.7 3제외 64.4
+#     ⓑ 쌍승/단승 대조  → 161경주 적중 14 회수 114.5 3제외 77.3   ✅ 알림 42% 감소 · 적중 14/19 유지 · 카사마츠 2R 차단
+#     ⓐ 2틱 확인       → 186경주 적중 11 회수 75.1 3제외 44.8    🔴 확인 틱이 대개 마감 0분이라 회원이 살 시간이 없다
+#   ⇒ ⓑ 는 켜고, ⓐ 는 스위치만 두고 **끈다**(측정이 반대). ⚠ 둘 다 적중<30 이라 성적 판정은 불가 — 오독 차단 목적.
+CORROB_ENABLED = True   # ⓑ 같은 틱 구간에서 쌍승(a>b·b>a 중 작은 쪽) 또는 두 말 단승 중 하나가 CORROB_MIN% 이상 내렸어야 한다
+CORROB_MIN = 10.0       #    쌍승·단승 값이 **둘 다 없으면** 통과(원칙 20 — 확실히 없는 것만 막는다)
+CONFIRM_TICKS = 0       # ⓐ 급락이 다음 N틱에서도 문턱을 유지해야 발송. 0 = 끔(소급 적중 19→11 로 유해)
+LAST_BLOCKED = {"corrob": 0, "confirm": 0}   # 직전 picks() 호출에서 게이트가 막은 조합 수(원칙 23 — 호출부가 계수기에 옮긴다)
+
+
+def _f(v):
+    try:
+        v = v.get("odds") if isinstance(v, dict) else v
+        return float(v) if v not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _exacta_min(t, c):
+    """틱 t 의 쌍승에서 (a>b, b>a) 중 작은 값. 없으면 None."""
+    ex = (t or {}).get("exacta") or {}
+    if not isinstance(ex, dict):
+        return None
+    a, b = c
+    vals = [_f(ex.get(k)) for k in ("%d>%d" % (a, b), "%d>%d" % (b, a), "%d-%d" % (a, b), "%d-%d" % (b, a))]
+    vals = [v for v in vals if v]
+    return min(vals) if vals else None
+
+
+def _win_of(t, n):
+    w = (t or {}).get("win") or {}
+    if not isinstance(w, dict):
+        return None
+    return _f(w.get(str(n)) if str(n) in w else w.get(n))
+
+
+def _corroborated(pt, ct, c):
+    """ⓑ 이전 틱 pt → 현재 틱 ct 사이에 쌍승 또는 단승이 같이 내렸나. 대조할 값이 하나도 없으면 True(통과)."""
+    checks = []
+    pe, ce = _exacta_min(pt, c), _exacta_min(ct, c)
+    if pe and ce:
+        checks.append(100.0 * (ce - pe) / pe)
+    for n in c:
+        pw, cw = _win_of(pt, n), _win_of(ct, n)
+        if pw and cw:
+            checks.append(100.0 * (cw - pw) / pw)
+    if not checks:
+        return True
+    return min(checks) <= -CORROB_MIN
+
 
 def _qmap(q):
     """{(a,b): odds} 정규화 — 리스트/딕트 두 형식."""
@@ -95,15 +148,17 @@ def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None):
             continue
         if now_mb is not None and float(mb) < float(now_mb):
             continue                          # 🔴 판정 시각 이후 = 아직 안 일어난 일
-        ser.append((float(mb), _qmap(t["quinella"])))
+        ser.append((float(mb), _qmap(t["quinella"]), t))   # [2026-09-08] 틱 원본도 들고 간다(쌍승·단승 대조용)
     ser.sort(key=lambda x: -x[0])            # 시간순(mb 큰 것 = 이른 것)
+    LAST_BLOCKED["corrob"] = 0
+    LAST_BLOCKED["confirm"] = 0
     if len(ser) < 3:
         return []
     ex = set(exclude or ())
     out = []
     for i in range(1, len(ser)):
-        pmb, pq = ser[i - 1]
-        cmb, cq = ser[i]
+        pmb, pq, pt = ser[i - 1]
+        cmb, cq, ct = ser[i]
         if cmb > mb_max:                      # 🔴 마감 mb_max 분 이내에 일어난 급락만
             continue
         for c, o in cq.items():
@@ -116,11 +171,21 @@ def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None):
             if d > -DROP_MIN:
                 continue
             # 🔴 **반등 판정** — 급락 이후 값이 다시 오르면 페이크다(실측 엣지 1.154·하한 0.941)
-            after = [q.get(c) for m, q in ser if m <= cmb and q.get(c)]
+            after = [q.get(c) for m, q, _t in ser if m <= cmb and q.get(c)]
             if len(after) >= 2:
                 lo_ = min(after)
                 if lo_ > 0 and 100.0 * (max(after) - lo_) / lo_ >= REBOUND_MAX:
                     continue
+            # 🔴 [2026-09-08 대표 승인] ⓐ 다음 N틱에서도 급락이 유지돼야 한다(기본 0 = 끔 · 위 주석 참조)
+            if CONFIRM_TICKS > 0:
+                nxt = [q.get(c) for m, q, _t in ser[i + 1:] if q.get(c)][:CONFIRM_TICKS]
+                if len(nxt) < CONFIRM_TICKS or any(100.0 * (v - po) / po > -DROP_MIN for v in nxt):
+                    LAST_BLOCKED["confirm"] += 1
+                    continue
+            # 🔴 [2026-09-08 대표 승인] ⓑ 복승만 떨어지고 쌍승·단승은 안 움직였으면 오독으로 보고 보류
+            if CORROB_ENABLED and not _corroborated(pt, ct, c):
+                LAST_BLOCKED["corrob"] += 1
+                continue
             out.append((c, o, d, cmb))
     # 같은 조합이 여러 번 잡히면 급락이 큰 것 하나만
     best = {}

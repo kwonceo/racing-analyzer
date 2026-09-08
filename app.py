@@ -41186,6 +41186,16 @@ def _late_drop_alert(rk, an, db):
             if isinstance(c, (list, tuple)) and len(c) >= 2:
                 ex.add((min(int(c[0]), int(c[1])), max(int(c[0]), int(c[1]))))
         ps = _LATE_DROP.picks(hist, ex)
+        # 🔴 [2026-09-08 대표 승인] 오독 게이트 계수기(원칙 23·24) — late_drop.py 의 ⓑ쌍승/단승 대조·ⓐ2틱 확인이
+        #   막은 조합 수. 발동률이 0% 면 게이트가 안 도는 것이고 100% 면 본 경로가 죽은 것이다.
+        try:
+            _blk = getattr(_LATE_DROP, "LAST_BLOCKED", None) or {}
+            if _blk.get("corrob"):
+                _gate_hit("late_drop_corrob_block", rk, "쌍승·단승 미동반 %d조합 보류" % _blk["corrob"], reach_only=True)
+            if _blk.get("confirm"):
+                _gate_hit("late_drop_confirm_block", rk, "다음 틱 미유지 %d조합 보류" % _blk["confirm"], reach_only=True)
+        except Exception:
+            pass
         if not ps:
             return
         _ln = _LATE_DROP.lines(ps)
