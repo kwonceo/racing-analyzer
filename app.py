@@ -17930,6 +17930,10 @@ def _raw_profile_snapshot(rk):
                   # 🔴 [2026-08-28] 과거 기수·마체중·부담중량 — 「기수 변경」·「마체중 증감」을
                   #   회원 예상문에 쓰려면 필요하다. 파서는 이미 뽑고 있었고 저장에서만 빠져 있었다.
                   "pastJockeys", "pastBodyWeights", "pastBurdens",
+                  # 🔴 [2026-09-08 대표 승인 「1번 배선」] DebaTable 과거 5전 상세(인기·타임·상3F·코너·두수·거리·날짜·마장·경기장)
+                  #   전적 원천과 무관하게 덧붙인 것(_nar_form_enrich) — analysis_log 로 옮겨야 소급 측정이 된다.
+                  "debaPastPlacings", "debaPastPops", "debaPastTimes", "debaPastLast3f", "debaPastCorners",
+                  "debaPastFieldSizes", "debaPastDistances", "debaPastDates", "debaPastTrackConds", "debaPastVenues", "enrichSrc",
                   "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
                   "declaredStyle", "declaredStyleLabel",    # [표기 각질 병기 2026-07-30]
                   "weight", "winOdds", "pop",               # [발주 시점 값 보존 2026-07-30]
@@ -38706,6 +38710,139 @@ def _nar_autocollect_form(rk, baba, ymd, rno):
         print("[南関東 전적] %s 실패(무시):" % rk, e)
 
 
+# ══════════ [1번 배선 · NAR 전적 상세 보강 (2026-09-08 대표 승인)] ══════════
+#   왜: 「상승세 복병」(직전 최고 착순 + 인기 대비 선전 + 타임 개선)을 재려면 **과거 인기순위·타임**이 필요한데
+#     oddspark 出走表에는 인기가 없어 pastPops 가 값 없이 키만 저장됐고(원칙 5·8-E 사례), keiba.go.jp 경로로
+#     받은 14% 경주에만 값이 있었다(2026-09-08 소급 186경주 · 판정 불가). DebaTable 원문에는 **전 경주** 있다.
+#   무엇: 전적 원천(oddspark·keiba_ext·keiba_nar)이 무엇이든, DebaTable 의 과거 5전 상세를 저장행에 **덧붙인다**.
+#     기존 키는 한 글자도 바꾸지 않는다(deba* 접두 키로 나란히 저장) · pastPops 만 「전부 비어 있고 착순 배열이
+#     자리까지 일치할 때」 채운다 · 점수·추천·판정 경로 무개입(저장만).
+#   계수기(원칙 23·24): _NAR_ENRICH_STAT reach/fired/ok/filled_pop/skip_have/blocked/nocode/fail + _gate_hit nar_form_enrich
+#   🔧 되돌리기: NAR_FORM_ENRICH_ENABLED = False (한 줄)
+NAR_FORM_ENRICH_ENABLED = True
+_NAR_ENRICH_DONE = set()
+_NAR_ENRICH_STAT = {"reach": 0, "fired": 0, "ok": 0, "filled_pop": 0, "skip_have": 0, "blocked": 0, "nocode": 0, "fail": 0}
+_NAR_DEBA_KEYS = ("debaPastPlacings", "debaPastPops", "debaPastTimes", "debaPastLast3f", "debaPastCorners",
+                  "debaPastFieldSizes", "debaPastDistances", "debaPastDates", "debaPastTrackConds", "debaPastVenues")
+
+
+def _nar_form_enrich_rows(hs, shutsuba, details):
+    """순수 병합(테스트 가능) — 저장행 hs 에 DebaTable 상세를 덧붙이고 (보강 두수, pastPops 채운 두수)를 돌려준다."""
+    by_no = {}
+    for sh in (shutsuba or {}).get("horses") or []:
+        try:
+            by_no[int(sh.get("no"))] = (details or {}).get(sh.get("lineageNb")) or []
+        except (TypeError, ValueError):
+            continue
+    n_rows = 0
+    filled = 0
+    for h in hs or []:
+        try:
+            past = by_no.get(int(h.get("no")))
+        except (TypeError, ValueError):
+            past = None
+        if not past:
+            continue
+        n_rows += 1
+        h["debaPastPlacings"] = [p.get("placing") for p in past]
+        h["debaPastPops"] = [p.get("pop") for p in past]
+        h["debaPastTimes"] = [p.get("time") for p in past]
+        h["debaPastLast3f"] = [p.get("last3f") for p in past]
+        h["debaPastCorners"] = [p.get("corner") for p in past]
+        h["debaPastFieldSizes"] = [p.get("fieldSize") for p in past]
+        h["debaPastDistances"] = [p.get("distance") for p in past]
+        h["debaPastDates"] = [p.get("date") for p in past]
+        h["debaPastTrackConds"] = [p.get("trackCond") for p in past]
+        h["debaPastVenues"] = [p.get("venue") for p in past]
+        h["enrichSrc"] = "keiba_nar"
+        # pastPops: 전부 비어 있고, DebaTable 착순(None 제외)이 기존 착순 배열과 자리까지 같을 때만 채운다.
+        _pp = h.get("pastPops")
+        if not _pp or all(x is None for x in _pp):
+            _deba_pl = [p.get("placing") for p in past if p.get("placing") is not None]
+            _ex_pl = [x for x in (h.get("pastPlacings") or h.get("recentPlacings") or []) if x is not None]
+            _k = min(len(_deba_pl), len(_ex_pl))
+            if _k >= 1 and _deba_pl[:_k] == _ex_pl[:_k]:
+                h["pastPops"] = [p.get("pop") for p in past]
+                filled += 1
+    return n_rows, filled
+
+
+def _nar_form_enrich(rk, ymd, rno):
+    """[1번 배선] 어느 원천이든 전적이 있는 지방경마 경주에 DebaTable 과거 5전 상세를 덧붙인다(경주당 1회 · 완전 격리)."""
+    try:
+        if not NAR_FORM_ENRICH_ENABLED or not rk or not rno or rk in _NAR_ENRICH_DONE:
+            return False
+        _NAR_ENRICH_STAT["reach"] += 1
+        try:
+            _row0 = (_starters_load() or {}).get(rk) or {}
+        except Exception:
+            _row0 = {}
+        _hs0 = _row0.get("horses") or []
+        if not _hs0:
+            return False                                   # 전적 자체가 없으면 폴백(_nar_form_fallback) 몫
+        if all(h.get("debaPastPops") is not None for h in _hs0):
+            _NAR_ENRICH_STAT["skip_have"] += 1
+            _NAR_ENRICH_DONE.add(rk)                       # 재기동 뒤 이미 보강된 경주
+            return False
+        baba = _jp_baba_code_from_rk(rk)
+        if not baba:
+            _NAR_ENRICH_STAT["nocode"] += 1
+            _NAR_ENRICH_DONE.add(rk)
+            return False
+        nar_guard = None
+        try:
+            import nar_guard
+            ok, why = nar_guard.wait_allow("live", max_wait=8.0)
+            if not ok:
+                _NAR_ENRICH_STAT["blocked"] += 1
+                print("[전적보강] %s 생략 — 요청 제한: %s (다음 폴링에 재시도)" % (rk, why))
+                return False
+        except Exception:
+            nar_guard = None
+        _NAR_ENRICH_STAT["fired"] += 1
+        html = _nar_fetch("%sDebaTable?k_raceDate=%s&k_raceNo=%d&k_babaCode=%s"
+                          % (NAR_KEIBA_BASE, _nar_date_param(ymd), int(rno), baba))
+        shutsuba, details = _nar_parse_deba(html)
+        got = bool(shutsuba.get("horses"))
+        try:
+            if nar_guard:
+                nar_guard.record(ok=got, code=None if got else 0)
+        except Exception:
+            pass
+        if not got:
+            _NAR_ENRICH_STAT["fail"] += 1
+            _NAR_ENRICH_DONE.add(rk)
+            print("[전적보강] %s 출주표 0두 → html=%dB" % (rk, len(html or "")))
+            return False
+        # fetch·파싱을 끝낸 뒤 **짧게** 읽고-고치고-저장한다(다른 스레드의 갱신과 겹치는 창을 줄인다)
+        sdb = _starters_load() or {}
+        row = sdb.get(rk) or {}
+        hs = row.get("horses") or []
+        if not hs:
+            return False
+        n_rows, filled = _nar_form_enrich_rows(hs, shutsuba, details)
+        if n_rows:
+            row["enrichT"] = time.time()
+            if not row.get("distance") and shutsuba.get("distance"):
+                row["distance"] = shutsuba.get("distance")
+            sdb[rk] = row
+            _starters_save(sdb)
+        _NAR_ENRICH_DONE.add(rk)
+        _NAR_ENRICH_STAT["ok"] += 1
+        _NAR_ENRICH_STAT["filled_pop"] += filled
+        try:
+            _gate_hit("nar_form_enrich", rk, "보강 %d두 · pastPops 채움 %d · src=%s" % (n_rows, filled, row.get("source")), once_key=rk)
+        except Exception:
+            pass
+        print("[전적보강] 🟢 %s: %d두 보강(pastPops 채움 %d · src=%s) · 누적 ok %d / fired %d"
+              % (rk, n_rows, filled, row.get("source"), _NAR_ENRICH_STAT["ok"], _NAR_ENRICH_STAT["fired"]))
+        return True
+    except Exception as e:
+        _NAR_ENRICH_STAT["fail"] += 1
+        print("[전적보강] %s 실패(무시):" % rk, str(e)[:120])
+        return False
+
+
 # ══════════ [ⓐ NAR 전적 폴백 (2026-08-03 승인)] ══════════
 #   왜: `narBaba`(南関東 4장) 에만 keiba.go.jp 경로가 열려 있어, 모리오카·몬베츠·오비히로·나고야·
 #     소노다는 oddspark 가 실패하면 **대안이 없어 전적이 통째로 비었다**.
@@ -39474,6 +39611,11 @@ def _multi_collect_one(track, race, ymd):
                 _nar_autocollect_form(key, track.get("narBaba"), ymd, rno)
             except Exception as _fe:
                 print(f"[전적수집] {key} 南関東 전적 실패: {_fe}")
+            # 🔴 [2026-09-08 「1번 배선」] 南関東도 타임·날짜 등 deba* 상세를 같은 형식으로 덧붙인다(확장 수집분 포함)
+            try:
+                _nar_form_enrich(key, ymd, rno)
+            except Exception as _fe:
+                print(f"[전적보강] {key} 실패(무시): {_fe}")
         elif track.get("opTrackCd"):
             # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
             #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
@@ -39497,6 +39639,11 @@ def _multi_collect_one(track, race, ymd):
                 _nar_form_fallback(key, ymd, rno, _ok_form)
             except Exception as _fe:
                 print(f"[전적수집·폴백] {key} 실패(무시): {_fe}")
+            # 🔴 [2026-09-08 대표 승인 「1번 배선」] 원천이 무엇이든 DebaTable 과거 5전 상세를 덧붙인다(추가만 · 격리)
+            try:
+                _nar_form_enrich(key, ymd, rno)
+            except Exception as _fe:
+                print(f"[전적보강] {key} 실패(무시): {_fe}")
         elif not track.get("joCode"):
             # 코드가 **하나도 없다** → 전적·결과·흐름 수집이 전부 스킵된다. 경주당 1회만 경고.
             try:

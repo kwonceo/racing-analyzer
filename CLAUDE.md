@@ -1574,6 +1574,21 @@ c8105d75a · e825326a3   「결과 자동백업: 이토 5경주 2-5-3」
 
 # ═══ 최근 일지 (2026-09-07) ═══
 
+# ✅ [2026-09-08] **1번 배선 — 지방경마 전 경주에 DebaTable 과거 5전 상세(인기·타임·상3F·코너·날짜) 덧붙이기** (대표 승인 · 원본 커밋 · 🔴 운영 00:10 pull)
+```
+app.py  NAR_FORM_ENRICH_ENABLED=True · _nar_form_enrich(rk,ymd,rno) · _nar_form_enrich_rows(순수 병합) · 계수기 nar_form_enrich · _NAR_ENRICH_STAT
+호출    스케줄 루프 narBaba·opTrackCd 경로 직후(경륜 제외 · 경주당 1회 · nar_guard live · 완전 격리)
+저장    starters_store 말 행에 deba* 10종 + enrichSrc · pastPops 는 「전부 비어 있고 착순이 자리까지 같을 때만」 채움 · 기존 키 무변경
+        raw_profile.entries 키 목록에 deba*·enrichSrc 추가 → analysis_log 로 소급 가능
+검증    미즈사와 9R 실제 저장행: 8두 보강·pastPops 8 채움 · 기존 키 변경 0 / 불일치 → 채움 0 / 기존값 보존 · 문법 OK
+되돌리기 NAR_FORM_ENRICH_ENABLED = False
+```
+⏳ 다음 개최일: 계수기 nar_form_enrich 가 지방경마 경주마다 1회 뜨는지 · entries.debaPastPops 보유율(목표 90%) · D2b(저장 실패) 증가 여부
+⏳ 2주 뒤: measure_half_hit_form 이 deba* 를 읽게 보강 → 「상승세 복병」 AB·ABC 정의 **그대로** 재측정(문턱 스윕 금지)
+⚠ 별건: 확장(keiba_ext) 경로는 각질이 전부 「자유」 → 페이스 판정 오류(미즈사와 9R 느린 판 · 실제 선행 3두). 코너로 역산하는 보강은 승인 사항
+
+---
+
 # 🟡 [2026-09-08] **「상승세 복병」 소급 — 미즈사와 9R 8번 유형(직전 최고 + 인기 대비 선전)** (읽기 전용 · 결과 미열람)
 
 > 대표: *「8번을 머리로 놓고 3·4·5 삼복승 · 이게 내가 원하는 전적 분석 기능 · 최근 전적을 보면 상승세」* · 전문 `docs/REPORT.md`

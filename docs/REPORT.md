@@ -1,4 +1,47 @@
 <!--REPORT-->
+# ✅ 1번 배선 — 지방경마 전 경주에 keiba.go.jp 출마표 과거 5전 상세(인기·타임·상3F·코너·날짜) 덧붙이기 (2026-09-08 대표 승인 · 원본 커밋 · 운영 00:10)
+
+- 시각: 2026-09-08 17:04:16
+- 커밋(작성 시점 HEAD): 82423e6e3
+  ⚠ 이 보고가 담긴 커밋은 보통 **그 다음 커밋**이다(작성 후 커밋하므로).
+
+## 1부. 쉬운 설명
+
+대표님이 「1번 배선해」 하셔서, 지방경마 경주마다 keiba.go.jp 출마표의 과거 5전 상세를 우리 전적 저장에 덧붙이는 배선을 넣었습니다. 지금까지는 oddspark 경로로 받은 전적에 과거 인기순위가 비어 있어(키만 있고 값이 없음) 「인기보다 잘 달린 말」 축을 14% 경주에서만 잴 수 있었습니다. 출마표 원문에는 전 경주 다 있습니다.
+
+방식은 「덧붙이기」만입니다. 전적을 어느 경로로 받았든(oddspark·확장·keiba) 전적이 있는 경주면 한 번 출마표를 더 받아, 말마다 과거 5전의 착순·인기·타임·상3F·코너·두수·거리·날짜·마장상태·경기장을 deba로 시작하는 새 이름으로 나란히 저장합니다. 기존 값은 한 글자도 바꾸지 않고, 과거 인기순위만 「전부 비어 있고 착순 배열이 자리까지 같을 때」 채웁니다. 점수·추천·판정에는 손대지 않았고, 요청 제한(nar_guard)을 지키며 경주당 한 번만 받습니다.
+
+미즈사와 9경주 실제 저장행으로 검증했습니다. 8두 전부 보강되고 8번의 과거 인기 [8,6,9,6,5]·타임 ['1:27.0','1:27.6','1:39.1','1:27.3','1:27.1']·날짜가 들어갔으며 기존 키는 변한 게 없습니다. 착순이 안 맞는 경우와 이미 값이 있는 경우엔 채우지 않는 것도 확인했습니다. 2주면 700경주쯤 쌓이고, 그때 「상승세 복병」 정의를 그대로 다시 잽니다.
+
+## 2부. 예상
+
+· 기대: 다음 개최일부터 지방경마 경주의 raw_profile.entries 에 debaPastPops·debaPastTimes 가 90% 이상 채워진다. 계수기 nar_form_enrich 가 경주마다 1회 뜬다(원칙 23). 실패·차단은 _NAR_ENRICH_STAT 로 센다.
+· 2주 뒤: 측정 도구(measure_half_hit_form)가 deba* 키를 읽도록 한 줄 보강한 뒤 상승세 정의(AB·ABC)를 그대로 재측정. 문턱 스윕 금지.
+· 되돌리기: NAR_FORM_ENRICH_ENABLED = False 한 줄.
+
+## 3부. 결과
+
+■ 변경(원본 racing-analyzer · 운영 미반영 · 00:10 pull 대상)
+· app.py: NAR_FORM_ENRICH_ENABLED · _NAR_ENRICH_DONE/_NAR_ENRICH_STAT · _nar_form_enrich_rows(순수 병합) · _nar_form_enrich(fetch→파싱→짧은 읽기-고치기-저장) · 계수기 _gate_hit nar_form_enrich
+· 호출: 다중경주 스케줄 루프의 narBaba 경로·opTrackCd 경로 각각 직후(try 격리) · 경륜 제외
+· raw_profile.entries 키 목록에 deba* 10종 + enrichSrc 추가(analysis_log 로 소급 가능하게)
+· 저장 필드: debaPastPlacings·debaPastPops·debaPastTimes·debaPastLast3f·debaPastCorners·debaPastFieldSizes·debaPastDistances·debaPastDates·debaPastTrackConds·debaPastVenues · pastPops 는 조건부 채움 · row.enrichT
+■ 자기검증(원칙 17 · 원문 함수 실행): 미즈사와 9R 8두 보강·채움 8 · 기존 키 변경 없음 / 착순 불일치 → 채움 0(deba* 는 저장) / 기존 pastPops 보존 → 채움 0 · 문법 OK
+■ 위험: starters_store 읽기-고치기-저장은 기존 _nar_autocollect_form 과 같은 방식(락 없음) — fetch·파싱을 끝낸 뒤 창을 짧게 했다. 위험목록 ②(tmp 공유) 계열이라 D2b 계수를 다음 날 본다.
+■ 후속: tools/measure_half_hit_form.py 가 deba* 를 읽도록 보강(재측정 전) · 각질 「자유」 → 코너로 역산(페이스 오판) 별건
+
+## 메타
+
+```
+{
+ "승인": "1번 배선",
+ "적용": "원본 커밋 · 운영 00:10",
+ "되돌리기": "NAR_FORM_ENRICH_ENABLED=False",
+ "계수기": "nar_form_enrich · _NAR_ENRICH_STAT"
+}
+```
+
+<!--REPORT-->
 # 🟡 「상승세 복병」(직전 최고 착순 + 인기 대비 선전) 소급 — 미즈사와 9R 8번 유형 · 186경주에서 시장 냉대(6위↓) 말은 입상 1.9%(기준 5.2%) · 시장 3~5위+상3F 상위만 +18pp(n=15) (2026-09-08)
 
 - 시각: 2026-09-08 16:44:10
