@@ -14226,6 +14226,19 @@ def _triple_analyze(rk, rec):
             core_picks["qMainCheck"] = _fp.get("qMainCheck")       # [삼복승 정합성] 복승메인 말 포함 검증 결과(qMain·replaced·allInclude)
             core_picks["scenarioPlan"] = _fp.get("scenarioPlan")   # [시나리오] 시나리오A(유력마)+B(편성 유리) 조합 자동생성
             core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
+            # 🔴 [2026-09-08 대표 승인 「경륜만 끄는 것으로 진행」] 💎 BMED 특별 감지를 **경륜에서 표시·카톡에서 뺀다.**
+            #   7주 실측(결과+확정배당 · 경륜 3,205경주): 💎 조합 4,329구좌 적중 194(4.5%) 회수 65.1 3제외 61.7 — 판정선 미달 ·
+            #   💎 말(유력마 제외) 1·2착 20.7% ↔ 무작위 28.4% · 경주의 78.0% 에 뜸(원칙 18 · 변별력 없음) · 회원 수신 1,618구좌 62.2%.
+            #   경마는 남긴다(516구좌 적중 17 회수 91.6 · 판정 불가 · 사업 원칙 고배당 자리 — 적중 30건에 재판정).
+            #   ⚠ 여기서 비우면 오버레이·웹·카톡(sentQuinellas·sentDia)·T-2 잠금·판정(라 다이아) 전부 한 지점에서 빠진다.
+            #   계산값은 bmedSpecialShadow 에 남겨 측정은 계속한다(관측 유지 · 삭제 아님). 🔧 되돌리기: BMED_SPECIAL_OFF_SPORTS = ()
+            if core_picks["bmedSpecial"] and str(_analyze_sport or "") in BMED_SPECIAL_OFF_SPORTS:
+                core_picks["bmedSpecialShadow"] = core_picks["bmedSpecial"]
+                core_picks["bmedSpecial"] = []
+                try:
+                    _gate_hit("bmed_special_off", str(rec.get("raceKey") or ""), "경륜 💎 %d개 숨김" % len(core_picks["bmedSpecialShadow"]), reach_only=True)
+                except Exception:
+                    pass
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
             core_picks["dansungPlan"] = _fp.get("dansungPlan")     # [단통 근본수정] 복승 중심 재편성(단통말 제외·복병 복승·삼복승 보험)
@@ -41061,6 +41074,9 @@ def _kakao_trio_official(cp, sport=None):
 #   🔧 되돌리기: LATE_DROP_ALERT_ENABLED = False
 LATE_DROP_ALERT_ENABLED = True
 LATE_DROP_SPORTS = ("horse",)        # 🔴 경마부터 — 경륜은 CI 하한 0.874 로 미달
+# 🔴 [2026-09-08 대표 승인] 💎 BMED 특별 감지 표시를 끄는 종목 — 경륜(회수 65.1 · 💎 말 입상 무작위 이하 · 78% 경주 노출).
+#   적용 지점은 core_picks["bmedSpecial"] 생성 직후 한 곳(app.py 「경륜만 끄는 것으로 진행」 주석). 🔧 되돌리기: ()
+BMED_SPECIAL_OFF_SPORTS = ("cycle",)
 LATE_DROP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "late_drop")
 _LATE_DROP_SENT = set()              # 경주당 1회
 
