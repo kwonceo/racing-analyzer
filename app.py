@@ -14239,6 +14239,52 @@ def _triple_analyze(rk, rec):
                     _gate_hit("bmed_special_off", str(rec.get("raceKey") or ""), "경륜 💎 %d개 숨김" % len(core_picks["bmedSpecialShadow"]), reach_only=True)
                 except Exception:
                     pass
+            # 🔴 [2026-09-08 대표 「1번으로 진행」] 전적표 한방(FORM_EDGE_MODE · 상단 주석) — 완전 격리 · shadow 는 기록만
+            try:
+                if FORM_EDGE_MODE in ("shadow", "live") and _PREVIEW is not None and form and str(_analyze_sport or "") == "horse":
+                    _fe_q = _as_qmap(curQ) or {}
+                    _fe_mr = _market_rank_from_quin(_fe_q) or {}
+                    _fe_ax = [int(n) for n, rr in _fe_mr.items() if rr == 1]
+                    _fe_rows = [h for h in form if isinstance(h, dict) and h.get("no") is not None]
+                    _fe_rs = sorted(_fe_rows, key=lambda h: -float(h.get("totalScore") or 0))
+                    _fe_rsrank = {int(h["no"]): i + 1 for i, h in enumerate(_fe_rs)}
+                    _fe_cands = []
+                    for h in _fe_rows:
+                        _n = int(h["no"])
+                        if _fe_ax and _n == _fe_ax[0]:
+                            continue
+                        if "꾸준함" not in (_PREVIEW.form_tags(h, None) or []):
+                            continue
+                        if int(_fe_mr.get(_n) or _fe_mr.get(str(_n)) or 0) < FORM_EDGE_COLD_MIN:
+                            continue
+                        if _fe_rsrank.get(_n, 99) > FORM_EDGE_RS_RANK_MAX:
+                            continue
+                        _fe_cands.append((_fe_rsrank[_n], _n))
+                    _gate_hit("form_edge", rk, "도달", reach_only=True)
+                    if _fe_cands and _fe_ax:
+                        _fe_cands.sort()
+                        _fe_no = _fe_cands[0][1]
+                        _fe_c = [min(_fe_ax[0], _fe_no), max(_fe_ax[0], _fe_no)]
+                        _fe_o = _fe_q.get((_fe_c[0], _fe_c[1])) or _fe_q.get("%d+%d" % (_fe_c[0], _fe_c[1]))
+                        _fe_rec = {"t": time.time(), "rk": rk, "mode": FORM_EDGE_MODE, "combo": _fe_c, "odds": _fe_o,
+                                   "cold": _fe_mr.get(_fe_no) or _fe_mr.get(str(_fe_no)), "rsRank": _fe_rsrank.get(_fe_no),
+                                   "inList": any(sorted(int(x) for x in (q.get("combo") or [])) == _fe_c
+                                                 for q in (core_picks.get("finalQuinellas") or []) if isinstance(q, dict))}
+                        core_picks["formEdge"] = _fe_rec                       # 화면·복기용(표시 전용 키)
+                        try:
+                            os.makedirs(FORM_EDGE_DIR, exist_ok=True)
+                            with io.open(os.path.join(FORM_EDGE_DIR, time.strftime("%Y%m%d") + ".jsonl"), "a", encoding="utf-8") as _ff:
+                                _ff.write(json.dumps(_fe_rec, ensure_ascii=False) + "\n")
+                        except Exception:
+                            pass
+                        _gate_hit("form_edge", rk, "%s %d+%d %s배" % (FORM_EDGE_MODE, _fe_c[0], _fe_c[1], _fe_o), once_key=rk)
+                        if FORM_EDGE_MODE == "live" and not _fe_rec["inList"]:
+                            core_picks.setdefault("finalQuinellas", []).append({
+                                "combo": _fe_c, "odds": _fe_o, "formEdge": True, "stars": 1,
+                                "reason": "전적표 한방 — 전적 %d위·꾸준함·시장 %s위 %d번 × 시장 1위 %d번" % (
+                                    _fe_rsrank.get(_fe_no, 0), _fe_rec["cold"], _fe_no, _fe_ax[0])})
+            except Exception as _fee:
+                print("[전적표 한방] 스킵(무시):", str(_fee)[:90])
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
             core_picks["dansungPlan"] = _fp.get("dansungPlan")     # [단통 근본수정] 복승 중심 재편성(단통말 제외·복병 복승·삼복승 보험)
@@ -19760,7 +19806,7 @@ def _build_analysis_log(rk, an=None):
                         if str(_e.get("src") or "") in ("crossPair", "dark"):
                             _bombk.add(tuple(sorted(int(x) for x in (_e.get("combo") or []))))
                     for _q in ((core_picks_out or {}).get("finalQuinellas") or []):
-                        if _q.get("crossPair") or _q.get("evRescue"):
+                        if _q.get("crossPair") or _q.get("evRescue") or _q.get("formEdge"):   # [2026-09-08] 전적표 한방(live 시)
                             _bombk.add(tuple(sorted(int(x) for x in (_q.get("combo") or []))))
                     # 🔴 [2026-08-23] 카톡 편입분은 대부분 💎(고배당)다 → **한방**으로 센다.
                     #   본선이었다면 이미 판정 명단에 있어 편입 자체가 일어나지 않는다.
@@ -41224,6 +41270,16 @@ LATE_DROP_SPORTS = ("horse",)        # 🔴 경마부터 — 경륜은 CI 하한
 # 🔴 [2026-09-08 대표 승인] 💎 BMED 특별 감지 표시를 끄는 종목 — 경륜(회수 65.1 · 💎 말 입상 무작위 이하 · 78% 경주 노출).
 #   적용 지점은 core_picks["bmedSpecial"] 생성 직후 한 곳(app.py 「경륜만 끄는 것으로 진행」 주석). 🔧 되돌리기: ()
 BMED_SPECIAL_OFF_SPORTS = ("cycle",)
+# 🔴 [2026-09-08 대표 「1번으로 진행」] 전적표 한방 — 「꾸준함」 태그 + 시장 냉대 + 전적점수 1위권 말을 시장 1위 말과 묶어 카톡 「한방」 1구좌.
+#   실물: 카나자와 11R 6번(전적 1위·최근 4-1-2-3-2·시장 9위) × 1번 = 정답 1+6 33.7배 — 💎 1순위에 있었으나 배당 컷에 잘려 회원에게 안 감.
+#   소급(경마지방 1,326경주 · 축=T-5 단승 1위 · 구좌=조합 1): 꾸준함+전적1위+시장6위↓ 발동 26 · 적중 2 · 회수 74.2 · 3제외 0 ⚠판정불가
+#     꾸준함+전적1~2위 47 · 4 · 135.7 · 13.6 ⚠ / 꾸준함+시장6위↓(전적 무관) 158 · 11 · 111.4 · 50.8 ⚠ / 대조 무작위 냉대 짝 26 · 3 · 97.7
+#   ⇒ 원칙 20: 켜기엔 표본이 없다. **shadow** = 조합을 만들어 logs/form_edge/ 에 기록·계수만 하고 발송·판정에 안 넣는다.
+#     실전 기록 30건에서 회수·3제외를 보고 "live" 로 올린다(대표 결정). live = finalQuinellas 에 formEdge 표식으로 추가 → 카톡 한방 상자.
+FORM_EDGE_MODE = "shadow"            # "off" | "shadow" | "live"
+FORM_EDGE_RS_RANK_MAX = 2            # 전적점수 경주 내 순위 상한(1위권 = 1~2)
+FORM_EDGE_COLD_MIN = 6               # 시장 순위(복승 최저 기준) 이 값 이상이면 냉대
+FORM_EDGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "form_edge")
 LATE_DROP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "late_drop")
 _LATE_DROP_SENT = set()              # 경주당 1회
 
@@ -41412,7 +41468,7 @@ def _kakao_rich_message(rk, phase, an):
         #   갈래 기준은 저장된 상품 분리와 같다 — 교차 짝·기대값 복원·💎 편입분이 한방이다.
         _main, _bomb = [], []
         for i, q in enumerate(_fq3):
-            (_bomb if (q.get("crossPair") or q.get("evRescue")) else _main).append((i, q))
+            (_bomb if (q.get("crossPair") or q.get("evRescue") or q.get("formEdge")) else _main).append((i, q))   # [2026-09-08] 전적표 한방(live 시)
 
         def _row(i, q, mark):
             _o = (" (%s배)" % q.get("odds")) if q.get("odds") else ""
