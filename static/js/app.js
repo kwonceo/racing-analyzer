@@ -181,18 +181,36 @@
     }
     if (!first) return;
     const btn = $('#dayRacesLoad');
-    if (btn) btn.addEventListener('click', loadDayRaces);
+    if (btn) btn.addEventListener('click', () => loadDayRaces());
     loadDayRaces();
+    // 🔴 [2026-09-08 대표 「적중한 경주가 초록으로 안 변한다」] 이 탭은 열 때 한 번만 읽고 **자동 갱신이 없었다.**
+    //   서버 카드(/api/day/races)에는 결과 도착 즉시 hit=true 가 붙는데(실측 9/08 적중 61장) 화면이 다시 안 읽어
+    //   결과가 나온 뒤에도 ⏳ 그대로였다. 라이브 대시보드 30초 폴링에는 적중 배지 자체가 없다.
+    //   ⇒ 오늘 날짜를 보고 있고 탭이 화면에 있을 때만 60초마다 조용히 다시 읽는다(깜빡임·스크롤 이동 없음).
+    //   🔧 되돌리기: 아래 setInterval 한 줄 제거.
+    if (!_dayTimer) {
+      _dayTimer = setInterval(() => {
+        try {
+          const list = $('#dayRacesList'), dateEl = $('#dayRacesDate');
+          if (!list || document.visibilityState !== 'visible' || list.offsetParent === null) return;
+          const v = (dateEl && dateEl.value) || '';
+          if (v && v !== _ymdLocal(new Date())) return;      // 지난 날짜는 바뀔 게 없다
+          loadDayRaces({ quiet: true });
+        } catch (_) { /* 표시 계층 — 실패해도 조용히 */ }
+      }, 60000);
+    }
   }
-  async function loadDayRaces() {
+  let _dayTimer = null;
+  async function loadDayRaces(opts) {
+    const quiet = !!(opts && opts.quiet);
     const list = $('#dayRacesList'), kpi = $('#dayRacesKpi');
     const dateEl = $('#dayRacesDate');
     if (!list) return;
     const ymd = (dateEl && dateEl.value || '').replace(/-/g, '');
-    list.innerHTML = '<p class="hint">불러오는 중…</p>';
+    if (!quiet) list.innerHTML = '<p class="hint">불러오는 중…</p>';
     let d;
     try { d = await (await fetch('/api/day/races?date=' + ymd)).json(); }
-    catch (_) { list.innerHTML = '<p class="err">조회 실패</p>'; return; }
+    catch (_) { if (!quiet) list.innerHTML = '<p class="err">조회 실패</p>'; return; }
     const k = d.kpi || {};
     if (kpi) {
       const sig = Object.entries(k.bySignal || {}).map(([s, v]) =>
