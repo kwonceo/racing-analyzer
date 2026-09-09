@@ -90,6 +90,9 @@ def _pred_html(rec):
            "<p>복승 %s<br>삼복승 %s</p>" % (" · ".join("+".join(str(x) for x in q) for q in p.get("quinellas") or []),
                                          " · ".join("-".join(str(x) for x in t) for t in p.get("trios") or [])),
            "<p><b>전개</b> %s</p>" % html.escape(str(p.get("pace", "")))]
+    for k, lab in (("story", "시나리오"), ("market_view", "시장과 갈리는 점"), ("risk", "깨지는 조건")):
+        if p.get(k):
+            out.append("<p><b>%s</b> %s</p>" % (lab, html.escape(str(p[k]))))
     if p.get("lines"):
         out.append("<p><b>라인</b> %s</p>" % html.escape(" / ".join("-".join(str(x) for x in l) for l in p["lines"])))
     out.append("<table><tr><th>번호</th><th>근거</th></tr>")
