@@ -1,60 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 8경주",
-      "horse_no": 3,
-      "recent_avg": 5.6,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-09-01"
-    },
-    {
-      "race": "몬베츠 8경주",
-      "horse_no": 2,
-      "recent_avg": 7.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-09-01"
-    },
-    {
-      "race": "카나자와 9경주",
-      "horse_no": 2,
-      "recent_avg": 5.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-01"
-    },
-    {
-      "race": "카나자와 9경주",
-      "horse_no": 6,
-      "recent_avg": 4.4,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-09-01"
-    },
-    {
-      "race": "나고야 9경주",
-      "horse_no": 5,
-      "recent_avg": 8.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-01"
-    },
-    {
-      "race": "나고야 9경주",
-      "horse_no": 2,
-      "recent_avg": 5.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-01"
-    },
-    {
       "race": "몬베츠 9경주",
       "horse_no": 7,
       "recent_avg": 7.4,
@@ -4641,16 +4587,71 @@
         "복승이상감지"
       ],
       "date": "2026-09-09"
+    },
+    {
+      "race": "소노다 10경주",
+      "horse_no": 3,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-09-09"
+    },
+    {
+      "race": "카와사키 7경주",
+      "horse_no": 9,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [
+        "급락47%",
+        "복승이상감지"
+      ],
+      "date": "2026-09-09"
+    },
+    {
+      "race": "카와사키 7경주",
+      "horse_no": 3,
+      "recent_avg": 6.5,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-09"
+    },
+    {
+      "race": "카와사키 7경주",
+      "horse_no": 6,
+      "recent_avg": 6.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-09-09"
+    },
+    {
+      "race": "몬베츠 7경주",
+      "horse_no": 7,
+      "recent_avg": 4.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-09"
+    },
+    {
+      "race": "몬베츠 7경주",
+      "horse_no": 4,
+      "recent_avg": 6.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-09-09"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 7448,
-      "hit": 1185
+      "count": 7462,
+      "hit": 1188
     },
     "전체부진마": {
-      "count": 12324,
-      "hit": 3241
+      "count": 12347,
+      "hit": 3247
     },
     "대규모급락": {
       "count": 4,
@@ -4660,12 +4661,12 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 4876,
-      "hit": 2056
+      "count": 4885,
+      "hit": 2059
     },
     "급락동반": {
-      "count": 693,
-      "hit": 189
+      "count": 695,
+      "hit": 190
     }
   },
   "bokbyeong_patterns": [
@@ -5038,88 +5039,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1995,
-    "hit": 1545,
+    "count": 2000,
+    "hit": 1550,
     "cases": [
-      {
-        "race": "오가키 10경주",
-        "date": "2026-09-07",
-        "smart_horses": [
-          2,
-          5,
-          6
-        ],
-        "placed": [
-          6
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
-      {
-        "race": "야히코 9경주",
-        "date": "2026-09-07",
-        "smart_horses": [
-          6,
-          4,
-          2
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": 2.8,
-        "quinella_odds": 6.8,
-        "high_odds": false
-      },
-      {
-        "race": "야히코 10경주",
-        "date": "2026-09-07",
-        "smart_horses": [
-          6,
-          4
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.4,
-        "high_odds": false
-      },
-      {
-        "race": "야히코 11경주",
-        "date": "2026-09-07",
-        "smart_horses": [
-          7,
-          2
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
-      {
-        "race": "이와키타이라 2경주",
-        "date": "2026-09-07",
-        "smart_horses": [
-          5,
-          6,
-          3,
-          4
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 6.3,
-        "high_odds": false
-      },
       {
         "race": "세이부엔 1경주",
         "date": "2026-09-07",
@@ -6568,9 +6490,88 @@
         "trifecta_odds": null,
         "quinella_odds": 2.0,
         "high_odds": false
+      },
+      {
+        "race": "소노다 10경주",
+        "date": "2026-09-09",
+        "smart_horses": [
+          4,
+          10
+        ],
+        "placed": [
+          10
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "이와키타이라 4경주",
+        "date": "2026-09-09",
+        "smart_horses": [
+          2,
+          6,
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "hit": true,
+        "trifecta_odds": 16.8,
+        "quinella_odds": 3.2,
+        "high_odds": false
+      },
+      {
+        "race": "이와키타이라 3경주",
+        "date": "2026-09-09",
+        "smart_horses": [
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.2,
+        "high_odds": false
+      },
+      {
+        "race": "카와사키 7경주",
+        "date": "2026-09-09",
+        "smart_horses": [
+          9,
+          7,
+          5
+        ],
+        "placed": [
+          9
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 7경주",
+        "date": "2026-09-09",
+        "smart_horses": [
+          2,
+          7,
+          3,
+          8
+        ],
+        "placed": [
+          7,
+          8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 16.4,
+        "high_odds": false
       }
     ],
-    "rate": 77.4,
+    "rate": 77.5,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
