@@ -31,7 +31,7 @@ SYSTEM = """당신은 경주 예측의 복기 담당이다. 예측(축·상대·
 규칙 태그(아래 목록에서만 고른다): %s
 
 반드시 아래 JSON 하나만 출력한다:
-{"verdict": "적중|반적중|미적중",
+{"verdict": "기계 복기의 verdict 를 그대로 쓴다(바꾸지 않는다)",
  "axis_result": "1·2착|3착|착외",
  "missed": [{"no": 정답마 번호, "where": "상대|제외|미언급|축", "why_missed": "왜 못 넣었나 1문장", "clue_in_card": true/false, "clue": "출마표에 있던 단서 1문장(없으면 빈 문자열)"}],
  "pace_check": {"predicted": "예측한 전개 한 줄", "actual": "실제 통과순위로 본 전개 한 줄", "correct": true/false},
@@ -97,7 +97,9 @@ def _machine_review(rec, kind):
         elif n in reasons: where[n] = "근거만"
         else: where[n] = "미언급"
     mk = [m[0] for m in (rec.get("marketAtFetch") or [])]
-    return {"axis_result": "1·2착" if axis in top2 else ("3착" if axis in top3 else "착외"),
+    g = rec.get("grade") or {}
+    verdict = "적중" if g.get("q_hit") else ("삼복승만" if g.get("trio_hit") else ("반적중" if axis in top2 else "미적중"))
+    return {"verdict": verdict, "axis_result": "1·2착" if axis in top2 else ("3착" if axis in top3 else "착외"),
             "answer_where": {str(k): v for k, v in where.items()},
             "answer_market_rank": [mk.index(n) + 1 if n in mk else None for n in order[:2]],
             "q_hit": (rec.get("grade") or {}).get("q_hit"), "trio_hit": (rec.get("grade") or {}).get("trio_hit")}
