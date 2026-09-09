@@ -25,7 +25,7 @@ KEIBA = "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/"
 HDR = {"User-Agent": "Mozilla/5.0", "Accept": "*/*", "Accept-Language": "ja,en"}
 FETCH_GAP_SEC = 2.0          # keiba.go.jp 예의(서버 수집과 별개 프로세스)
 LEAD_HI = 14                 # 발주 14분 전부터
-PROMPT_VERSION = "h4-20260909-all"   # 규칙판 표식 — 프롬프트를 고치면 올린다(복기 집계는 판별로 나눈다)
+PROMPT_VERSION = "h5-20260909-short"   # 규칙판 표식 — 프롬프트를 고치면 올린다(복기 집계는 판별로 나눈다)
 LEAD_LO = 3                  # 3분 전까지(예측 1건 50~60초 · 급한 경주부터 처리)
 
 # k_babaCode → 우리 저장 토큰(analysis_log 파일명과 같은 것 · app.py _JP_BABA_CODE 의 첫 한글 별칭)
@@ -61,10 +61,9 @@ SYSTEM = """당신은 일본 지방경마 출마표(전적표)만으로 복승·
 
 출력 언어·깊이 규칙(대표 지시 2026-09-09 「한국말로 · 약해 보인다」):
 · 모든 문장은 한국어로 쓴다. 일본어 용어는 반드시 번역한다 — 良=양호 · 稍重=약간 다습 · 重=다습 · 不良=불량 · 人気=인기 · 直前/前走=직전 · 距=거리 실적 · 場=경기장 실적 · 牝=암말 · 牡=수말 · セン=거세마 · 逃げ=도주 · 差し=차입 · 追込=추입 · 先行=선행 · 番手=2번수 · 上がり=상3F. 경기장·마명은 한글로(川崎=카와사키 · 園田=소노다 · 浦和=우라와 · 船橋=후나바시 · 大井=오이 · 門別=몬베츠 · 金沢=카나자와 · 笠松=카사마츠 · 名古屋=나고야 · 高知=고치 · 佐賀=사가 · 姫路=히메지 · 盛岡=모리오카 · 水沢=미즈사와). 마명은 가타카나를 한글 음역으로.
-· 근거(reasons)는 말마다 2~3문장의 완결된 이야기로 쓴다: ① 직전에 무엇을 했나(착순·통과순위·마장·인기·상대) ② 그것이 오늘 왜 통하나(전개·마장·거리·등급) ③ 무엇이 되면 들어오나. 숫자 나열이 아니라 판단을 쓴다.
-· "story": 이 경주가 어떻게 흘러갈지 3~4문장(누가 앞을 잡고, 누가 그 뒤에 붙고, 결승선에서 누가 뻗는가 · 마장 영향).
-· "market_view": 시장(단승 순)과 내 판단이 갈리는 지점 2~3문장 — 시장 상위 중 내가 내린 말과 이유, 시장이 놓친 냉대말과 이유. 시장과 같으면 「시장과 같다」고 쓰고 그 이유를 쓴다.
-· "risk": 이 그림이 깨지는 조건 1~2문장(축이 무너지는 경우와 그때 살아남는 조합).
+· 분량(대표 지시 「텍스트를 줄여라」): 축·상대의 근거(reasons)는 2문장 이내 — ① 직전에 무엇을 했나 ② 오늘 왜 통하나. 제외(excluded)는 한 구절(15자 안팎)로만. 판단을 쓰고 숫자 나열은 하지 않는다.
+· "story": 전개 2문장(누가 앞을 잡고 결승선에서 누가 뻗는가). "market_view": 시장과 갈리는 점 1~2문장. "risk": 깨지는 조건 1문장.
+· 전체 JSON 은 한국어 1,200자 안쪽으로 맞춘다.
 
 반드시 아래 JSON 하나만 출력한다(설명문 금지):
 {"axis": 축 마번(정수), "partners": [상대 마번 3~4개, 유력 순], "quinellas": [[a,b],...3~4개], "trios": [[a,b,c],...1~2개],
@@ -139,6 +138,8 @@ def deba_text(date_s, baba, rno):
                 out.extend(buf)
                 buf = []
             out.append(l)
+    drop = re.compile(r"(牧場|ファーム|株式会|（有）|（株）|\(有\)|\(株\)|組合|ステーブル|ホールディングス|スタッド|クラブ|ＨＤ|^（.+）$|^\(.+\)$)")
+    out = [x for x in out if not drop.search(x)]
     return head, " | ".join(out)
 
 
@@ -151,6 +152,16 @@ def _market_order(body):
     return rows
 
 
+def _gen_kwargs():
+    """생성 파라미터 — 5계열은 thinking 이 adaptive 이고 노력은 output_config.effort 로 조절한다(실측: thinking.enabled 는 400).
+    FORECAST_EFFORT = low | medium | high (기본 medium · 텍스트·시간을 줄이려면 low) · FORECAST_MAX_TOKENS 기본 8000."""
+    eff = str(_env("FORECAST_EFFORT", "medium")).strip().lower()
+    kw = {"max_tokens": int(_env("FORECAST_MAX_TOKENS", "8000")), "thinking": {"type": "adaptive"}}
+    if eff in ("low", "medium", "high"):
+        kw["output_config"] = {"effort": eff}
+    return kw
+
+
 def ask_claude(head, body, model):
     import anthropic
     key = _env("ANTHROPIC_API_KEY")
@@ -158,8 +169,7 @@ def ask_claude(head, body, model):
         raise RuntimeError("ANTHROPIC_API_KEY 없음(.env)")
     client = anthropic.Anthropic(api_key=key)
     user = "【경주】 %s\n\n【출마표 원문(압축 · 말마다 '| 마번 | 마명 | 기수 | 単勝 | (人気) | 着別성적 全/左/右/場/距 | 최고타임 | 최근 5주(착순·날짜·馬場·두수·경기장·거리·게이트) | 性齢 | 부담중량·조건 | 등급명 | 種牡馬·조교사 | 마체중(증감) | 최근5주 人気·체중·기수 | 타임·통과순위·상3F | ...')】\n%s" % (head, body)
-    msg = client.messages.create(model=model, max_tokens=12000, system=SYSTEM,   # 5계열은 기본 thinking 블록이 먼저 나온다 — 1200 이면 본문이 비었다(2026-09-09 실측)
-                                 messages=[{"role": "user", "content": user}])
+    msg = client.messages.create(model=model, system=SYSTEM, messages=[{"role": "user", "content": user}], **_gen_kwargs())
     txt = "".join(getattr(b, "text", "") for b in msg.content)
     m = re.search(r"\{.*\}", txt, flags=re.S)
     pred = json.loads(m.group(0)) if m else {"raw": txt}

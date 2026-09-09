@@ -114,7 +114,7 @@ def ask(head, body, model):
     if not key:
         raise RuntimeError("ANTHROPIC_API_KEY 없음(.env)")
     client = anthropic.Anthropic(api_key=key)
-    msg = client.messages.create(model=model, max_tokens=12000, system=SYSTEM,
+    msg = client.messages.create(model=model, system=SYSTEM, **FF._gen_kwargs(),
                                  messages=[{"role": "user", "content": "【경주】 %s\n\n【출주표】\n%s" % (head, body)}])
     txt = "".join(getattr(b, "text", "") for b in msg.content)
     m = re.search(r"\{.*\}", txt, flags=re.S)
