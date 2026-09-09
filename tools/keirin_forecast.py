@@ -24,6 +24,7 @@ import form_forecast as FF          # _env · _load · 공통
 OUT_DIR = os.path.join(BASE, "logs", "keirin_forecast")
 STAMP = os.path.join(OUT_DIR, "_daemon_last.txt")
 LEAD_HI = 9
+PROMPT_VERSION = "k2-20260909-ko"
 LEAD_LO = 3
 
 SYSTEM = """당신은 일본 경륜 출주표만으로 2차복(복승)·3연복(삼복승)을 짚는 분석가다. 배당·인기·다른 분석기의 추천은 주어지지 않는다.
@@ -145,7 +146,7 @@ def forecast_one(date_s, rk, model=None, force=False, tick=None):
     rec = {"date": date_s, "race": rk, "track": rk.rsplit(" ", 1)[0], "rno": rk.rsplit(" ", 1)[1],
            "fetchedAt": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
            "tickMb": tick.get("minutes_before") if tick else None, "tickTime": tick.get("time") if tick else None,
-           "model": model, "usage": usage, "latencySec": round(time.time() - t0, 1),
+           "model": model, "usage": usage, "latencySec": round(time.time() - t0, 1), "prompt_version": PROMPT_VERSION,
            "head": head, "bodyChars": len(body), "marketAtFetch": mk[:5], "prediction": pred}
     io.open(path, "w", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False, indent=1))
     io.open(jl, "a", encoding="utf-8").write(json.dumps({k: v for k, v in rec.items() if k != "head"}, ensure_ascii=False) + "\n")

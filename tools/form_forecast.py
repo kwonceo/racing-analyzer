@@ -25,6 +25,7 @@ KEIBA = "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/"
 HDR = {"User-Agent": "Mozilla/5.0", "Accept": "*/*", "Accept-Language": "ja,en"}
 FETCH_GAP_SEC = 2.0          # keiba.go.jp 예의(서버 수집과 별개 프로세스)
 LEAD_HI = 14                 # 발주 14분 전부터
+PROMPT_VERSION = "h3-20260909-ko"   # 규칙판 표식 — 프롬프트를 고치면 올린다(복기 집계는 판별로 나눈다)
 LEAD_LO = 3                  # 3분 전까지(예측 1건 50~60초 · 급한 경주부터 처리)
 
 # k_babaCode → 우리 저장 토큰(analysis_log 파일명과 같은 것 · app.py _JP_BABA_CODE 의 첫 한글 별칭)
@@ -187,7 +188,7 @@ def forecast_one(date_s, baba, rno, start_hm=None, model=None, force=False):
     rec = {"date": date_s, "baba": baba, "track": BABA.get(baba, baba), "rno": rno,
            "race": "%s %d경주" % (BABA.get(baba, baba), rno), "start": start_hm,
            "fetchedAt": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-           "model": model, "usage": usage, "latencySec": round(time.time() - t0, 1),
+           "model": model, "usage": usage, "latencySec": round(time.time() - t0, 1), "prompt_version": PROMPT_VERSION,
            "head": head, "bodyChars": len(body), "marketAtFetch": mk[:5],
            "prediction": pred}
     io.open(path, "w", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False, indent=1))

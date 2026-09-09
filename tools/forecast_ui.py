@@ -15,6 +15,7 @@ BASE = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import form_forecast as FF
 import keirin_forecast as KF
+import forecast_review as RV
 
 PORT = int(os.environ.get("FORECAST_UI_PORT", "8012"))
 LOCK = threading.Lock()
@@ -107,8 +108,40 @@ def _pred_html(rec):
             "-".join(str(x) for x in res.get("order") or []), q if q else "?",
             "ok" if (g or {}).get("q_hit") else "no", "적중" if (g or {}).get("q_hit") else "미적중",
             "ok" if (g or {}).get("trio_hit") else "no", "적중" if (g or {}).get("trio_hit") else "미적중"))
+    rv = (rec.get("review") or {}).get("llm")
+    if rv:
+        mr = (rec.get("review") or {}).get("machine") or {}
+        out.append("<div class='box' style='background:#172554'><div class='big'>복기 — %s</div>" % html.escape(str(rv.get("verdict"))))
+        out.append("<p>축 결과 <b>%s</b> · 정답마 위치 %s</p>" % (html.escape(str(mr.get("axis_result"))), html.escape(json.dumps(mr.get("answer_where"), ensure_ascii=False))))
+        for m in rv.get("missed") or []:
+            out.append("<p><b>놓친 %s번</b>(%s) — %s<br><span class='mut'>출마표 단서: %s</span></p>" % (
+                m.get("no"), html.escape(str(m.get("where"))), html.escape(str(m.get("why_missed"))), html.escape(str(m.get("clue") or ("있었음" if m.get("clue_in_card") else "없었음")))))
+        pc = rv.get("pace_check") or {}
+        if pc:
+            out.append("<p><b>전개</b> 예측: %s<br>실제: %s → <span class='%s'>%s</span></p>" % (
+                html.escape(str(pc.get("predicted"))), html.escape(str(pc.get("actual"))), "ok" if pc.get("correct") else "no", "맞음" if pc.get("correct") else "틀림"))
+        rt = rv.get("rule_tags") or {}
+        out.append("<p>도운 규칙 <span class='ok'>%s</span> · 해친 규칙 <span class='no'>%s</span></p>" % (
+            html.escape(" · ".join(rt.get("helped") or []) or "-"), html.escape(" · ".join(rt.get("hurt") or []) or "-")))
+        out.append("<p><b>교훈</b> %s<br><b>규칙 수정 제안</b> %s</p></div>" % (html.escape(str(rv.get("lesson"))), html.escape(str(rv.get("rule_change")))))
+    elif res:
+        out.append("<p><a class='btn' href='/review?kind=%s&key=%s'>복기 만들기</a></p>" % (
+            "horse" if "baba" in rec else "keirin", urllib.parse.quote(("%s|%s" % (rec.get("baba"), rec.get("rno"))) if "baba" in rec else rec.get("race", ""))))
     out.append("</div>")
     return "".join(out)
+
+
+def page_review(kind, key):
+    try:
+        if kind == "horse":
+            baba, rno = key.split("|"); d, path, _ = FF._paths(_today_h(), baba, int(rno))
+        else:
+            path, _ = KF._paths(_today_k(), key)
+        with LOCK:
+            RV.review_one(path, kind)
+        return page_view(kind, key)
+    except Exception as e:
+        return CSS + "<p class='no'>복기 오류: %s</p><p><a href='/'>목록</a></p>" % html.escape(str(e))
 
 
 def page_index():
@@ -171,7 +204,7 @@ def page_summary():
     import contextlib
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        FF.grade(); KF.grade()
+        FF.grade(); KF.grade(); RV.stats()
     return "<title>채점 집계</title>" + CSS + "<p><a href='/'>← 목록</a></p><pre>%s</pre>" % html.escape(buf.getvalue())
 
 
@@ -188,6 +221,8 @@ class H(BaseHTTPRequestHandler):
             body = page_index()
         elif u.path in ("/run", "/view"):
             body = page_view(qs.get("kind", ["horse"])[0], qs.get("key", [""])[0], force=(qs.get("force", ["0"])[0] == "1"))
+        elif u.path == "/review":
+            body = page_review(qs.get("kind", ["horse"])[0], qs.get("key", [""])[0])
         elif u.path == "/summary":
             body = page_summary()
         else:
