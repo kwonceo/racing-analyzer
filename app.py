@@ -26814,6 +26814,17 @@ def day_races():
                 if _cd.get("_stamp") == _dc_stamp:
                     _cd.pop("_stamp", None)
                     return jsonify(_cd)
+                # [2026-09-09 대표 「오늘 적중률 화면 로딩이 너무 길다」] 경주 중에는 analysis_log 가 30초마다 갱신돼
+                #   스탬프가 매번 어긋나고, 그때마다 재계산(3초 · 다른 스레드와 겹치면 54초 실측)이 화면에 그대로 보였다.
+                #   ⇒ 캐시가 DAY_CARDS_STALE_SEC 안쪽이면 스탬프가 달라도 그대로 준다(한 화면이 1분 안에 두 번 재계산하지 않는다).
+                #   원칙 23: 계수기 day_cards_stale_hit 로 발동을 센다. 🔧 되돌리기: DAY_CARDS_STALE_SEC = 0
+                try:
+                    if DAY_CARDS_STALE_SEC > 0 and (time.time() - os.path.getmtime(_cp)) < DAY_CARDS_STALE_SEC:
+                        _cd.pop("_stamp", None)
+                        _gate_hit("day_cards_stale_hit", date_dash, "stale<%ds" % DAY_CARDS_STALE_SEC)
+                        return jsonify(_cd)
+                except Exception:
+                    pass
         except Exception as _dce0:
             print("[날짜별카드] 캐시 조회 실패(무시):", str(_dce0)[:100])
     cards = []
@@ -36974,6 +36985,7 @@ TRIO_MAIN_BY_LABEL = True
 #   🔧 되돌리기: TRIO_PAIR_ONE = False
 # [날짜별 카드 응답 파일 캐시 · 2026-08-19] 상세는 day_races 안 주석 참조.
 DAY_CARDS_CACHE = True
+DAY_CARDS_STALE_SEC = 45   # [2026-09-09] 경주 중 스탬프 어긋남 재계산 억제 — 캐시가 이 초 안쪽이면 그대로 준다(0 = 끔)
 DAY_CARDS_CACHE_DIR = os.path.join(os.path.dirname(__file__), "data", "day_cards_cache")
 TRIO_PAIR_ONE = True
 TRIO_PAIR_ONE_SPORTS = ("cycle",)
