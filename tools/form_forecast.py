@@ -25,7 +25,7 @@ KEIBA = "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/"
 HDR = {"User-Agent": "Mozilla/5.0", "Accept": "*/*", "Accept-Language": "ja,en"}
 FETCH_GAP_SEC = 2.0          # keiba.go.jp 예의(서버 수집과 별개 프로세스)
 LEAD_HI = 14                 # 발주 14분 전부터
-LEAD_LO = 5                  # 5분 전까지(그 뒤는 마감이 가까워 건너뜀)
+LEAD_LO = 3                  # 3분 전까지(예측 1건 50~60초 · 급한 경주부터 처리)
 
 # k_babaCode → 우리 저장 토큰(analysis_log 파일명과 같은 것 · app.py _JP_BABA_CODE 의 첫 한글 별칭)
 BABA = {"36": "몬베츠", "10": "모리오카", "11": "미즈사와", "18": "우라와", "19": "후나바시", "20": "오오이",
@@ -46,7 +46,14 @@ SYSTEM = """당신은 일본 지방경마 출마표(전적표)만으로 복승·
 ⑨ 기수 감량(★☆▲◇)과 마체중 급변(±10kg).
 ⑩ 출走取消·除外 표시 말은 제외한다.
 
-시장(単勝 오즈·人気)은 참고만 한다. 시장 1위를 축으로 삼는 것은 근거가 있을 때만 허용되고, 시장 순위를 그대로 베끼면 안 된다. 목표는 시장이 놓친 말을 상대에 넣는 것이다.
+읽기 규칙(실전에서 틀렸던 것들 · 반드시 지킨다):
+· 직전 경주를 선행(통과 1-1-x-x 또는 2-2-x-x)으로 입상(3착 이내)한 말은 나이·인기와 무관하게 상대에서 빼지 않는다.
+· 같은 거리·같은 마장·같은 경기장에서 입상 실적이 있는 말을 직전 한 번의 대패로 버리지 않는다(휴양 뒤·게이트·마장 탓인지 본다).
+· 상대 3~4두 중 최소 1두는 시장 5위 이하(単勝 순)의 냉대말로 넣고, 복승 조합 중 1개 이상은 그 냉대말과의 조합으로 한다. 근거 없이 넣지 말고 위 ①~⑨ 중 무엇에 해당하는지 reasons 에 적는다.
+· 근거(reasons)에 적은 말은 조합에도 반영한다. 근거에는 쓰고 조합에서 빠뜨리는 것을 금지한다.
+· 3세 말이 고령마 조건에서 직전 입상했으면 상승 여지를 가산한다.
+
+시장(単勝 오즈·人気)은 참고만 한다. 시장 1위를 축으로 삼는 것은 근거가 있을 때만 허용되고, 시장 순위를 그대로 베끼면 안 된다(상위 4두를 그대로 축·상대로 두는 답은 실패다). 목표는 시장이 놓친 말을 상대에 넣는 것이다. 배당이 낮은 자리라도 근거가 확실하면 산다.
 
 반드시 아래 JSON 하나만 출력한다(설명문 금지):
 {"axis": 축 마번(정수), "partners": [상대 마번 3~4개, 유력 순], "quinellas": [[a,b],...3~4개], "trios": [[a,b,c],...1~2개],
@@ -206,16 +213,19 @@ def run_once(date_s=None, model=None):
     date_s = date_s or _today()
     now = datetime.datetime.now()
     n = 0
+    due = []
     for baba, rno, hm, name in todays_races(date_s):
         hh, mm = hm.split(":")
         st = now.replace(hour=int(hh), minute=int(mm), second=0, microsecond=0)
         mb = (st - now).total_seconds() / 60.0
         if LEAD_LO <= mb <= LEAD_HI:
-            try:
-                if forecast_one(date_s, baba, rno, hm, model=model):
-                    n += 1
-            except Exception as e:
-                print("[오류] %s %dR: %s" % (BABA.get(baba), rno, e))
+            due.append((mb, baba, rno, hm))
+    for mb, baba, rno, hm in sorted(due):          # 발주가 가까운 경주부터(한 건 50~60초라 순서가 중요하다)
+        try:
+            if forecast_one(date_s, baba, rno, hm, model=model):
+                n += 1
+        except Exception as e:
+            print("[오류] %s %dR: %s" % (BABA.get(baba), rno, e))
     try:
         io.open(STAMP, "w").write(now.strftime("%Y-%m-%d %H:%M:%S"))
     except Exception:
@@ -232,8 +242,37 @@ def _load(p):
     return None
 
 
+def _result_from_keiba(date_s, baba, rno):
+    """keiba.go.jp RaceMarkTable(성적표) → {order, quinella, trifecta}. 미확정이면 None."""
+    try:
+        t = _text(_get("%sRaceMarkTable?k_raceDate=%s&k_raceNo=%d&k_babaCode=%s" % (KEIBA, date_s, rno, baba)))
+    except Exception as e:
+        print("[keiba 결과] %s %s %dR 실패: %s" % (date_s, baba, rno, e))
+        return None
+    t = re.sub(r"\s+", " ", t)
+    i = t.find("単勝 オッズ")
+    if i < 0:
+        return None
+    seg = t[i:i + 3000]
+    order = {}
+    for m in re.finditer(r"(?:^| )([1-3]) (\d{1,2}) (\d{1,2}) (?=[^\d ])", seg):
+        pl = int(m.group(1))
+        if pl not in order:
+            order[pl] = int(m.group(3))
+    if not (order.get(1) and order.get(2)):
+        return None
+    q = re.search(r"馬連複 (\d{1,2})-(\d{1,2}) ([\d,]+)円", t)
+    tr = re.search(r"三連複 (\d{1,2})-(\d{1,2})-(\d{1,2}) ([\d,]+)円", t)
+    qv = round(int(q.group(3).replace(",", "")) / 100.0, 1) if q else None
+    tv = round(int(tr.group(4).replace(",", "")) / 100.0, 1) if tr else None
+    if q and {int(q.group(1)), int(q.group(2))} != {order[1], order[2]}:
+        print("[keiba 결과] %s %dR 착순↔馬連複 불일치 %s vs %s — 배당 버림" % (BABA.get(baba), rno, order, q.groups()))
+        qv = None
+    return {"order": [order[1], order[2], order.get(3) or 0], "quinella": qv, "trifecta": tv, "src": "keiba"}
+
+
 def _result_of(rec):
-    """운영 data/analysis_log/<Y_M_D>_<track>_<N>경주.json 의 result (없으면 race_results)."""
+    """운영 data/analysis_log/<Y_M_D>_<track>_<N>경주.json 의 result → 없으면 race_results → 없으면 keiba.go.jp 성적표(발주 20분 뒤부터)."""
     y, m, d = rec["date"].split("/")
     fn = "%s_%s_%s_%s_%d경주.json" % (y, m, d, rec["track"], rec["rno"])
     for sub in ("analysis_log", "race_results"):
@@ -246,7 +285,13 @@ def _result_of(rec):
                         "quinella": pay.get("quinella"), "trifecta": pay.get("trifecta") or pay.get("trio")}
             except Exception:
                 return None
-    return None
+    try:
+        st = datetime.datetime.strptime("%s %s" % (rec["date"], rec.get("start") or "00:00"), "%Y/%m/%d %H:%M")
+        if (datetime.datetime.now() - st).total_seconds() < 20 * 60:
+            return None
+    except Exception:
+        pass
+    return _result_from_keiba(rec["date"], rec["baba"], rec["rno"])
 
 
 def grade(date_s=None):
