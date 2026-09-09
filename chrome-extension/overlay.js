@@ -341,7 +341,7 @@
       var res = null;
       try {
         var txt = ((document.body && document.body.innerText) || '').slice(0, 30000);
-        var m = /이전\s*([가-힣]{2,8})\s*(\d{1,2})\s*경주/.exec(txt);
+        var m = /이전\s*([가-힣]{2,8})(?:\s*\[[^\]\s]{1,3}\])?\s*(\d{1,2})\s*경주/.exec(txt);   // [2026-09-09] 「코치[륜] 2경주」 꼬리표 허용 — 못 읽으면 이전 경주 분석이 그대로 남는다
         if (m) res = { v: m[1], n: +m[2] };
       } catch (_) { /* */ }
       _brdCache = { t: Date.now(), v: res };
