@@ -241,6 +241,43 @@ def resolve_key(rk, sport):
     return None, None, "지원하지 않는 경기장/종목: %s (%s)" % (track, sport)
 
 
+def _odds_for(kind, key, rec):
+    """최신 odds_history 틱의 복승·단승 배당(있으면). 경마는 babaCode → 저장 토큰으로."""
+    try:
+        if kind == "horse":
+            baba, rno = key.split("|")
+            rk = "%s %d경주" % (FF.BABA.get(baba, baba), int(rno))
+        else:
+            rk = key
+        fn = "%s_%s" % (KF._ymd_token(_today_k()), rk.replace(" ", "_"))
+        t = KF._latest_tick(fn)
+        if not t:
+            return None
+        q = {}
+        for k, v in (t.get("quinella") or {}).items():
+            try:
+                a, b = sorted(int(x) for x in re.split(r"[+\-]", k))
+                q["%d+%d" % (a, b)] = float(v.get("odds") if isinstance(v, dict) else v)
+            except Exception:
+                continue
+        w = {}
+        for k, v in (t.get("win") or {}).items():
+            try:
+                w[str(int(k))] = float(v.get("odds") if isinstance(v, dict) else v)
+            except Exception:
+                continue
+        tr = {}
+        for k, v in (t.get("trio") or {}).items():
+            try:
+                a, b, c = sorted(int(x) for x in re.split(r"[+\-]", k))
+                tr["%d-%d-%d" % (a, b, c)] = float(v.get("odds") if isinstance(v, dict) else v)
+            except Exception:
+                continue
+        return {"quinella": q, "win": w, "trio": tr, "at": (t.get("time") or "")[:8], "mb": t.get("minutes_before"), "src": t.get("src")}
+    except Exception:
+        return None
+
+
 def api_forecast(qs):
     rk = qs.get("rk", [""])[0]; sport = qs.get("sport", [""])[0]; force = qs.get("force", ["0"])[0] == "1"
     kind, key, err = resolve_key(rk, sport)
@@ -270,7 +307,8 @@ def api_forecast(qs):
             return {"ok": False, "error": "예측을 만들지 못함(출마표 없음/오류)"}
         return {"ok": True, "kind": kind, "race": rec.get("race"), "cached": cached, "fetchedAt": rec.get("fetchedAt"), "model": rec.get("model"),
                 "prediction": rec.get("prediction"), "validation": {"passed": (rec.get("validation") or {}).get("passed")},
-                "result": rec.get("result"), "grade": rec.get("grade"), "marketAtFetch": rec.get("marketAtFetch")}
+                "result": rec.get("result"), "grade": rec.get("grade"), "marketAtFetch": rec.get("marketAtFetch"),
+                "odds": _odds_for(kind, key, rec)}
     except Exception as e:
         return {"ok": False, "error": str(e)[:300]}
 
