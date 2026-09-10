@@ -83,6 +83,90 @@
     function byId(id) { try { return document.getElementById(id); } catch (_) { return null; } }
     function root() { return document.body || document.documentElement; }
 
+    // ═══ [🧭 전적표 분석 패널 · 2026-09-10] ═══════════════════════════════════════════════════
+    //   본 패널(ID_PANEL) 왼쪽에 붙는 독립 패널. 본 패널 재생성(2초)과 무관하게 남는다. ✕ 로 닫는다.
+    var ID_FC = 'kbOvForecast';
+    function _fcPanel() {
+      var p = byId(ID_FC);
+      if (p) return p;
+      p = mk('div', 'position:fixed;z-index:2147483646;width:340px;max-height:70vh;overflow:auto;background:rgba(15,23,42,.97);color:#e2e8f0;border:1px solid #334155;border-radius:10px;padding:10px 12px;font:13px/1.45 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.5)');
+      p.id = ID_FC;
+      root().appendChild(p);
+      _fcPlace(p);
+      return p;
+    }
+    function _fcPlace(p) {
+      try {
+        var main = byId(ID_PANEL);
+        var r = main ? main.getBoundingClientRect() : null;
+        if (r && r.width) { p.style.top = Math.max(8, r.top) + 'px'; p.style.left = Math.max(8, r.left - 348) + 'px'; }
+        else { p.style.top = '80px'; p.style.right = '380px'; }
+      } catch (_) { p.style.top = '80px'; p.style.right = '380px'; }
+    }
+    function _fcHead(p, title, rk, sp, busy) {
+      var h = mk('div', 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px');
+      h.appendChild(mk('span', 'font-weight:800;color:#fbbf24', title));
+      var r = mk('div', 'display:flex;gap:8px;align-items:center');
+      if (!busy) {
+        var re = mk('button', 'all:unset;cursor:pointer;color:#7dd3fc;font-size:12px', '다시');
+        re.title = '다시 분석(토큰 추가 사용)';
+        re.addEventListener('click', function () { runFormForecast(rk, sp, true); });
+        r.appendChild(re);
+      }
+      var x = mk('button', 'all:unset;cursor:pointer;color:#94a3b8;font:700 14px sans-serif', '✕');
+      x.addEventListener('click', function () { var q = byId(ID_FC); if (q && q.parentNode) q.parentNode.removeChild(q); });
+      r.appendChild(x);
+      h.appendChild(r);
+      p.appendChild(h);
+    }
+    function runFormForecast(rk, sp, force) {
+      var p = _fcPanel();
+      while (p.firstChild) p.removeChild(p.firstChild);
+      _fcHead(p, '🧭 전적표 분석', rk, sp, true);
+      p.appendChild(mk('div', 'color:#94a3b8', (rk || '경주?') + ' · 출마표를 읽는 중… 40~80초'));
+      try {
+        chrome.runtime.sendMessage({ type: 'FORM_FORECAST', raceKey: rk, sport: sp, force: !!force }, function (res) {
+          try { void chrome.runtime.lastError; } catch (_) { /* */ }
+          var q = byId(ID_FC); if (!q) return;
+          while (q.firstChild) q.removeChild(q.firstChild);
+          _fcHead(q, '🧭 전적표 분석', rk, sp, false);
+          if (!res || !res.ok) {
+            q.appendChild(mk('div', 'color:#f87171;font-weight:700', (res && (res.error || (res.data && res.data.error))) || '실패'));
+            return;
+          }
+          _fcRender(q, res.data);
+        });
+      } catch (e) { p.appendChild(mk('div', 'color:#f87171', String(e))); }
+    }
+    function _fcRender(q, data) {
+      var pr = data.prediction || {};
+      var join = function (arr, sep) { return (arr || []).map(function (x) { return Array.isArray(x) ? x.join(sep || '+') : String(x); }).join(' · '); };
+      q.appendChild(mk('div', 'font-weight:800;font-size:14px;margin-bottom:4px', (data.race || '') + (data.cached ? '  (저장본)' : '')));
+      q.appendChild(mk('div', 'color:#94a3b8;font-size:11px;margin-bottom:6px', (data.fetchedAt || '') + ' · ' + (data.model || '') + (data.validation && data.validation.passed === false ? ' · 검증 미통과' : '')));
+      q.appendChild(mk('div', 'font-size:15px;font-weight:800;color:#fde68a', '축 ' + pr.axis + ' → ' + (pr.partners || []).join('·')));
+      q.appendChild(mk('div', 'margin:4px 0', '복승 ' + join(pr.quinellas, '+')));
+      q.appendChild(mk('div', 'margin:0 0 6px', '삼복승 ' + join(pr.trios, '-')));
+      if (pr.lines) q.appendChild(mk('div', 'color:#c4b5fd;margin-bottom:4px', '라인 ' + (pr.lines || []).map(function (l) { return l.join('-'); }).join(' / ')));
+      if (pr.pace) q.appendChild(mk('div', 'margin-bottom:4px', '전개: ' + pr.pace));
+      if (pr.story) q.appendChild(mk('div', 'color:#cbd5e1;margin-bottom:4px', pr.story));
+      if (pr.market_view) q.appendChild(mk('div', 'color:#93c5fd;margin-bottom:4px', '시장과 갈리는 점: ' + pr.market_view));
+      if (pr.risk) q.appendChild(mk('div', 'color:#fca5a5;margin-bottom:6px', '깨지는 조건: ' + pr.risk));
+      var rs = pr.reasons || {};
+      Object.keys(rs).forEach(function (k) {
+        var row = mk('div', 'display:flex;gap:6px;margin:2px 0;border-top:1px solid #1e293b;padding-top:2px');
+        row.appendChild(mk('span', 'font-weight:800;min-width:22px;color:#fde68a', k));
+        row.appendChild(mk('span', '', String(rs[k])));
+        q.appendChild(row);
+      });
+      var ex = pr.excluded || {};
+      var exs = Object.keys(ex).map(function (k) { return k + ': ' + ex[k]; }).join(' · ');
+      if (exs) q.appendChild(mk('div', 'color:#94a3b8;font-size:11px;margin-top:6px', '제외 ' + exs));
+      if (data.result && data.result.order) {
+        var g = data.grade || {};
+        q.appendChild(mk('div', 'margin-top:6px;font-weight:700', '결과 ' + data.result.order.join('-') + ' · 복승 ' + (g.q_hit ? '적중' : '미적중') + ' · 삼복승 ' + (g.trio_hit ? '적중' : '미적중')));
+      }
+    }
+
     // ── [분석 자동화] 자동전송(autoSend) 여부와 무관하게 주기적으로 서버 분석을 요청 → analyzeStatus 갱신 →
     //    수동 버튼 없이 추천이 자동으로 뜬다. 서버 bg 수집(oddspark)·확장 수집 무엇이든 배당만 있으면 분석 자동.
     //    마감 후에는 서버가 afterClose 로 처리(추천 미반영). 오버레이 꺼져 있으면 생략(자원 절약).
@@ -1603,6 +1687,17 @@
           captureBoardSnapshot(d, 'manual');
         });
         hR.appendChild(snapBtn);
+        // [🧭 전적표 분석 · 2026-09-10 대표 지시] 누를 때만 8012 예측을 받아 **별도 패널**에 그린다(본 패널은 2초마다 재생성되므로 분리).
+        var fcBtn = mk('button', 'all:unset;cursor:pointer;font-size:15px;line-height:1;padding:0 2px', '🧭');
+        fcBtn.title = '전적표 분석(누를 때만 · 40~80초 · 별도 패널)';
+        fcBtn.addEventListener('mousedown', function (ev) { try { ev.stopPropagation(); } catch (_) { /* */ } });
+        fcBtn.addEventListener('click', function (ev) {
+          try { ev.stopPropagation(); } catch (_) { /* */ }
+          var _rk = (st && st.raceKey) || (d && d.raceKey) || '';
+          var _sp = (d && (d.sport || (d.corePicks && d.corePicks.sport))) || (st && st.sport) || (d && d.category === 'cycle' ? 'cycle' : '') || '';
+          runFormForecast(_rk, _sp, false);
+        });
+        hR.appendChild(fcBtn);
         var x = mk('button', 'all:unset;cursor:pointer;color:#94a3b8;font:700 14px sans-serif;padding:0 2px', '✕');
         x.title = '오버레이 끄기';
         x.addEventListener('click', function () {
