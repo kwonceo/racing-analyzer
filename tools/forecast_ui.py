@@ -91,6 +91,16 @@ def _pred_html(rec):
            "<p>복승 %s<br>삼복승 %s</p>" % (" · ".join("+".join(str(x) for x in q) for q in p.get("quinellas") or []),
                                          " · ".join("-".join(str(x) for x in t) for t in p.get("trios") or [])),
            "<p><b>전개</b> %s</p>" % html.escape(str(p.get("pace", "")))]
+    va = rec.get("validation") or {}
+    if va:
+        first = (va.get("history") or [{}])[0].get("violations") or []
+        out.append("<div class='mut'>코드 검증 %s · 시도 %s%s</div>" % ("<span class='ok'>통과</span>" if va.get("passed") else "<span class='no'>미통과</span>", va.get("attempts"),
+                   (" · 최초 위반: " + html.escape(" / ".join(first))) if first else ""))
+    sh = rec.get("shadow") or {}
+    if isinstance(sh.get("prediction"), dict):
+        spp = sh["prediction"]; sg = sh.get("grade") or {}
+        out.append("<div class='mut'>그림자(%s): 축 %s → %s · 복승 %s%s</div>" % (html.escape(str(sh.get("model"))), spp.get("axis"), "·".join(str(x) for x in spp.get("partners") or []),
+                   " · ".join("+".join(str(x) for x in q) for q in spp.get("quinellas") or []), (" · <span class='%s'>%s</span>" % ("ok" if sg.get("q_hit") else "no", "적중" if sg.get("q_hit") else "미적중")) if sg else ""))
     for k, lab in (("story", "시나리오"), ("market_view", "시장과 갈리는 점"), ("risk", "깨지는 조건")):
         if p.get(k):
             out.append("<p><b>%s</b> %s</p>" % (lab, html.escape(str(p[k]))))

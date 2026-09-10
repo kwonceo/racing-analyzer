@@ -25,7 +25,7 @@ KEIBA = "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/"
 HDR = {"User-Agent": "Mozilla/5.0", "Accept": "*/*", "Accept-Language": "ja,en"}
 FETCH_GAP_SEC = 2.0          # keiba.go.jp 예의(서버 수집과 별개 프로세스)
 LEAD_HI = 14                 # 발주 14분 전부터
-PROMPT_VERSION = "h5-20260909-short"   # 규칙판 표식 — 프롬프트를 고치면 올린다(복기 집계는 판별로 나눈다)
+PROMPT_VERSION = "h6-20260909-validated"   # 규칙판 표식 — 프롬프트를 고치면 올린다(복기 집계는 판별로 나눈다)
 LEAD_LO = 3                  # 3분 전까지(예측 1건 50~60초 · 급한 경주부터 처리)
 
 # k_babaCode → 우리 저장 토큰(analysis_log 파일명과 같은 것 · app.py _JP_BABA_CODE 의 첫 한글 별칭)
@@ -53,7 +53,7 @@ SYSTEM = """당신은 일본 지방경마 출마표(전적표)만으로 복승·
 · 상대 3~4두 중 최소 1두는 시장 5위 이하(単勝 순)의 냉대말로 넣고, 복승 조합 중 1개 이상은 그 냉대말과의 조합으로 한다. 근거 없이 넣지 말고 위 ①~⑨ 중 무엇에 해당하는지 reasons 에 적는다.
 · 근거(reasons)에 적은 말은 조합에도 반영한다. 근거에는 쓰고 조합에서 빠뜨리는 것을 금지한다.
 · 출마표의 모든 말을 reasons(축·상대) 또는 excluded 중 한 곳에 반드시 넣는다. 미언급 0두. 특히 예측 시점 인기 6위 이내는 빠뜨리면 실패다(복기에서 미언급 말이 3착에 들어온 사례).
-· 복승 3~4개 중 1개는 축을 빼고 상대 상위 2두끼리 묶는다(축이 3착 밖으로 무너질 때의 보험). 삼복승은 축+상대 2두로 한다.
+· 복승은 축+상대 조합 전부에 상대 상위 2두끼리 1개를 더한다(합 3~5개)(축이 3착 밖으로 무너질 때의 보험). 삼복승은 축+상대 2두로 한다.
 · 3세 말이 고령마 조건에서 직전 입상했으면 상승 여지를 가산한다.
 
 시장(単勝 오즈·人気)은 참고만 한다. 시장 1위를 축으로 삼는 것은 근거가 있을 때만 허용되고, 시장 순위를 그대로 베끼면 안 된다(상위 4두를 그대로 축·상대로 두는 답은 실패다). 목표는 시장이 놓친 말을 상대에 넣는 것이다. 배당이 낮은 자리라도 근거가 확실하면 산다.
@@ -66,7 +66,7 @@ SYSTEM = """당신은 일본 지방경마 출마표(전적표)만으로 복승·
 · 전체 JSON 은 한국어 1,200자 안쪽으로 맞춘다.
 
 반드시 아래 JSON 하나만 출력한다(설명문 금지):
-{"axis": 축 마번(정수), "partners": [상대 마번 3~4개, 유력 순], "quinellas": [[a,b],...3~4개], "trios": [[a,b,c],...1~2개],
+{"axis": 축 마번(정수), "partners": [상대 마번 3~4개, 유력 순], "quinellas": [[a,b],...3~5개(축+상대 전부 · 상대끼리 1개)], "trios": [[a,b,c],...1~2개],
  "pace": "선행 N두 · 판단 한 줄", "reasons": {"마번": "한 줄 근거", ...}, "excluded": {"마번": "제외 이유", ...}, "story": "경주 시나리오 3~4문장", "market_view": "시장과 갈리는 점 2~3문장", "risk": "그림이 깨지는 조건 1~2문장", "confidence": 1~5}"""
 
 
@@ -143,6 +143,143 @@ def deba_text(date_s, baba, rno):
     return head, " | ".join(out)
 
 
+
+# ═══ 코드 검증기(2026-09-09 대표 승인 「opus 가 일하고 코드가 검증」) ═══════════════════════════
+#   모델 출력을 규칙으로 기계 검사하고 위반이 있으면 같은 대화에서 최대 MAX_RETRY 번 고쳐 오게 한다.
+#   위반 목록·재시도 횟수는 예측 JSON "validation" 에 남긴다(원칙 23 — 검증이 도는지 센다).
+MAX_RETRY = 2
+
+
+def _field_nos(body):
+    """출마표 압축 본문에서 마번 전수(취소마 포함) — '| 마번 | 가타카나마명 | 기수 （소속）' 패턴."""
+    nos = []
+    for m in re.finditer(r"\| (\d{1,2}) \| ([ァ-ヶー][^|]{1,40}?) \| [^|]{1,30}?（", body):
+        n = int(m.group(1))
+        if 1 <= n <= 18 and n not in nos:
+            nos.append(n)
+    return nos
+
+
+def _cancelled_nos(body):
+    """出走取消·競走除外 표식이 붙은 말(같은 말 블록 안에 표식이 있으면)."""
+    out = set()
+    for b in re.split(r"(?=\| \d{1,2} \| [ァ-ヶー])", body):
+        m = re.match(r"\| (\d{1,2}) \|", b)
+        if m and ("出走取消" in b or "競走除外" in b):
+            out.add(int(m.group(1)))
+    return out
+
+
+def _ints(xs):
+    out = []
+    for x in xs or []:
+        try:
+            out.append(int(x))
+        except Exception:
+            pass
+    return out
+
+
+def validate(pred, field, market, kind="horse", cancelled=()):
+    """규칙 위반 목록(빈 리스트면 통과). field=마번 전수 · market=[(no, odds, ...)] 예측 시점 시장 순."""
+    v = []
+    if not isinstance(pred, dict):
+        return ["JSON 이 아니다"]
+    field = list(field or [])
+    fs = set(field) - set(cancelled or ())
+    try:
+        axis = int(pred.get("axis"))
+    except Exception:
+        return ["axis 가 정수가 아니다"]
+    partners = _ints(pred.get("partners"))
+    qs = [tuple(sorted(_ints(q))) for q in (pred.get("quinellas") or []) if isinstance(q, (list, tuple))]
+    ts = [tuple(sorted(_ints(t))) for t in (pred.get("trios") or []) if isinstance(t, (list, tuple))]
+    reasons = {int(k) for k in (pred.get("reasons") or {}) if str(k).isdigit()}
+    excluded = {int(k) for k in (pred.get("excluded") or {}) if str(k).isdigit()}
+    unit = "차번" if kind == "keirin" else "마번"
+    if fs and axis not in fs:
+        v.append("축 %d 이 출주 %s에 없다(취소마 포함 금지)" % (axis, unit))
+    if not (3 <= len(partners) <= 4):
+        v.append("상대는 3~4개여야 한다(지금 %d)" % len(partners))
+    if axis in partners:
+        v.append("축이 상대에 다시 들어 있다")
+    if len(set(partners)) != len(partners):
+        v.append("상대에 중복이 있다")
+    bad = [n for n in partners if fs and n not in fs]
+    if bad:
+        v.append("상대 %s 가 출주 %s에 없다" % (bad, unit))
+    if not (3 <= len(qs) <= 5) or any(len(q) != 2 for q in qs):
+        v.append("복승은 2개 번호 조합 3~5개여야 한다(축+상대 전부 · 상대끼리 1개)")
+    if len(set(qs)) != len(qs):
+        v.append("복승 조합이 중복된다")
+    if not (1 <= len(ts) <= 2) or any(len(t) != 3 for t in ts):
+        v.append("삼복승은 3개 번호 조합 1~2개여야 한다")
+    used = set(n for q in qs for n in q) | set(n for t in ts for n in t)
+    if fs and (used - fs):
+        v.append("조합에 출주하지 않는 번호 %s" % sorted(used - fs))
+    notin = [n for n in partners if not any(n in q for q in qs)]
+    if notin:
+        v.append("상대 %s 가 복승 조합 어디에도 없다(근거=조합 규칙)" % notin)
+    orphan = sorted((reasons - {axis} - set(partners)) & fs)
+    if orphan:
+        v.append("근거(reasons)에만 있고 축·상대가 아닌 %s %s — 상대에 넣거나 제외로 옮겨라" % (unit, orphan))
+    if qs and not any(axis not in q for q in qs):
+        v.append("축 없는 복승(상대끼리) 조합이 1개 있어야 한다(축 붕괴 보험)")
+    if fs:
+        missing = sorted(fs - reasons - excluded - {axis} - set(partners))
+        if missing:
+            v.append("미언급 %s %s — 모든 %s를 reasons 또는 excluded 에 넣어라" % (unit, missing, unit))
+    if cancelled:
+        wrong = sorted(set(cancelled) & (set(partners) | {axis} | used))
+        if wrong:
+            v.append("취소·제외마 %s 가 축·상대·조합에 있다" % wrong)
+    if market and len(market) >= 6:
+        rank = {m[0]: i + 1 for i, m in enumerate(market)}
+        cold_min = 5 if len(market) >= 9 else 4
+        if partners and not any(rank.get(n, 99) >= cold_min for n in partners):
+            v.append("상대 중 시장 %d위 이하 냉대 %s가 없다(지금 순위 %s)" % (cold_min, unit, [rank.get(n) for n in partners]))
+    if not str(pred.get("pace") or "").strip():
+        v.append("pace(전개 판단)가 비었다")
+    if not str(pred.get("story") or "").strip():
+        v.append("story 가 비었다")
+    return v
+
+
+def _extract_json(txt):
+    m = re.search(r"\{.*\}", txt, flags=re.S)
+    return json.loads(m.group(0)) if m else {"raw": txt}
+
+
+def ask_validated(system, user, model, field, market, kind="horse", cancelled=()):
+    """모델 호출 → 검증 → 위반이면 같은 대화에서 고쳐 오게 함(최대 MAX_RETRY). (pred, usage합, validation)"""
+    import anthropic
+    key = _env("ANTHROPIC_API_KEY")
+    if not key:
+        raise RuntimeError("ANTHROPIC_API_KEY 없음(.env)")
+    client = anthropic.Anthropic(api_key=key)
+    msgs = [{"role": "user", "content": user}]
+    usage = {"in": 0, "out": 0}
+    history = []
+    pred = None
+    for attempt in range(MAX_RETRY + 1):
+        msg = client.messages.create(model=model, system=system, messages=msgs, **_gen_kwargs())
+        usage["in"] += getattr(msg.usage, "input_tokens", 0) or 0
+        usage["out"] += getattr(msg.usage, "output_tokens", 0) or 0
+        txt = "".join(getattr(b, "text", "") for b in msg.content)
+        try:
+            pred = _extract_json(txt)
+        except Exception:
+            pred = {"raw": txt}
+        viol = validate(pred, field, market, kind, cancelled)
+        history.append({"attempt": attempt + 1, "violations": viol})
+        if not viol:
+            break
+        if attempt < MAX_RETRY:
+            msgs = msgs + [{"role": "assistant", "content": txt},
+                           {"role": "user", "content": "아래 규칙 위반을 전부 고쳐 JSON 하나만 다시 출력하라(설명문 금지 · 다른 판단은 유지):\n- " + "\n- ".join(viol)}]
+    return pred, usage, {"attempts": len(history), "history": history, "passed": not history[-1]["violations"], "final": history[-1]["violations"]}
+
+
 def _market_order(body):
     """출마표의 単勝 오즈(人気)로 시장 순서 — 예측 시점 시장 대조군. [(마번, 오즈, 인기)]"""
     rows = []
@@ -162,19 +299,13 @@ def _gen_kwargs():
     return kw
 
 
+def _user_text(head, body):
+    return "【경주】 %s\n\n【출마표 원문(압축 · 말마다 '| 마번 | 마명 | 기수 | 単勝 | (人気) | 着別성적 全/左/右/場/距 | 최고타임 | 최근 5주(착순·날짜·馬場·두수·경기장·거리·게이트) | 性齢 | 부담중량·조건 | 등급명 | 種牡馬·조교사 | 마체중(증감) | 최근5주 人気·체중·기수 | 타임·통과순위·상3F | ...')】\n%s" % (head, body)
+
+
 def ask_claude(head, body, model):
-    import anthropic
-    key = _env("ANTHROPIC_API_KEY")
-    if not key:
-        raise RuntimeError("ANTHROPIC_API_KEY 없음(.env)")
-    client = anthropic.Anthropic(api_key=key)
-    user = "【경주】 %s\n\n【출마표 원문(압축 · 말마다 '| 마번 | 마명 | 기수 | 単勝 | (人気) | 着別성적 全/左/右/場/距 | 최고타임 | 최근 5주(착순·날짜·馬場·두수·경기장·거리·게이트) | 性齢 | 부담중량·조건 | 등급명 | 種牡馬·조교사 | 마체중(증감) | 최근5주 人気·체중·기수 | 타임·통과순위·상3F | ...')】\n%s" % (head, body)
-    msg = client.messages.create(model=model, system=SYSTEM, messages=[{"role": "user", "content": user}], **_gen_kwargs())
-    txt = "".join(getattr(b, "text", "") for b in msg.content)
-    m = re.search(r"\{.*\}", txt, flags=re.S)
-    pred = json.loads(m.group(0)) if m else {"raw": txt}
-    usage = {"in": getattr(msg.usage, "input_tokens", None), "out": getattr(msg.usage, "output_tokens", None)}
-    return pred, usage
+    """검증 루프 포함. (pred, usage, validation)"""
+    return ask_validated(SYSTEM, _user_text(head, body), model, _field_nos(body), _market_order(body), "horse", _cancelled_nos(body))
 
 
 def _paths(date_s, baba, rno):
@@ -195,19 +326,27 @@ def forecast_one(date_s, baba, rno, start_hm=None, model=None, force=False):
         return None
     mk = _market_order(body)
     t0 = time.time()
-    pred, usage = ask_claude(head, body, model)
+    pred, usage, valid = ask_claude(head, body, model)
+    shadow = None
+    sm = _env("FORECAST_SHADOW_MODEL")
+    if sm and sm != model:
+        try:
+            sp, su, sv = ask_claude(head, body, sm)
+            shadow = {"model": sm, "prediction": sp, "usage": su, "validation": sv}
+        except Exception as e:
+            shadow = {"model": sm, "error": str(e)}
     rec = {"date": date_s, "baba": baba, "track": BABA.get(baba, baba), "rno": rno,
            "race": "%s %d경주" % (BABA.get(baba, baba), rno), "start": start_hm,
            "fetchedAt": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
            "model": model, "usage": usage, "latencySec": round(time.time() - t0, 1), "prompt_version": PROMPT_VERSION,
-           "head": head, "bodyChars": len(body), "marketAtFetch": mk[:5],
-           "prediction": pred}
+           "head": head, "bodyChars": len(body), "marketAtFetch": mk[:5], "field": _field_nos(body), "cancelled": sorted(_cancelled_nos(body)),
+           "prediction": pred, "validation": valid, "shadow": shadow}
     io.open(path, "w", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False, indent=1))
     io.open(jl, "a", encoding="utf-8").write(json.dumps({k: v for k, v in rec.items() if k != "head"}, ensure_ascii=False) + "\n")
     p = pred if isinstance(pred, dict) else {}
-    print("[예측] %s 축 %s 상대 %s 복승 %s 삼복승 %s conf %s (%s · %.0fs · in %s)" % (
+    print("[예측] %s 축 %s 상대 %s 복승 %s 삼복승 %s conf %s (%s · %.0fs · in %s · 검증 %s%s)" % (
         rec["race"], p.get("axis"), p.get("partners"), p.get("quinellas"), p.get("trios"), p.get("confidence"),
-        model, rec["latencySec"], usage.get("in")))
+        model, rec["latencySec"], usage.get("in"), "통과" if valid.get("passed") else "미통과 " + str(valid.get("final")), (" · 재시도 %d" % (valid["attempts"] - 1)) if valid.get("attempts", 1) > 1 else ""))
     return rec
 
 
@@ -341,6 +480,13 @@ def grade(date_s=None):
              "market3_n": 3 if len(mk) >= 3 else 0}
         rec["result"] = res
         rec["grade"] = g
+        sh = rec.get("shadow") or {}
+        if isinstance(sh.get("prediction"), dict) and "axis" in sh["prediction"]:
+            sp = sh["prediction"]
+            sqs = [set(map(int, q)) for q in (sp.get("quinellas") or []) if isinstance(q, (list, tuple)) and len(q) == 2]
+            sts = [set(map(int, t)) for t in (sp.get("trios") or []) if isinstance(t, (list, tuple)) and len(t) == 3]
+            sh["grade"] = {"q_hit": any(q == top2 for q in sqs), "trio_hit": any(t == top3 for t in sts), "axis_top2": sp.get("axis") in top2,
+                           "axis_differs": sp.get("axis") != p.get("axis")}
         io.open(f, "w", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False, indent=1))
         n_new += 1
     print("[채점] 새로 %d건" % n_new)
@@ -368,7 +514,21 @@ def summary():
             if g["market3_q_hit"]:
                 ret_m3 += float(pay)
     tot = len([f for f in files if (_load(f) or {}).get("prediction")])
+    vp = vn = vr = 0; sh_n = sh_q = sh_d = sh_dm = sh_ds = 0
+    for f in files:
+        rec = _load(f) or {}; va = rec.get("validation") or {}
+        if va:
+            vn += 1; vp += bool(va.get("passed")); vr += (va.get("attempts", 1) - 1)
+        sg = (rec.get("shadow") or {}).get("grade")
+        if sg and rec.get("grade"):
+            sh_n += 1; sh_q += bool(sg.get("q_hit"))
+            if sg.get("axis_differs"):
+                sh_d += 1; sh_dm += bool(rec["grade"].get("axis_top2")); sh_ds += bool(sg.get("axis_top2"))
     print("전적표 예측 집계 — 예측 %d · 채점 %d%s" % (tot, n, "  ⚠판정불가(적중<30)" if q < 30 else ""))
+    if vn:
+        print("  코드 검증 — 대상 %d · 최종 통과 %d · 재시도 합 %d" % (vn, vp, vr))
+    if sh_n:
+        print("  그림자 모델 — 채점 %d · 복승 적중 본선 %d ↔ 그림자 %d · 머리 갈린 경주 %d (본선 축 1·2착 %d ↔ 그림자 %d)" % (sh_n, q, sh_q, sh_d, sh_dm, sh_ds))
     if n:
         pays.sort(reverse=True)
         print("  복승 적중 %d/%d (%.1f%%) · 삼복승 %d · 축 1·2착 %d (%.1f%%)" % (q, n, 100.0 * q / n, t, ax, 100.0 * ax / n))

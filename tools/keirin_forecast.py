@@ -24,7 +24,7 @@ import form_forecast as FF          # _env · _load · 공통
 OUT_DIR = os.path.join(BASE, "logs", "keirin_forecast")
 STAMP = os.path.join(OUT_DIR, "_daemon_last.txt")
 LEAD_HI = 9
-PROMPT_VERSION = "k3-20260909-all"
+PROMPT_VERSION = "k5-20260909-validated"
 LEAD_LO = 3
 
 SYSTEM = """당신은 일본 경륜 출주표만으로 2차복(복승)·3연복(삼복승)을 짚는 분석가다. 배당·인기·다른 분석기의 추천은 주어지지 않는다.
@@ -42,7 +42,7 @@ SYSTEM = """당신은 일본 경륜 출주표만으로 2차복(복승)·3연복(
 읽기 규칙(반드시 지킨다):
 · 축은 「라인 선두가 강한 라인의 番手」 또는 「유일 자력형」 중에서 고른다. 강한 자력형 선두 자신을 축으로 삼는 것은 자력형이 2명 이하일 때만.
 · 상대 3~4명 중 최소 1명은 다른 라인(축과 다른 라인)에서 넣는다 — 축 라인이 무너질 때의 보험.
-· 복승 3~4개 중 1개는 축을 빼고 상대끼리 묶는다. 삼복승은 축+상대 2명(같은 라인 2명+다른 라인 1명 조합을 우선).
+· 복승은 축+상대 조합 전부에 상대끼리 1개를 더한다(합 3~5개). 삼복승은 축+상대 2명(같은 라인 2명+다른 라인 1명 조합을 우선).
 · 근거(reasons)에 적은 선수는 조합에도 반영한다. 근거에만 쓰고 조합에서 빠뜨리는 것을 금지한다.
 · 출주표의 모든 선수를 reasons 또는 excluded 중 한 곳에 반드시 넣는다. 미언급 0명.
 · 등급·연대율 상위만 나열하는 답(=시장 베끼기)은 실패다. 전개(누가 앞을 잡고 누가 그 뒤에 붙나)를 먼저 쓰고 거기서 조합을 만든다.
@@ -50,13 +50,12 @@ SYSTEM = """당신은 일본 경륜 출주표만으로 2차복(복승)·3연복(
 
 출력 언어·깊이 규칙(대표 지시 2026-09-09 「한국말로 · 약해 보인다」):
 · 모든 문장은 한국어로 쓴다. 일본어 용어는 반드시 번역한다 — 良=양호 · 稍重=약간 다습 · 重=다습 · 不良=불량 · 人気=인기 · 直前/前走=직전 · 距=거리 실적 · 場=경기장 실적 · 牝=암말 · 牡=수말 · セン=거세마 · 逃げ=도주 · 差し=차입 · 追込=추입 · 先行=선행 · 番手=2번수 · 上がり=상3F. 경기장·마명은 한글로(川崎=카와사키 · 園田=소노다 · 浦和=우라와 · 船橋=후나바시 · 大井=오이 · 門別=몬베츠 · 金沢=카나자와 · 笠松=카사마츠 · 名古屋=나고야 · 高知=고치 · 佐賀=사가 · 姫路=히메지 · 盛岡=모리오카 · 水沢=미즈사와). 마명은 가타카나를 한글 음역으로.
-· 근거(reasons)는 말마다 2~3문장의 완결된 이야기로 쓴다: ① 직전에 무엇을 했나(착순·통과순위·마장·인기·상대) ② 그것이 오늘 왜 통하나(전개·마장·거리·등급) ③ 무엇이 되면 들어오나. 숫자 나열이 아니라 판단을 쓴다.
-· "story": 이 경주가 어떻게 흘러갈지 3~4문장(누가 앞을 잡고, 누가 그 뒤에 붙고, 결승선에서 누가 뻗는가 · 마장 영향).
-· "market_view": 시장(단승 순)과 내 판단이 갈리는 지점 2~3문장 — 시장 상위 중 내가 내린 말과 이유, 시장이 놓친 냉대말과 이유. 시장과 같으면 「시장과 같다」고 쓰고 그 이유를 쓴다.
-· "risk": 이 그림이 깨지는 조건 1~2문장(축이 무너지는 경우와 그때 살아남는 조합).
+· 분량(대표 지시 「텍스트를 줄여라」): 축·상대의 근거(reasons)는 2문장 이내 — ① 직전에 무엇을 했나 ② 오늘 왜 통하나. 제외(excluded)는 한 구절(15자 안팎)로만. 판단을 쓰고 숫자 나열은 하지 않는다.
+· "story": 전개 2문장(누가 앞을 잡고 결승선에서 누가 뻗는가). "market_view": 시장과 갈리는 점 1~2문장. "risk": 깨지는 조건 1문장.
+· 전체 JSON 은 한국어 1,200자 안쪽으로 맞춘다.
 
 반드시 아래 JSON 하나만 출력한다(설명문 금지):
-{"axis": 축 차번(정수), "partners": [상대 차번 3~4개, 유력 순], "quinellas": [[a,b],...3~4개], "trios": [[a,b,c],...1~2개],
+{"axis": 축 차번(정수), "partners": [상대 차번 3~4개, 유력 순], "quinellas": [[a,b],...3~5개(축+상대 전부 · 상대끼리 1개)], "trios": [[a,b,c],...1~2개],
  "pace": "라인 N개 · 자력형 N명 · 전개 판단 한 줄", "lines": [[라인1 차번들],[라인2],...], "reasons": {"차번": "한 줄 근거", ...}, "excluded": {"차번": "제외 이유", ...}, "story": "경주 시나리오 3~4문장", "market_view": "시장과 갈리는 점 2~3문장", "risk": "그림이 깨지는 조건 1~2문장", "confidence": 1~5}"""
 
 
@@ -108,18 +107,9 @@ def _market_from_tick(t):
     return [(n, m[n]) for n in sorted(m, key=lambda x: m[x])]
 
 
-def ask(head, body, model):
-    import anthropic
-    key = FF._env("ANTHROPIC_API_KEY")
-    if not key:
-        raise RuntimeError("ANTHROPIC_API_KEY 없음(.env)")
-    client = anthropic.Anthropic(api_key=key)
-    msg = client.messages.create(model=model, system=SYSTEM, **FF._gen_kwargs(),
-                                 messages=[{"role": "user", "content": "【경주】 %s\n\n【출주표】\n%s" % (head, body)}])
-    txt = "".join(getattr(b, "text", "") for b in msg.content)
-    m = re.search(r"\{.*\}", txt, flags=re.S)
-    pred = json.loads(m.group(0)) if m else {"raw": txt}
-    return pred, {"in": getattr(msg.usage, "input_tokens", None), "out": getattr(msg.usage, "output_tokens", None)}
+def ask(head, body, model, field=(), market=()):
+    """검증 루프 포함(FF.ask_validated). (pred, usage, validation)"""
+    return FF.ask_validated(SYSTEM, "【경주】 %s\n\n【출주표】\n%s" % (head, body), model, list(field), list(market), "keirin", ())
 
 
 def _paths(date_s, rk):
@@ -143,18 +133,27 @@ def forecast_one(date_s, rk, model=None, force=False, tick=None):
     tick = tick or _latest_tick(fn)
     mk = _market_from_tick(tick) if tick else []
     t0 = time.time()
-    pred, usage = ask(head, body, model)
+    field = sorted({int(h.get("no")) for h in (doc.get("horses") or []) if h.get("no")} | {int(e.get("no")) for e in ((doc.get("raw_profile") or {}).get("entries") or []) if e.get("no")})
+    pred, usage, valid = ask(head, body, model, field, mk)
+    shadow = None
+    sm = FF._env("FORECAST_SHADOW_MODEL")
+    if sm and sm != model:
+        try:
+            sp, su, sv = ask(head, body, sm, field, mk)
+            shadow = {"model": sm, "prediction": sp, "usage": su, "validation": sv}
+        except Exception as e:
+            shadow = {"model": sm, "error": str(e)}
     rec = {"date": date_s, "race": rk, "track": rk.rsplit(" ", 1)[0], "rno": rk.rsplit(" ", 1)[1],
            "fetchedAt": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
            "tickMb": tick.get("minutes_before") if tick else None, "tickTime": tick.get("time") if tick else None,
            "model": model, "usage": usage, "latencySec": round(time.time() - t0, 1), "prompt_version": PROMPT_VERSION,
-           "head": head, "bodyChars": len(body), "marketAtFetch": mk[:5], "prediction": pred}
+           "head": head, "bodyChars": len(body), "marketAtFetch": mk[:5], "field": field, "prediction": pred, "validation": valid, "shadow": shadow}
     io.open(path, "w", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False, indent=1))
     io.open(jl, "a", encoding="utf-8").write(json.dumps({k: v for k, v in rec.items() if k != "head"}, ensure_ascii=False) + "\n")
     p = pred if isinstance(pred, dict) else {}
-    print("[예측] %s 축 %s 상대 %s 복승 %s 삼복승 %s 라인 %s conf %s (%s · %.0fs · in %s)" % (
+    print("[예측] %s 축 %s 상대 %s 복승 %s 삼복승 %s 라인 %s conf %s (%s · %.0fs · in %s · 검증 %s%s)" % (
         rk, p.get("axis"), p.get("partners"), p.get("quinellas"), p.get("trios"), p.get("lines"), p.get("confidence"),
-        model, rec["latencySec"], usage.get("in")))
+        model, rec["latencySec"], usage.get("in"), "통과" if valid.get("passed") else "미통과 " + str(valid.get("final")), (" · 재시도 %d" % (valid["attempts"] - 1)) if valid.get("attempts", 1) > 1 else ""))
     return rec
 
 
