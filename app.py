@@ -14226,6 +14226,65 @@ def _triple_analyze(rk, rec):
             core_picks["qMainCheck"] = _fp.get("qMainCheck")       # [삼복승 정합성] 복승메인 말 포함 검증 결과(qMain·replaced·allInclude)
             core_picks["scenarioPlan"] = _fp.get("scenarioPlan")   # [시나리오] 시나리오A(유력마)+B(편성 유리) 조합 자동생성
             core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
+            # 🔴 [2026-09-08 대표 승인 「경륜만 끄는 것으로 진행」] 💎 BMED 특별 감지를 **경륜에서 표시·카톡에서 뺀다.**
+            #   7주 실측(결과+확정배당 · 경륜 3,205경주): 💎 조합 4,329구좌 적중 194(4.5%) 회수 65.1 3제외 61.7 — 판정선 미달 ·
+            #   💎 말(유력마 제외) 1·2착 20.7% ↔ 무작위 28.4% · 경주의 78.0% 에 뜸(원칙 18 · 변별력 없음) · 회원 수신 1,618구좌 62.2%.
+            #   경마는 남긴다(516구좌 적중 17 회수 91.6 · 판정 불가 · 사업 원칙 고배당 자리 — 적중 30건에 재판정).
+            #   ⚠ 여기서 비우면 오버레이·웹·카톡(sentQuinellas·sentDia)·T-2 잠금·판정(라 다이아) 전부 한 지점에서 빠진다.
+            #   계산값은 bmedSpecialShadow 에 남겨 측정은 계속한다(관측 유지 · 삭제 아님). 🔧 되돌리기: BMED_SPECIAL_OFF_SPORTS = ()
+            if core_picks["bmedSpecial"] and str(_analyze_sport or "") in BMED_SPECIAL_OFF_SPORTS:
+                core_picks["bmedSpecialShadow"] = core_picks["bmedSpecial"]
+                core_picks["bmedSpecial"] = []
+                try:
+                    _gate_hit("bmed_special_off", str(rec.get("raceKey") or ""), "경륜 💎 %d개 숨김" % len(core_picks["bmedSpecialShadow"]), reach_only=True)
+                except Exception:
+                    pass
+            # 🔴 [2026-09-08 대표 「1번으로 진행」] 전적표 한방(FORM_EDGE_MODE · 상단 주석) — 완전 격리 · shadow 는 기록만
+            try:
+                if FORM_EDGE_MODE in ("shadow", "live") and _PREVIEW is not None and form and str(_analyze_sport or "") == "horse":
+                    _fe_q = _as_qmap(curQ) or {}
+                    _fe_mr = _market_rank_from_quin(_fe_q) or {}
+                    _fe_ax = [int(n) for n, rr in _fe_mr.items() if rr == 1]
+                    _fe_rows = [h for h in form if isinstance(h, dict) and h.get("no") is not None]
+                    _fe_rs = sorted(_fe_rows, key=lambda h: -float(h.get("totalScore") or 0))
+                    _fe_rsrank = {int(h["no"]): i + 1 for i, h in enumerate(_fe_rs)}
+                    _fe_cands = []
+                    for h in _fe_rows:
+                        _n = int(h["no"])
+                        if _fe_ax and _n == _fe_ax[0]:
+                            continue
+                        if "꾸준함" not in (_PREVIEW.form_tags(h, None) or []):
+                            continue
+                        if int(_fe_mr.get(_n) or _fe_mr.get(str(_n)) or 0) < FORM_EDGE_COLD_MIN:
+                            continue
+                        if _fe_rsrank.get(_n, 99) > FORM_EDGE_RS_RANK_MAX:
+                            continue
+                        _fe_cands.append((_fe_rsrank[_n], _n))
+                    _gate_hit("form_edge", rk, "도달", reach_only=True)
+                    if _fe_cands and _fe_ax:
+                        _fe_cands.sort()
+                        _fe_no = _fe_cands[0][1]
+                        _fe_c = [min(_fe_ax[0], _fe_no), max(_fe_ax[0], _fe_no)]
+                        _fe_o = _fe_q.get((_fe_c[0], _fe_c[1])) or _fe_q.get("%d+%d" % (_fe_c[0], _fe_c[1]))
+                        _fe_rec = {"t": time.time(), "rk": rk, "mode": FORM_EDGE_MODE, "combo": _fe_c, "odds": _fe_o,
+                                   "cold": _fe_mr.get(_fe_no) or _fe_mr.get(str(_fe_no)), "rsRank": _fe_rsrank.get(_fe_no),
+                                   "inList": any(sorted(int(x) for x in (q.get("combo") or [])) == _fe_c
+                                                 for q in (core_picks.get("finalQuinellas") or []) if isinstance(q, dict))}
+                        core_picks["formEdge"] = _fe_rec                       # 화면·복기용(표시 전용 키)
+                        try:
+                            os.makedirs(FORM_EDGE_DIR, exist_ok=True)
+                            with io.open(os.path.join(FORM_EDGE_DIR, time.strftime("%Y%m%d") + ".jsonl"), "a", encoding="utf-8") as _ff:
+                                _ff.write(json.dumps(_fe_rec, ensure_ascii=False) + "\n")
+                        except Exception:
+                            pass
+                        _gate_hit("form_edge", rk, "%s %d+%d %s배" % (FORM_EDGE_MODE, _fe_c[0], _fe_c[1], _fe_o), once_key=rk)
+                        if FORM_EDGE_MODE == "live" and not _fe_rec["inList"]:
+                            core_picks.setdefault("finalQuinellas", []).append({
+                                "combo": _fe_c, "odds": _fe_o, "formEdge": True, "stars": 1,
+                                "reason": "전적표 한방 — 전적 %d위·꾸준함·시장 %s위 %d번 × 시장 1위 %d번" % (
+                                    _fe_rsrank.get(_fe_no, 0), _fe_rec["cold"], _fe_no, _fe_ax[0])})
+            except Exception as _fee:
+                print("[전적표 한방] 스킵(무시):", str(_fee)[:90])
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
             core_picks["dansungPlan"] = _fp.get("dansungPlan")     # [단통 근본수정] 복승 중심 재편성(단통말 제외·복병 복승·삼복승 보험)
@@ -17917,6 +17976,10 @@ def _raw_profile_snapshot(rk):
                   # 🔴 [2026-08-28] 과거 기수·마체중·부담중량 — 「기수 변경」·「마체중 증감」을
                   #   회원 예상문에 쓰려면 필요하다. 파서는 이미 뽑고 있었고 저장에서만 빠져 있었다.
                   "pastJockeys", "pastBodyWeights", "pastBurdens",
+                  # 🔴 [2026-09-08 대표 승인 「1번 배선」] DebaTable 과거 5전 상세(인기·타임·상3F·코너·두수·거리·날짜·마장·경기장)
+                  #   전적 원천과 무관하게 덧붙인 것(_nar_form_enrich) — analysis_log 로 옮겨야 소급 측정이 된다.
+                  "debaPastPlacings", "debaPastPops", "debaPastTimes", "debaPastLast3f", "debaPastCorners",
+                  "debaPastFieldSizes", "debaPastDistances", "debaPastDates", "debaPastTrackConds", "debaPastVenues", "enrichSrc",
                   "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
                   "declaredStyle", "declaredStyleLabel",    # [표기 각질 병기 2026-07-30]
                   "weight", "winOdds", "pop",               # [발주 시점 값 보존 2026-07-30]
@@ -19743,7 +19806,7 @@ def _build_analysis_log(rk, an=None):
                         if str(_e.get("src") or "") in ("crossPair", "dark"):
                             _bombk.add(tuple(sorted(int(x) for x in (_e.get("combo") or []))))
                     for _q in ((core_picks_out or {}).get("finalQuinellas") or []):
-                        if _q.get("crossPair") or _q.get("evRescue"):
+                        if _q.get("crossPair") or _q.get("evRescue") or _q.get("formEdge"):   # [2026-09-08] 전적표 한방(live 시)
                             _bombk.add(tuple(sorted(int(x) for x in (_q.get("combo") or []))))
                     # 🔴 [2026-08-23] 카톡 편입분은 대부분 💎(고배당)다 → **한방**으로 센다.
                     #   본선이었다면 이미 판정 명단에 있어 편입 자체가 일어나지 않는다.
@@ -26751,6 +26814,17 @@ def day_races():
                 if _cd.get("_stamp") == _dc_stamp:
                     _cd.pop("_stamp", None)
                     return jsonify(_cd)
+                # [2026-09-09 대표 「오늘 적중률 화면 로딩이 너무 길다」] 경주 중에는 analysis_log 가 30초마다 갱신돼
+                #   스탬프가 매번 어긋나고, 그때마다 재계산(3초 · 다른 스레드와 겹치면 54초 실측)이 화면에 그대로 보였다.
+                #   ⇒ 캐시가 DAY_CARDS_STALE_SEC 안쪽이면 스탬프가 달라도 그대로 준다(한 화면이 1분 안에 두 번 재계산하지 않는다).
+                #   원칙 23: 계수기 day_cards_stale_hit 로 발동을 센다. 🔧 되돌리기: DAY_CARDS_STALE_SEC = 0
+                try:
+                    if DAY_CARDS_STALE_SEC > 0 and (time.time() - os.path.getmtime(_cp)) < DAY_CARDS_STALE_SEC:
+                        _cd.pop("_stamp", None)
+                        _gate_hit("day_cards_stale_hit", date_dash, "stale<%ds" % DAY_CARDS_STALE_SEC)
+                        return jsonify(_cd)
+                except Exception:
+                    pass
         except Exception as _dce0:
             print("[날짜별카드] 캐시 조회 실패(무시):", str(_dce0)[:100])
     cards = []
@@ -36911,6 +36985,7 @@ TRIO_MAIN_BY_LABEL = True
 #   🔧 되돌리기: TRIO_PAIR_ONE = False
 # [날짜별 카드 응답 파일 캐시 · 2026-08-19] 상세는 day_races 안 주석 참조.
 DAY_CARDS_CACHE = True
+DAY_CARDS_STALE_SEC = 45   # [2026-09-09] 경주 중 스탬프 어긋남 재계산 억제 — 캐시가 이 초 안쪽이면 그대로 준다(0 = 끔)
 DAY_CARDS_CACHE_DIR = os.path.join(os.path.dirname(__file__), "data", "day_cards_cache")
 TRIO_PAIR_ONE = True
 TRIO_PAIR_ONE_SPORTS = ("cycle",)
@@ -38693,6 +38768,139 @@ def _nar_autocollect_form(rk, baba, ymd, rno):
         print("[南関東 전적] %s 실패(무시):" % rk, e)
 
 
+# ══════════ [1번 배선 · NAR 전적 상세 보강 (2026-09-08 대표 승인)] ══════════
+#   왜: 「상승세 복병」(직전 최고 착순 + 인기 대비 선전 + 타임 개선)을 재려면 **과거 인기순위·타임**이 필요한데
+#     oddspark 出走表에는 인기가 없어 pastPops 가 값 없이 키만 저장됐고(원칙 5·8-E 사례), keiba.go.jp 경로로
+#     받은 14% 경주에만 값이 있었다(2026-09-08 소급 186경주 · 판정 불가). DebaTable 원문에는 **전 경주** 있다.
+#   무엇: 전적 원천(oddspark·keiba_ext·keiba_nar)이 무엇이든, DebaTable 의 과거 5전 상세를 저장행에 **덧붙인다**.
+#     기존 키는 한 글자도 바꾸지 않는다(deba* 접두 키로 나란히 저장) · pastPops 만 「전부 비어 있고 착순 배열이
+#     자리까지 일치할 때」 채운다 · 점수·추천·판정 경로 무개입(저장만).
+#   계수기(원칙 23·24): _NAR_ENRICH_STAT reach/fired/ok/filled_pop/skip_have/blocked/nocode/fail + _gate_hit nar_form_enrich
+#   🔧 되돌리기: NAR_FORM_ENRICH_ENABLED = False (한 줄)
+NAR_FORM_ENRICH_ENABLED = True
+_NAR_ENRICH_DONE = set()
+_NAR_ENRICH_STAT = {"reach": 0, "fired": 0, "ok": 0, "filled_pop": 0, "skip_have": 0, "blocked": 0, "nocode": 0, "fail": 0}
+_NAR_DEBA_KEYS = ("debaPastPlacings", "debaPastPops", "debaPastTimes", "debaPastLast3f", "debaPastCorners",
+                  "debaPastFieldSizes", "debaPastDistances", "debaPastDates", "debaPastTrackConds", "debaPastVenues")
+
+
+def _nar_form_enrich_rows(hs, shutsuba, details):
+    """순수 병합(테스트 가능) — 저장행 hs 에 DebaTable 상세를 덧붙이고 (보강 두수, pastPops 채운 두수)를 돌려준다."""
+    by_no = {}
+    for sh in (shutsuba or {}).get("horses") or []:
+        try:
+            by_no[int(sh.get("no"))] = (details or {}).get(sh.get("lineageNb")) or []
+        except (TypeError, ValueError):
+            continue
+    n_rows = 0
+    filled = 0
+    for h in hs or []:
+        try:
+            past = by_no.get(int(h.get("no")))
+        except (TypeError, ValueError):
+            past = None
+        if not past:
+            continue
+        n_rows += 1
+        h["debaPastPlacings"] = [p.get("placing") for p in past]
+        h["debaPastPops"] = [p.get("pop") for p in past]
+        h["debaPastTimes"] = [p.get("time") for p in past]
+        h["debaPastLast3f"] = [p.get("last3f") for p in past]
+        h["debaPastCorners"] = [p.get("corner") for p in past]
+        h["debaPastFieldSizes"] = [p.get("fieldSize") for p in past]
+        h["debaPastDistances"] = [p.get("distance") for p in past]
+        h["debaPastDates"] = [p.get("date") for p in past]
+        h["debaPastTrackConds"] = [p.get("trackCond") for p in past]
+        h["debaPastVenues"] = [p.get("venue") for p in past]
+        h["enrichSrc"] = "keiba_nar"
+        # pastPops: 전부 비어 있고, DebaTable 착순(None 제외)이 기존 착순 배열과 자리까지 같을 때만 채운다.
+        _pp = h.get("pastPops")
+        if not _pp or all(x is None for x in _pp):
+            _deba_pl = [p.get("placing") for p in past if p.get("placing") is not None]
+            _ex_pl = [x for x in (h.get("pastPlacings") or h.get("recentPlacings") or []) if x is not None]
+            _k = min(len(_deba_pl), len(_ex_pl))
+            if _k >= 1 and _deba_pl[:_k] == _ex_pl[:_k]:
+                h["pastPops"] = [p.get("pop") for p in past]
+                filled += 1
+    return n_rows, filled
+
+
+def _nar_form_enrich(rk, ymd, rno):
+    """[1번 배선] 어느 원천이든 전적이 있는 지방경마 경주에 DebaTable 과거 5전 상세를 덧붙인다(경주당 1회 · 완전 격리)."""
+    try:
+        if not NAR_FORM_ENRICH_ENABLED or not rk or not rno or rk in _NAR_ENRICH_DONE:
+            return False
+        _NAR_ENRICH_STAT["reach"] += 1
+        try:
+            _row0 = (_starters_load() or {}).get(rk) or {}
+        except Exception:
+            _row0 = {}
+        _hs0 = _row0.get("horses") or []
+        if not _hs0:
+            return False                                   # 전적 자체가 없으면 폴백(_nar_form_fallback) 몫
+        if all(h.get("debaPastPops") is not None for h in _hs0):
+            _NAR_ENRICH_STAT["skip_have"] += 1
+            _NAR_ENRICH_DONE.add(rk)                       # 재기동 뒤 이미 보강된 경주
+            return False
+        baba = _jp_baba_code_from_rk(rk)
+        if not baba:
+            _NAR_ENRICH_STAT["nocode"] += 1
+            _NAR_ENRICH_DONE.add(rk)
+            return False
+        nar_guard = None
+        try:
+            import nar_guard
+            ok, why = nar_guard.wait_allow("live", max_wait=8.0)
+            if not ok:
+                _NAR_ENRICH_STAT["blocked"] += 1
+                print("[전적보강] %s 생략 — 요청 제한: %s (다음 폴링에 재시도)" % (rk, why))
+                return False
+        except Exception:
+            nar_guard = None
+        _NAR_ENRICH_STAT["fired"] += 1
+        html = _nar_fetch("%sDebaTable?k_raceDate=%s&k_raceNo=%d&k_babaCode=%s"
+                          % (NAR_KEIBA_BASE, _nar_date_param(ymd), int(rno), baba))
+        shutsuba, details = _nar_parse_deba(html)
+        got = bool(shutsuba.get("horses"))
+        try:
+            if nar_guard:
+                nar_guard.record(ok=got, code=None if got else 0)
+        except Exception:
+            pass
+        if not got:
+            _NAR_ENRICH_STAT["fail"] += 1
+            _NAR_ENRICH_DONE.add(rk)
+            print("[전적보강] %s 출주표 0두 → html=%dB" % (rk, len(html or "")))
+            return False
+        # fetch·파싱을 끝낸 뒤 **짧게** 읽고-고치고-저장한다(다른 스레드의 갱신과 겹치는 창을 줄인다)
+        sdb = _starters_load() or {}
+        row = sdb.get(rk) or {}
+        hs = row.get("horses") or []
+        if not hs:
+            return False
+        n_rows, filled = _nar_form_enrich_rows(hs, shutsuba, details)
+        if n_rows:
+            row["enrichT"] = time.time()
+            if not row.get("distance") and shutsuba.get("distance"):
+                row["distance"] = shutsuba.get("distance")
+            sdb[rk] = row
+            _starters_save(sdb)
+        _NAR_ENRICH_DONE.add(rk)
+        _NAR_ENRICH_STAT["ok"] += 1
+        _NAR_ENRICH_STAT["filled_pop"] += filled
+        try:
+            _gate_hit("nar_form_enrich", rk, "보강 %d두 · pastPops 채움 %d · src=%s" % (n_rows, filled, row.get("source")), once_key=rk)
+        except Exception:
+            pass
+        print("[전적보강] 🟢 %s: %d두 보강(pastPops 채움 %d · src=%s) · 누적 ok %d / fired %d"
+              % (rk, n_rows, filled, row.get("source"), _NAR_ENRICH_STAT["ok"], _NAR_ENRICH_STAT["fired"]))
+        return True
+    except Exception as e:
+        _NAR_ENRICH_STAT["fail"] += 1
+        print("[전적보강] %s 실패(무시):" % rk, str(e)[:120])
+        return False
+
+
 # ══════════ [ⓐ NAR 전적 폴백 (2026-08-03 승인)] ══════════
 #   왜: `narBaba`(南関東 4장) 에만 keiba.go.jp 경로가 열려 있어, 모리오카·몬베츠·오비히로·나고야·
 #     소노다는 oddspark 가 실패하면 **대안이 없어 전적이 통째로 비었다**.
@@ -39461,6 +39669,11 @@ def _multi_collect_one(track, race, ymd):
                 _nar_autocollect_form(key, track.get("narBaba"), ymd, rno)
             except Exception as _fe:
                 print(f"[전적수집] {key} 南関東 전적 실패: {_fe}")
+            # 🔴 [2026-09-08 「1번 배선」] 南関東도 타임·날짜 등 deba* 상세를 같은 형식으로 덧붙인다(확장 수집분 포함)
+            try:
+                _nar_form_enrich(key, ymd, rno)
+            except Exception as _fe:
+                print(f"[전적보강] {key} 실패(무시): {_fe}")
         elif track.get("opTrackCd"):
             # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
             #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
@@ -39484,6 +39697,11 @@ def _multi_collect_one(track, race, ymd):
                 _nar_form_fallback(key, ymd, rno, _ok_form)
             except Exception as _fe:
                 print(f"[전적수집·폴백] {key} 실패(무시): {_fe}")
+            # 🔴 [2026-09-08 대표 승인 「1번 배선」] 원천이 무엇이든 DebaTable 과거 5전 상세를 덧붙인다(추가만 · 격리)
+            try:
+                _nar_form_enrich(key, ymd, rno)
+            except Exception as _fe:
+                print(f"[전적보강] {key} 실패(무시): {_fe}")
         elif not track.get("joCode"):
             # 코드가 **하나도 없다** → 전적·결과·흐름 수집이 전부 스킵된다. 경주당 1회만 경고.
             try:
@@ -41061,6 +41279,19 @@ def _kakao_trio_official(cp, sport=None):
 #   🔧 되돌리기: LATE_DROP_ALERT_ENABLED = False
 LATE_DROP_ALERT_ENABLED = True
 LATE_DROP_SPORTS = ("horse",)        # 🔴 경마부터 — 경륜은 CI 하한 0.874 로 미달
+# 🔴 [2026-09-08 대표 승인] 💎 BMED 특별 감지 표시를 끄는 종목 — 경륜(회수 65.1 · 💎 말 입상 무작위 이하 · 78% 경주 노출).
+#   적용 지점은 core_picks["bmedSpecial"] 생성 직후 한 곳(app.py 「경륜만 끄는 것으로 진행」 주석). 🔧 되돌리기: ()
+BMED_SPECIAL_OFF_SPORTS = ("cycle",)
+# 🔴 [2026-09-08 대표 「1번으로 진행」] 전적표 한방 — 「꾸준함」 태그 + 시장 냉대 + 전적점수 1위권 말을 시장 1위 말과 묶어 카톡 「한방」 1구좌.
+#   실물: 카나자와 11R 6번(전적 1위·최근 4-1-2-3-2·시장 9위) × 1번 = 정답 1+6 33.7배 — 💎 1순위에 있었으나 배당 컷에 잘려 회원에게 안 감.
+#   소급(경마지방 1,326경주 · 축=T-5 단승 1위 · 구좌=조합 1): 꾸준함+전적1위+시장6위↓ 발동 26 · 적중 2 · 회수 74.2 · 3제외 0 ⚠판정불가
+#     꾸준함+전적1~2위 47 · 4 · 135.7 · 13.6 ⚠ / 꾸준함+시장6위↓(전적 무관) 158 · 11 · 111.4 · 50.8 ⚠ / 대조 무작위 냉대 짝 26 · 3 · 97.7
+#   ⇒ 원칙 20: 켜기엔 표본이 없다. **shadow** = 조합을 만들어 logs/form_edge/ 에 기록·계수만 하고 발송·판정에 안 넣는다.
+#     실전 기록 30건에서 회수·3제외를 보고 "live" 로 올린다(대표 결정). live = finalQuinellas 에 formEdge 표식으로 추가 → 카톡 한방 상자.
+FORM_EDGE_MODE = "shadow"            # "off" | "shadow" | "live"
+FORM_EDGE_RS_RANK_MAX = 2            # 전적점수 경주 내 순위 상한(1위권 = 1~2)
+FORM_EDGE_COLD_MIN = 6               # 시장 순위(복승 최저 기준) 이 값 이상이면 냉대
+FORM_EDGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "form_edge")
 LATE_DROP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "late_drop")
 _LATE_DROP_SENT = set()              # 경주당 1회
 
@@ -41249,7 +41480,7 @@ def _kakao_rich_message(rk, phase, an):
         #   갈래 기준은 저장된 상품 분리와 같다 — 교차 짝·기대값 복원·💎 편입분이 한방이다.
         _main, _bomb = [], []
         for i, q in enumerate(_fq3):
-            (_bomb if (q.get("crossPair") or q.get("evRescue")) else _main).append((i, q))
+            (_bomb if (q.get("crossPair") or q.get("evRescue") or q.get("formEdge")) else _main).append((i, q))   # [2026-09-08] 전적표 한방(live 시)
 
         def _row(i, q, mark):
             _o = (" (%s배)" % q.get("odds")) if q.get("odds") else ""
