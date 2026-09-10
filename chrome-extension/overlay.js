@@ -140,21 +140,42 @@
     }
     function _fcRender(q, data) {
       var pr = data.prediction || {};
-      var join = function (arr, sep) { return (arr || []).map(function (x) { return Array.isArray(x) ? x.join(sep || '+') : String(x); }).join(' · '); };
+      var od = data.odds || {};
+      var qm = od.quinella || {}, tm = od.trio || {};
+      var _fmt = function (v) { return (v == null || isNaN(v)) ? '' : (Math.round(v * 10) / 10) + '배'; };
+      var _qo = function (c) { var a = c.slice().map(Number).sort(function (x, y) { return x - y; }); var v = qm[a[0] + '+' + a[1]]; return _fmt(v); };
+      var _to = function (c) { var a = c.slice().map(Number).sort(function (x, y) { return x - y; }); var v = tm[a.join('-')]; return _fmt(v); };
+      // [2026-09-10 대표] 조합마다 배당을 붙인다(최신 수집 틱 · 없으면 빈칸). 삼복승은 수집 시에만.
+      var join = function (arr, sep, oddsFn) { return (arr || []).map(function (x) {
+        if (!Array.isArray(x)) return String(x);
+        var o = oddsFn ? oddsFn(x) : '';
+        return x.join(sep || '+') + (o ? ' ' + o : '');
+      }).join(' · '); };
       q.appendChild(mk('div', 'font-weight:800;font-size:14px;margin-bottom:4px', (data.race || '') + (data.cached ? '  (저장본)' : '')));
       q.appendChild(mk('div', 'color:#94a3b8;font-size:11px;margin-bottom:6px', (data.fetchedAt || '') + ' · ' + (data.model || '') + (data.validation && data.validation.passed === false ? ' · 검증 미통과' : '')));
       q.appendChild(mk('div', 'font-size:15px;font-weight:800;color:#fde68a', '축 ' + pr.axis + ' → ' + (pr.partners || []).join('·')));
-      q.appendChild(mk('div', 'margin:4px 0', '복승 ' + join(pr.quinellas, '+')));
-      q.appendChild(mk('div', 'margin:0 0 6px', '삼복승 ' + join(pr.trios, '-')));
+      q.appendChild(mk('div', 'margin:4px 0', '복승 ' + join(pr.quinellas, '+', _qo)));
+      q.appendChild(mk('div', 'margin:0 0 6px', '삼복승 ' + join(pr.trios, '-', _to) + (Object.keys(tm).length ? '' : '  (삼복승 배당 미수집)')));
+      if (od.at) q.appendChild(mk('div', 'color:#94a3b8;font-size:11px;margin-bottom:4px', '배당 기준 ' + od.at + (od.mb != null ? ' (T-' + od.mb + '분)' : '') + (od.src && String(od.src).indexOf('http') === 0 ? ' · 사설판' : od.src ? ' · ' + od.src : '')));
+      else q.appendChild(mk('div', 'color:#94a3b8;font-size:11px;margin-bottom:4px', '배당 없음 — 서버 수집 전(발주 10분 전부터)'));
+      if (data.marketAtFetch && data.marketAtFetch.length) q.appendChild(mk('div', 'color:#94a3b8;font-size:11px;margin-bottom:4px', '단승 인기순(출마표 시점) ' + data.marketAtFetch.map(function (m) { return m[0] + '(' + m[1] + ')'; }).join(' → ')));
       if (pr.lines) q.appendChild(mk('div', 'color:#c4b5fd;margin-bottom:4px', '라인 ' + (pr.lines || []).map(function (l) { return l.join('-'); }).join(' / ')));
       if (pr.pace) q.appendChild(mk('div', 'margin-bottom:4px', '전개: ' + pr.pace));
       if (pr.story) q.appendChild(mk('div', 'color:#cbd5e1;margin-bottom:4px', pr.story));
       if (pr.market_view) q.appendChild(mk('div', 'color:#93c5fd;margin-bottom:4px', '시장과 갈리는 점: ' + pr.market_view));
       if (pr.risk) q.appendChild(mk('div', 'color:#fca5a5;margin-bottom:6px', '깨지는 조건: ' + pr.risk));
       var rs = pr.reasons || {};
-      Object.keys(rs).forEach(function (k) {
+      // [2026-09-10 대표] 예상문 순서 = 축 → 상대(유력 순) → 나머지
+      var _ord = [String(pr.axis)].concat((pr.partners || []).map(String));
+      var _keys = Object.keys(rs).sort(function (a, b) {
+        var ia = _ord.indexOf(a), ib = _ord.indexOf(b);
+        if (ia < 0) ia = 99; if (ib < 0) ib = 99;
+        return ia - ib || (Number(a) - Number(b));
+      });
+      _keys.forEach(function (k) {
         var row = mk('div', 'display:flex;gap:6px;margin:2px 0;border-top:1px solid #1e293b;padding-top:2px');
-        row.appendChild(mk('span', 'font-weight:800;min-width:22px;color:#fde68a', k));
+        var _lab = (String(k) === String(pr.axis)) ? '축 ' + k : k;
+        row.appendChild(mk('span', 'font-weight:800;min-width:34px;color:' + (String(k) === String(pr.axis) ? '#fde68a' : '#c4b5fd'), _lab));
         row.appendChild(mk('span', '', String(rs[k])));
         q.appendChild(row);
       });
