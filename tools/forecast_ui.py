@@ -7,7 +7,7 @@ http://127.0.0.1:8012  에서 오늘 경마(keiba.go.jp 출마표)·경륜(서�
 🔴 app.py 와 무관한 별도 프로세스 · 127.0.0.1 전용 · 데몬이 이미 만든 예측이 있으면 그것을 먼저 보여준다(다시 분석 버튼 있음).
 실행: python -u tools/forecast_ui.py   (포트 변경 FORECAST_UI_PORT)
 """
-import os, sys, io, json, glob, html, datetime, threading, urllib.parse
+import os, sys, io, json, glob, html, datetime, threading, urllib.parse, re
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -210,6 +210,71 @@ def page_view(kind, key, force=False):
         return CSS + "<p class='no'>오류: %s</p><p><a href='/'>목록</a></p>" % html.escape(str(e))
 
 
+TRACK_ALIAS = {"타케오": "다케오", "고치": "코치", "가와사키": "카와사키", "가나자와": "카나자와", "오이": "오오이", "몬베쓰": "몬베츠",
+               "히코다테": "하코다테", "후쿠시마": "후쿠시마", "후크시마": "후쿠시마"}
+HORSE_BABA = {}
+for _b, _n in FF.BABA.items():
+    HORSE_BABA[_n] = _b
+HORSE_BABA.update({"오이": "20", "가와사키": "21", "가나자와": "22", "고치": "31", "몬베쓰": "36"})
+
+
+def resolve_key(rk, sport):
+    """배당판 raceKey('타케오 6경주') + 종목 → (kind, key). 경륜은 오늘 analysis_log 토큰으로, 경마는 babaCode 로."""
+    m = re.match(r"^\s*([가-힣]{2,7})(?:\s*\[[^\]\s]{1,3}\])?\s*(\d{1,2})\s*(?:경주|R)?\s*$", str(rk or ""))
+    if not m:
+        return None, None, "경주명을 못 읽음: %r" % rk
+    track, rno = m.group(1), int(m.group(2))
+    cands = [track, TRACK_ALIAS.get(track, track)]
+    tok = KF._ymd_token(_today_k())
+    if sport in ("", None, "cycle", "keirin"):
+        for t in cands:
+            rk2 = "%s %d경주" % (t, rno)
+            fn = os.path.join(BASE, "data", "analysis_log", "%s_%s_%d경주.json" % (tok, t, rno))
+            doc = FF._load(fn) or {}
+            if doc.get("sport") == "cycle":
+                return "keirin", rk2, None
+        if sport in ("cycle", "keirin"):
+            return None, None, "경륜 출주표가 아직 없음(서버가 발주 10분 전부터 모읍니다): %s %d경주" % (track, rno)
+    for t in cands:
+        if t in HORSE_BABA:
+            return "horse", "%s|%d" % (HORSE_BABA[t], rno), None
+    return None, None, "지원하지 않는 경기장/종목: %s (%s)" % (track, sport)
+
+
+def api_forecast(qs):
+    rk = qs.get("rk", [""])[0]; sport = qs.get("sport", [""])[0]; force = qs.get("force", ["0"])[0] == "1"
+    kind, key, err = resolve_key(rk, sport)
+    if err:
+        return {"ok": False, "error": err}
+    try:
+        if kind == "horse":
+            baba, rno = key.split("|"); rno = int(rno)
+            d, path, _ = FF._paths(_today_h(), baba, rno)
+            cached = os.path.exists(path) and not force
+            if not cached:
+                with LOCK:
+                    FF.forecast_one(_today_h(), baba, rno, force=True)
+                try: FF.grade(_today_h().replace("/", ""))
+                except Exception: pass
+            rec = FF._load(path)
+        else:
+            path, _ = KF._paths(_today_k(), key)
+            cached = os.path.exists(path) and not force
+            if not cached:
+                with LOCK:
+                    KF.forecast_one(_today_k(), key, force=True)
+                try: KF.grade(_today_k().replace("-", ""))
+                except Exception: pass
+            rec = FF._load(path)
+        if not rec:
+            return {"ok": False, "error": "예측을 만들지 못함(출마표 없음/오류)"}
+        return {"ok": True, "kind": kind, "race": rec.get("race"), "cached": cached, "fetchedAt": rec.get("fetchedAt"), "model": rec.get("model"),
+                "prediction": rec.get("prediction"), "validation": {"passed": (rec.get("validation") or {}).get("passed")},
+                "result": rec.get("result"), "grade": rec.get("grade"), "marketAtFetch": rec.get("marketAtFetch")}
+    except Exception as e:
+        return {"ok": False, "error": str(e)[:300]}
+
+
 def page_summary():
     import contextlib
     buf = io.StringIO()
@@ -235,6 +300,13 @@ class H(BaseHTTPRequestHandler):
             body = page_review(qs.get("kind", ["horse"])[0], qs.get("key", [""])[0])
         elif u.path == "/summary":
             body = page_summary()
+        elif u.path == "/api/forecast":
+            data = json.dumps(api_forecast(qs), ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers(); self.wfile.write(data); return
         else:
             self.send_response(404); self.end_headers(); return
         data = ("<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>" + body).encode("utf-8")

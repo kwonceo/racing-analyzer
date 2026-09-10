@@ -265,6 +265,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   // [1번] 즉시 분석: 규칙기반 이상감지+유력마+삼복승추천 (서버가 최신 3종으로 계산)
+  // [🧭 전적표 분석 · 2026-09-10] 오버레이 「분석」 버튼 → 별도 예측 서버(127.0.0.1:8012 · tools/forecast_ui.py) → JSON.
+  //   서버(8011)와 무관한 프로세스라 실패해도 수집·분석에 영향 없다. 40~80초 걸린다(누를 때만).
+  if (msg?.type === 'FORM_FORECAST') {
+    const q = new URLSearchParams({ rk: msg.raceKey || '', sport: msg.sport || '', force: msg.force ? '1' : '0' });
+    fetch('http://127.0.0.1:8012/api/forecast?' + q.toString())
+      .then(async (res) => { let d = null; try { d = await res.json(); } catch (_) { /* */ } if (!d) throw new Error('HTTP ' + res.status); return d; })
+      .then((data) => sendResponse({ ok: !!data.ok, data }))
+      .catch((err) => sendResponse({ ok: false, error: /Failed to fetch|NetworkError|ERR_CONNECTION/i.test(String(err && err.message || err)) ? '예측 서버(8012) 꺼짐 — python -u tools/forecast_ui.py' : String(err && err.message || err) }));
+    return true; // async
+  }
   if (msg?.type === 'ANALYZE_TRIPLE') {
     fetch(ANALYZE_URL, {
       method: 'POST',
