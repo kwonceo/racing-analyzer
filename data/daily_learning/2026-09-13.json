@@ -1,0 +1,170 @@
+{
+ "date": "2026-09-13",
+ "results_summary": {
+  "total_races": 112,
+  "hits": 87,
+  "hit_rate": 77.7,
+  "profit": {
+   "net": 199100,
+   "settled": 133
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 6971,
+  "quality_score": 69,
+  "ai_ready_races": 76,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "大宮": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "기후": {
+    "n": 12,
+    "hits": 12,
+    "hit_rate": 100.0
+   },
+   "나라": {
+    "n": 12,
+    "hits": 8,
+    "hit_rate": 66.7
+   },
+   "미즈사와": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "사세보": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "코치": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "카나자와": {
+    "n": 11,
+    "hits": 8,
+    "hit_rate": 72.7
+   },
+   "서울": {
+    "n": 10,
+    "hits": 5,
+    "hit_rate": 50.0
+   },
+   "마쓰야마": {
+    "n": 7,
+    "hits": 7,
+    "hit_rate": 100.0
+   },
+   "오가키": {
+    "n": 6,
+    "hits": 5,
+    "hit_rate": 83.3
+   },
+   "도요하시": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   },
+   "마에바시": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   }
+  },
+  "by_field_size": {
+   "소두수(≤8)": {
+    "n": 59,
+    "hits": 54,
+    "hit_rate": 91.5
+   },
+   "중두수(9~12)": {
+    "n": 28,
+    "hits": 19,
+    "hit_rate": 67.9
+   },
+   "미상": {
+    "n": 25,
+    "hits": 14,
+    "hit_rate": 56.0
+   }
+  },
+  "by_time_zone": {
+   "저녁": {
+    "n": 48,
+    "hits": 36,
+    "hit_rate": 75.0
+   },
+   "오후": {
+    "n": 46,
+    "hits": 34,
+    "hit_rate": 73.9
+   },
+   "오전": {
+    "n": 18,
+    "hits": 17,
+    "hit_rate": 94.4
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 112,
+    "hits": 87,
+    "hit_rate": 77.7
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 112,
+    "hits": 87,
+    "hit_rate": 77.7
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 112,
+    "hits": 87,
+    "hit_rate": 77.7
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 68,
+   "n": 81,
+   "rate": 84.0
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 5,
+   "n": 24,
+   "rate": 20.8
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 339,
+   "n": 567,
+   "rate": 59.8
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 781,
+   "n": 1756,
+   "rate": 44.5
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-09-13 22:01:51"
+}

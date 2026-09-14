@@ -1,0 +1,325 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_09_10_소노다_12경주",
+ "race_info": {
+  "date": "2026-09-10",
+  "track": "소노다",
+  "round": 12,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "スマルト",
+   "jockey": "田野豊",
+   "jockey_winrate": 56.7,
+   "recent_results": [
+    4,
+    1,
+    4,
+    1,
+    4
+   ],
+   "record_score": 126.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 3.4
+  },
+  {
+   "no": 4,
+   "name": "トレジャーブルー",
+   "jockey": "南部楓",
+   "jockey_winrate": 33.3,
+   "recent_results": [
+    2,
+    2,
+    7,
+    2,
+    2
+   ],
+   "record_score": 73.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 7.5
+  },
+  {
+   "no": 5,
+   "name": "シェナホープ",
+   "jockey": "廣瀬航",
+   "jockey_winrate": 40.0,
+   "recent_results": [
+    3,
+    8,
+    8,
+    4,
+    1
+   ],
+   "record_score": 96.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 11.9
+  },
+  {
+   "no": 9,
+   "name": "マリーナサンライズ",
+   "jockey": "塩津璃",
+   "jockey_winrate": 20.0,
+   "recent_results": [
+    2,
+    8,
+    8,
+    4,
+    7
+   ],
+   "record_score": 76.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 1.9
+  },
+  {
+   "no": 8,
+   "name": "モンサンヴェロニカ",
+   "jockey": "高橋洸",
+   "jockey_winrate": 23.3,
+   "recent_results": [
+    8,
+    10,
+    5,
+    1,
+    9
+   ],
+   "record_score": 35.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 14.0
+  },
+  {
+   "no": 6,
+   "name": "サンピラーゴールド",
+   "jockey": "下原理",
+   "jockey_winrate": 53.3,
+   "recent_results": [
+    4,
+    4,
+    9,
+    10,
+    9
+   ],
+   "record_score": 42.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 11.4
+  },
+  {
+   "no": 10,
+   "name": "ドリームハーモニー",
+   "jockey": "佐々世",
+   "jockey_winrate": 16.7,
+   "recent_results": [
+    10,
+    5,
+    6,
+    3,
+    2
+   ],
+   "record_score": 14.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 22.4
+  },
+  {
+   "no": 2,
+   "name": "ファルコンエース",
+   "jockey": "小谷哲",
+   "jockey_winrate": 10.0,
+   "recent_results": [
+    8,
+    8,
+    6,
+    9,
+    11
+   ],
+   "record_score": 10,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 121.3
+  },
+  {
+   "no": 3,
+   "name": "メイショウサザナミ",
+   "jockey": "松木大",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    7,
+    8,
+    10,
+    16,
+    10
+   ],
+   "record_score": 10,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 159.5
+  },
+  {
+   "no": 7,
+   "name": "ロサバンクシア",
+   "jockey": "竹村達",
+   "jockey_winrate": 16.7,
+   "recent_results": [
+    10,
+    8,
+    7,
+    9,
+    7
+   ],
+   "record_score": -22.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 55.4
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "17:00:38",
+    "quinella": {
+     "1+9": 4.2,
+     "1+4": 7.7,
+     "4+9": 8.3,
+     "5+9": 11.0,
+     "8+9": 12.8,
+     "6+9": 12.8,
+     "1+6": 16.0,
+     "1+5": 18.9,
+     "9+10": 21.4,
+     "1+8": 25.1,
+     "4+6": 25.2,
+     "4+5": 26.9,
+     "5+6": 32.0,
+     "1+10": 36.9,
+     "7+9": 37.5,
+     "4+10": 49.2,
+     "6+10": 57.3,
+     "5+10": 67.7,
+     "2+9": 72.9,
+     "4+8": 76.5,
+     "5+8": 78.4,
+     "6+8": 85.6,
+     "1+7": 99.0,
+     "1+2": 117.3,
+     "6+7": 119.5,
+     "8+10": 121.7,
+     "5+7": 134.9,
+     "3+9": 175.0,
+     "4+7": 184.0,
+     "7+10": 186.1,
+     "1+3": 221.8,
+     "2+4": 238.1,
+     "2+6": 291.7,
+     "3+6": 311.4,
+     "2+5": 344.5,
+     "7+8": 359.8,
+     "2+10": 437.6,
+     "3+5": 449.8,
+     "3+4": 483.4,
+     "2+8": 483.4,
+     "3+10": 704.1,
+     "3+8": 771.1,
+     "3+7": 1156.7,
+     "2+7": 1199.6,
+     "2+3": 1349.5
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.771,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   4,
+   5,
+   6,
+   8,
+   9,
+   10,
+   3
+  ],
+  "eliminated": [
+   2,
+   7
+  ],
+  "recommend": "1+9",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 9,
+  "2nd": 1,
+  "3rd": 8,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 9,
+  "second": 1,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-09-10 17:07:15",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
