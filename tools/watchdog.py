@@ -89,18 +89,114 @@ def _alive():
         return False
 
 
+def _app_procs():
+    """지금 떠 있는 `python … app.py` 프로세스 [(pid, 나이초)]. 조회 실패면 None(모른다 — 빈 목록과 구분한다 · 원칙 24)."""
+    ps = ("Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Where-Object { $_.CommandLine -like '*app.py*' } | "
+          "ForEach-Object { '{0} {1}' -f $_.ProcessId, [int]((Get-Date) - $_.CreationDate).TotalSeconds }")
+    try:
+        out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True, timeout=30).stdout
+    except Exception as e:
+        print("[watchdog] 프로세스 조회 실패:", str(e)[:100])
+        return None
+    rows = []
+    for line in (out or "").splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[0].isdigit() and parts[1].lstrip("-").isdigit():
+            rows.append((int(parts[0]), int(parts[1])))
+    # ⚠ 다른 계정(관리자 콘솔 등)이 띄운 프로세스는 CommandLine 이 안 읽힌다(9/14·9/18 실측 — 빈 목록).
+    #   그래서 8011 을 LISTEN 중인 소유 프로세스도 「있는 프로세스」로 합친다(나이는 CIM 으로 다시 읽는다).
+    try:
+        out2 = subprocess.run(["powershell", "-NoProfile", "-Command",
+                               "Get-NetTCPConnection -LocalPort 8011 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { $p = Get-CimInstance Win32_Process -Filter (\"ProcessId=\" + $_.OwningProcess); '{0} {1}' -f $_.OwningProcess, [int]((Get-Date) - $p.CreationDate).TotalSeconds }"],
+                              capture_output=True, text=True, timeout=30).stdout
+        seen = {p for p, _ in rows}
+        for line in (out2 or "").splitlines():
+            parts = line.split()
+            if len(parts) == 2 and parts[0].isdigit() and parts[1].lstrip("-").isdigit() and int(parts[0]) not in seen:
+                rows.append((int(parts[0]), int(parts[1])))
+    except Exception:
+        pass
+    return rows
+
+
+AUTOSTART_LOG = os.path.join(LOG_DIR, "autostart.log")
+
+
+def _recent_start_attempt(within_sec):
+    """시작 bat 이 남기는 「[YYYY-MM-DD HH:MM:SS.ff] START attempt」가 within_sec 안에 있으면 그 초 전 값. 없으면 None.
+    프로세스 명령줄이 안 읽히는 계정에서도 「지금 뜨는 중」을 알 수 있는 유일한 흔적이다."""
+    try:
+        if not os.path.exists(AUTOSTART_LOG):
+            return None
+        last = None
+        with open(AUTOSTART_LOG, "r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if "START attempt" in line and line.startswith("["):
+                    last = line[1:20].strip()
+        if not last:
+            return None
+        t = time.mktime(time.strptime(last.replace("  ", " 0") if last[11] == " " else last, "%Y-%m-%d %H:%M:%S"))
+        age = time.time() - t
+        return age if 0 <= age <= within_sec else None
+    except Exception:
+        return None
+
+
+def _uptime_sec():
+    try:
+        out = subprocess.run(["powershell", "-NoProfile", "-Command",
+                              "[int]((Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).TotalSeconds"],
+                             capture_output=True, text=True, timeout=30).stdout.strip()
+        return int(out) if out.lstrip("-").isdigit() else None
+    except Exception:
+        return None
+
+
+# [2026-09-18 실사고] 9/16 12:04 부팅 → 시작프로그램 bat 이 서버를 띄우는 중(바인딩까지 ~40초)에 5분 주기 워치독이
+#   HTTP 미응답을 「죽음」으로 보고 두 번째 서버를 띄웠다 → SO_REUSEADDR 로 8011 에 두 벌 LISTEN(카톡 2회 · 틱 중복).
+#   9/14 재부팅 때도 같은 무늬(autostart START 2회). ⇒ 「프로세스는 있는데 HTTP 만 안 되는」 상태를 죽음과 구분한다.
+START_GRACE_SEC = 240      # app.py 프로세스가 이 나이 안이면 「뜨는 중」 — 재기동하지 않는다
+BOOT_GRACE_SEC = 300       # 부팅 뒤 이 시간 안에는 시작프로그램에 맡긴다
+
+
 def main():
     if _alive():
         # 직전이 down 이었을 때만 한 줄 남긴다.
         rows = _recent_rows(RESTART_WINDOW_MIN)
         if rows:
             last = rows[-1].get("ev")
-            if last in ("down", "restart", "giveup"):
+            if last in ("down", "restart", "giveup", "starting", "hung"):
                 _append("recovered")
         print("[watchdog] alive")
         return 0
 
-    # ---- 여기부터 죽어 있다 ----
+    # ---- HTTP 는 안 온다. 그런데 프로세스가 있나? (죽음 ↔ 뜨는 중 ↔ 멈춤을 가른다) ----
+    procs = _app_procs()
+    up = _uptime_sec()
+    sa = _recent_start_attempt(START_GRACE_SEC)
+    if sa is not None:
+        _append("starting", procs=procs, uptime=up, start_attempt_age=int(sa))
+        print("[watchdog] 시작 bat 이 %d초 전에 기동 시도 — 재기동하지 않는다" % sa)
+        return 0
+    if procs:
+        young = [p for p in procs if p[1] < START_GRACE_SEC]
+        if young or (up is not None and up < BOOT_GRACE_SEC):
+            _append("starting", procs=procs, uptime=up)
+            print("[watchdog] 서버가 뜨는 중(app.py %d개 · 부팅 %s초) — 재기동하지 않는다" % (len(procs), up))
+            return 0
+        # 프로세스는 오래 살아 있는데 HTTP 가 죽었다 = 멈춤. 두 벌을 만들지 않고 사람에게 남긴다.
+        _append("hung", procs=procs, uptime=up)
+        print("[watchdog] app.py 프로세스 %d개가 있는데 HTTP 무응답 — 두 벌 방지로 재기동 보류(tools/kill_safe.py 로 정리 후)" % len(procs))
+        return 7
+    if procs is None:
+        _append("giveup", reason="프로세스 조회 실패 — 두 벌 위험이라 재기동 보류")
+        return 8
+    if up is not None and up < BOOT_GRACE_SEC:
+        _append("starting", procs=[], uptime=up)
+        print("[watchdog] 부팅 %d초 — 시작프로그램에 맡긴다" % up)
+        return 0
+
+    # ---- 여기부터 죽어 있다(프로세스도 없다) ----
     rows = _recent_rows(RESTART_WINDOW_MIN)
     if rows is None:
         _append("giveup", reason="이력 읽기 실패 — 상한 판정 불가")
