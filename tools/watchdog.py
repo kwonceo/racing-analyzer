@@ -159,7 +159,50 @@ START_GRACE_SEC = 240      # app.py 프로세스가 이 나이 안이면 「뜨�
 BOOT_GRACE_SEC = 300       # 부팅 뒤 이 시간 안에는 시작프로그램에 맡긴다
 
 
+def _listeners():
+    """8011 LISTEN 소유 프로세스 [(pid, 생성시각 epoch)] — 소유자와 무관하게 CIM 으로 읽는다."""
+    ps = ("Get-NetTCPConnection -LocalPort 8011 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | "
+          "ForEach-Object { $p = Get-CimInstance Win32_Process -Filter (\"ProcessId=\" + $_); if ($p) { '{0} {1}' -f $p.ProcessId, [int64](Get-Date $p.CreationDate -UFormat %s) } }")
+    try:
+        out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True, timeout=30).stdout
+    except Exception:
+        return None
+    rows = []
+    for line in (out or "").splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[0].isdigit() and parts[1].lstrip("-").isdigit():
+            rows.append((int(parts[0]), int(parts[1])))
+    return rows
+
+
+def _dedupe_listeners(dry=False):
+    """[2026-09-18 대표 「정리해」] 8011 에 두 벌 이상 LISTEN 이면 **가장 오래된 것만 남기고** 나머지를 자식까지 끝낸다.
+    왜 여기서: 두 벌 중 하나는 SYSTEM(스케줄러 워치독)이 띄운 것이라 관리자 콘솔에서 taskkill 이 「액세스 거부」였다(실측).
+    이 스크립트는 SYSTEM 으로 돌므로 끝낼 수 있다. 한 벌이면 아무것도 안 한다."""
+    rows = _listeners()
+    if not rows or len(rows) < 2:
+        return 0
+    rows.sort(key=lambda r: r[1])          # 생성시각 오름차순 → [0] 이 가장 오래된 것
+    keep, extra = rows[0], rows[1:]
+    killed = []
+    for pid, _t in extra:
+        if dry:
+            killed.append(pid); continue
+        try:
+            r = subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True, text=True, timeout=30)
+            killed.append(pid if r.returncode == 0 else -pid)   # 음수 = 실패
+        except Exception:
+            killed.append(-pid)
+    _append("dedupe", keep=keep[0], killed=killed, dry=dry)
+    print("[watchdog] 8011 두 벌 정리: 유지 %d · 종료 %s%s" % (keep[0], killed, " (dry)" if dry else ""))
+    return len([k for k in killed if k > 0])
+
+
 def main():
+    try:
+        _dedupe_listeners(dry=bool(os.environ.get("WATCHDOG_DRY")))
+    except Exception as e:
+        print("[watchdog] 두 벌 정리 실패(무시):", str(e)[:100])
     if _alive():
         # 직전이 down 이었을 때만 한 줄 남긴다.
         rows = _recent_rows(RESTART_WINDOW_MIN)
