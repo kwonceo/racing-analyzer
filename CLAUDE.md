@@ -1574,6 +1574,15 @@ c8105d75a · e825326a3   「결과 자동백업: 이토 5경주 2-5-3」
 
 # ═══ 최근 일지 (2026-09-07) ═══
 
+# ✅ [2026-09-18] **급락 알림 ⓐ 발주 30초 안 틱 차단 · ⓑ 문구 「발주까지 약 N초」** (대표 「a b 진행 승인」 · 원본 커밋 · 🔴 운영 00:10 pull — late_drop.py·app.py 둘 다 리로더 재기동)
+```
+코드  tools/late_drop.py MIN_SEC_BEFORE=30 · picks(deadline=) 급락 틱이 발주 30초 안이면 버리고 LAST_BLOCKED["late"] · replay_live(deadline=) · lines(left_sec=)
+      app.py _late_drop_alert: _dl_ep=odds_history.deadline_epoch → picks(deadline) · 계수기 late_drop_late_block · lines(left_sec) · jsonl "left" · 팝업 _late_drop_recent 는 left−경과
+검증  자기검증 9/9(차단·통과·None 동일·ms·replay·문구·되돌리기) · 소급 9/12~17 61경주: OFF 94조합 적중 7 회수 167 ↔ ON 57조합 적중 5 회수 186 · 사라지는 경주 23 · 사라진 적중 2(10.6·40.5배 — 발주 ±30초 틱이라 못 샀다)
+되돌리기 MIN_SEC_BEFORE = 0 · deadline 못 받으면 종전과 동일(원칙 20)
+```
+⏳ 다음 경마일: 계수기 late_drop_late_block 이 알림 도달 경주의 ~40% 에서 뜨는지(원칙 23) · 카톡에 「발주까지 약 N초」가 찍히는지 · 알림 수 감소 체감
+
 # 🔴 [2026-09-18] 마감 급락 알림 시각·적중률 재점검 — **발송 중앙 발주 34초 전(살 수 없는 시점) · 급락은 한 갱신에 통째로 와서 전조 5% · 폴링·게이트·판정 지연 아님** (읽기 전용 · 코드 무변경 · 대표 「경기 종료 후에 나온다 · 빨리 잡게 · 적중률 재점검」)
 ```
 시각  9/12~17 83경주(9/06~11 odds_history 없음 74): 발송−발주 중앙 −34초 · 발주 후 8(10% · 두 벌 기간 마감시각 불일치 틱 22% 섞임 · 단일 서버 9/12~13 은 1/20)
