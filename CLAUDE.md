@@ -1588,7 +1588,8 @@ c8105d75a · e825326a3   「결과 자동백업: 이토 5경주 2-5-3」
 수정  tools/watchdog.py: START attempt 240초 내 = starting · app.py/8011 소유 프로세스 있음 = hung(기록만 · 두 벌 방지) · 부팅 300초 내 = 시작프로그램에 맡김 · 프로세스도 없을 때만 재기동
       ⚠ 다른 계정 프로세스는 CommandLine 미판독(실측 빈 목록) → 포트 소유(Get-NetTCPConnection)로 보강
 검증  ① 죽음+프로세스 → hung rc7 ② 시작시도 12초 전 → starting rc0 ③ 아무것도 없음 → 종전 재기동 경로 · 운영 즉시 반영(스케줄러가 5분마다 새 파일 실행)
-남음  🔴 두 벌 정리(10660+13720 종료 · 2864+13728 유지)는 승인 사항 · 정리 전까지 카톡 2회·틱 중복 계속
+정리  대표 「정리해」 → 관리자 콘솔 taskkill 은 액세스 거부(10660 은 SYSTEM 스케줄러가 띄운 것) ⇒ 워치독에 dedupe(8011 두 벌이면 가장 오래된 것만 유지 · netstat 으로 셈 — Get-NetTCPConnection 은 두 벌이면 1개만 돌려줌) 추가
+      10:59:02 SYSTEM 워치독이 10660 종료 · 2864 유지 · LISTEN 1개 · 수집 지속(11:04 틱) · watchdog.jsonl {"ev":"dedupe","keep":2864,"killed":[10660]}
 ```
 
 ---

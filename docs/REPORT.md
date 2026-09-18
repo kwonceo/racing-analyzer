@@ -93,6 +93,7 @@
 ■ tools/watchdog.py: _app_procs()(CIM CommandLine ∪ Get-NetTCPConnection 8011 소유) · _uptime_sec() · _recent_start_attempt() · START_GRACE_SEC 240 · BOOT_GRACE_SEC 300 · 이벤트 starting/hung 추가 · recovered 판정에 포함
 ■ 자기검증(원칙 17): ① HTTP 죽음+프로세스 있음 → hung rc7 재기동 없음 ② START attempt 12초 전 → starting rc0 ③ 프로세스·시작시도 없음 → 종전 재기동 경로 도달(rc4 기동스크립트 없음 주입)
 ■ 별도 프로세스(작업 스케줄러)라 서버 무관 · 운영 tools/watchdog.py 체크아웃으로 즉시 반영 · 되돌리기: START_GRACE_SEC=0 · BOOT_GRACE_SEC=0 (hung 보류는 남음)
+■ [추가 10:59] 대표 승인 「정리해」 → 워치독 dedupe(netstat 두 벌 감지 · 가장 오래된 것 유지 · SYSTEM 권한 taskkill /T) → 10660 종료 · 2864 유지 · 관리자 콘솔 taskkill 은 액세스 거부였음 · 이후 두 벌이 다시 생겨도 5분 안에 자동 정리된다
 
 <!--REPORT-->
 # ✅ 코드 검증기(모델 출력 기계 검사 + 재시도) · 그림자 모델 A/B · 오늘 적중률 화면 지연 원인(캐시 스탬프 30초 어긋남 · 재계산 3초 · 스레드 겹치면 54초) 수정안 · 오늘 판정 56.5%의 의미 (2026-09-09)
