@@ -161,17 +161,33 @@ BOOT_GRACE_SEC = 300       # 부팅 뒤 이 시간 안에는 시작프로그램�
 
 def _listeners():
     """8011 LISTEN 소유 프로세스 [(pid, 생성시각 epoch)] — 소유자와 무관하게 CIM 으로 읽는다."""
-    ps = ("Get-NetTCPConnection -LocalPort 8011 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | "
-          "ForEach-Object { $p = Get-CimInstance Win32_Process -Filter (\"ProcessId=\" + $_); if ($p) { '{0} {1}' -f $p.ProcessId, [int64](Get-Date $p.CreationDate -UFormat %s) } }")
+    # ⚠ Get-NetTCPConnection 은 같은 주소:포트에 두 벌이 LISTEN 이면 한 줄만 돌려준다(실측 — 두 벌인데 1개) → netstat 으로 센다
+    try:
+        ns = subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True, timeout=30).stdout
+    except Exception:
+        return None
+    pids = []
+    for line in (ns or "").splitlines():
+        parts = line.split()
+        if len(parts) >= 5 and parts[1].endswith(":8011") and parts[3].upper() == "LISTENING" and parts[4].isdigit():
+            if int(parts[4]) not in pids:
+                pids.append(int(parts[4]))
+    if not pids:
+        return []
+    ps = ("Get-CimInstance Win32_Process | Where-Object { $_.ProcessId -in %s } | "
+          "ForEach-Object { '{0} {1}' -f $_.ProcessId, [int64](Get-Date $_.CreationDate -UFormat %%s) }" % ",".join(str(p) for p in pids))
     try:
         out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True, timeout=30).stdout
     except Exception:
-        return None
+        out = ""
     rows = []
     for line in (out or "").splitlines():
         parts = line.split()
         if len(parts) == 2 and parts[0].isdigit() and parts[1].lstrip("-").isdigit():
             rows.append((int(parts[0]), int(parts[1])))
+    for p in pids:                                   # 생성시각을 못 읽은 PID 는 「가장 새 것」으로 취급(오래된 것을 남긴다는 원칙에 안전)
+        if p not in {r[0] for r in rows}:
+            rows.append((p, 2 ** 62))
     return rows
 
 
