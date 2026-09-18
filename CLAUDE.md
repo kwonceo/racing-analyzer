@@ -1574,6 +1574,48 @@ c8105d75a · e825326a3   「결과 자동백업: 이토 5경주 2-5-3」
 
 # ═══ 최근 일지 (2026-09-07) ═══
 
+# ✅ [2026-09-18 16:10] **경륜 고질병 「경기장 글자가 틀리면 오버레이가 안 잡힌다」(토야마) — 확장이 서버 별칭표로 경기장을 대조 · 확장 2.1.173** (대표 지적 · 원본 커밋 · 운영 확장 파일 체크아웃 · 🔴 대표 확장 재로드)
+```
+뿌리   서버는 토야마→도야마 로 정규화해 저장·응답 ↔ overlay.js 는 표시 직전(readData)·분석 폴링에서 「분석 경주명 ↔ 배당판 경주명」을 글자 그대로 대조 → 불일치로 분석을 버림 → 패널 안 뜸
+       별칭을 서버(_TRACK_GROUPS)에만 추가해 온 그동안의 수리가 화면에는 안 닿았다(원칙 25 의 세 번째 축 = 확장)
+수정   tools/gen_ext_track_alias.py: app.py _TRACK_GROUPS·_TRACK_ALIAS 를 ast 로 읽어 chrome-extension/track_alias.js 생성(별칭 242 · 정식 키 67) · --check 로 낡음 검출
+       kbVenueCanon = 별칭표(정확) → 별칭표(발음형) → 자기 발음형(격음·경음→평음 · 쓰/츠 · 장음 겹침) · kbVenueSame = 정확 일치만
+       overlay._rkMatchesBoard · content._rkVenueDiffers 가 kbVenueSame 사용(표 없으면 종전) · manifest 두 묶음 앞에 track_alias.js
+검증   tests/run_ext_track_alias.js 25/25 — 같음 14쌍(토야마·타치카와·고치·키시와다·마츠야마·富山·오오이…) · 다름 9쌍 · 정식 키 67개 충돌 0
+       🔴 1차에 충돌 2건 검출(이즈카↔이즈 · 마쓰사카↔사가 — 발음형 포함 대조 탓) → 포함 대조 제거(원칙 20 이 켜기 전에 잡음)
+       저장 토큰 94종 대조(원칙 25 ⓑ): 묶이는 24그룹 전부 같은 경기장 표기 변형 · 다른 경기장 섞임 0
+규칙   _TRACK_GROUPS 를 고치면 gen_ext_track_alias.py 재실행 + 확장 버전 올림(--check 가 rc=1 로 알린다)
+```
+⏳ 다음 경륜일: 토야마·타치카와·키시와다 배당판에서 패널이 뜨는가(대표 화면) · ⚠ 오늘 도야마 9~11R 사설 틱 0(oddspark 만) — 경륜 배당판 탭 수집이 드문 원인은 별건 미확인
+
+# ✅ [2026-09-18 15:00] **확장 2.1.172 — ⓐ 팝업 「경주 지정」이 배당판 경기장과 다르면 배당판 값 · ⓑ 날짜 바뀌면 「경주 지정」 자동 비움** (대표 「둘다 승인 진행」 · 원본 커밋 · 운영은 확장 파일만 체크아웃 · 🔴 대표 확장 재로드 필요)
+```
+content.js   _rkVenueOf/_rkVenueDiffers/_overrideOrBoard · _resolveRaceKey(수집)·결과수집 2곳·전적수집 에 적용 · 둘 다 읽혔고 경기장이 확실히 다를 때만(포함 대조 · 원칙 20)
+overlay.js   pollOverlayAnalyze: 저장 키가 배당판과 다르면 생략하지 않고 _boardRk() 로 만든 키로 분석(패널이 뜬다)
+background.js RK_DAY_ALARM 5분 · raceKeySetDay(onChanged 로 기록) ≠ 오늘이면 raceKey 비움 · onInstalled/onStartup 에도 · 기록 없으면 오늘로 간주(다음 날 비워짐)
+검증   node --check 3파일 · 자기검증 10/10(다름→배당판 · 같은 경기장 유지 · 못 읽음 유지 · 형식 아님 유지 · 진짜 다름 true) · ZIP 재빌드
+```
+⏳ 다음 개최일: 계수기 ingest_rk_mismatch 가 0 근처로 내려가는가(오늘 90) · 콘솔 「[수집] 팝업 지정(…) 경기장 ≠ 배당판」 · 자정 넘긴 뒤 팝업 경주 지정이 비는가
+
+# 🔴 [2026-09-18 14:40] **오버레이 안 뜸 — 확장 팝업 「경주 지정」에 9/17 값 「카와사키 1경주」가 남아 전송 키가 고정 · 서버 rkVerify 409 로 오늘 90건 거부 · 오버레이 분석 폴링은 배당판 경주와 안 맞아 생략** (읽기 전용 · 코드 무변경 · 대표 「오버레이가 아예 안 뜬다」)
+```
+서버   8011 1벌(2864) health 200 · 사설 틱은 들어온다(소노다 1R 14:21~14:30 19틱 · 부산 4R 23틱) → 서버·수집 정상
+증거   _gate_hits ingest_rk_mismatch 오늘 90 · last 「긁기 시작 카와사키 1경주 ↔ 전송 직전 나고야 4경주」14:05 · 로그 「수신거부 카와사키 1경주 → 小松島 7/도야마 1/다치카와 1」 94건(9/17 저녁부터)
+       확장 분석 요청은 「타치카와 1경주」(10:56 마감 · 종료 경주)로 계속 · overlay.js pollOverlayAnalyze 는 storage raceKey 가 배당판 경주와 다르면 _rkMatchesBoard 실패 → 분석 생략 → 패널 미생성
+원인   content.js _resolveRaceKey: 자동 경로가 아니면 override(팝업 경주 지정) 우선 → 9/17 「카와사키 1경주」가 그대로 → rkGuard 가 rkVerify 를 실어 서버 409 · 오버레이는 그 키로 분석 못 함
+조치   대표: 팝업 「경주 지정」 비우기 → 자동전송 ON 확인 → 배당판 F5 (9/10 「오버레이 안 뜸」과 같은 계열 — 팝업 상태가 넘어온 것)
+⏸ 승인 사항  ⓐ override 가 배당판 감지 경주와 경기장이 다르면 override 무시(수집 혼입방지와 같은 규칙을 분석 폴링에도) ⓑ 날짜가 바뀌면 override 자동 비움 · 둘 다 확장(manifest bump)
+```
+
+# ✅ [2026-09-18] **급락 알림 ⓐ 발주 30초 안 틱 차단 · ⓑ 문구 「발주까지 약 N초」** (대표 「a b 진행 승인」 · 원본 커밋 · 🔴 운영 00:10 pull — late_drop.py·app.py 둘 다 리로더 재기동)
+```
+코드  tools/late_drop.py MIN_SEC_BEFORE=30 · picks(deadline=) 급락 틱이 발주 30초 안이면 버리고 LAST_BLOCKED["late"] · replay_live(deadline=) · lines(left_sec=)
+      app.py _late_drop_alert: _dl_ep=odds_history.deadline_epoch → picks(deadline) · 계수기 late_drop_late_block · lines(left_sec) · jsonl "left" · 팝업 _late_drop_recent 는 left−경과
+검증  자기검증 9/9(차단·통과·None 동일·ms·replay·문구·되돌리기) · 소급 9/12~17 61경주: OFF 94조합 적중 7 회수 167 ↔ ON 57조합 적중 5 회수 186 · 사라지는 경주 23 · 사라진 적중 2(10.6·40.5배 — 발주 ±30초 틱이라 못 샀다)
+되돌리기 MIN_SEC_BEFORE = 0 · deadline 못 받으면 종전과 동일(원칙 20)
+```
+⏳ 다음 경마일: 계수기 late_drop_late_block 이 알림 도달 경주의 ~40% 에서 뜨는지(원칙 23) · 카톡에 「발주까지 약 N초」가 찍히는지 · 알림 수 감소 체감
+
 # 🔴 [2026-09-18] 마감 급락 알림 시각·적중률 재점검 — **발송 중앙 발주 34초 전(살 수 없는 시점) · 급락은 한 갱신에 통째로 와서 전조 5% · 폴링·게이트·판정 지연 아님** (읽기 전용 · 코드 무변경 · 대표 「경기 종료 후에 나온다 · 빨리 잡게 · 적중률 재점검」)
 ```
 시각  9/12~17 83경주(9/06~11 odds_history 없음 74): 발송−발주 중앙 −34초 · 발주 후 8(10% · 두 벌 기간 마감시각 불일치 틱 22% 섞임 · 단일 서버 9/12~13 은 1/20)

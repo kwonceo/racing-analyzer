@@ -782,7 +782,7 @@
     }
     const finalOdds = extractResultOdds();
     const { raceKey: override } = await getSettings();
-    const raceKey = (override && override.trim()) || extractRaceKey();
+    const raceKey = _overrideOrBoard(override, extractRaceKey(), '결과수집') || extractRaceKey();   // [2026-09-18 ⓐ]
     if (!raceKey) return { ok: false, error: 'raceKey를 만들 수 없습니다. 팝업에서 직접 입력하세요.' };
     console.log(`[결과수집] ✅ 1~3착: ${results.filter((r) => r.rank <= 3).map((r) => `${r.rank}착 ${r.no}번`).join(', ')}`
       + ` | 확정배당 복승: ${finalOdds.quinella ? finalOdds.quinella.combo.join('-') + '=' + finalOdds.quinella.odds + '배' : '미검출'}`
@@ -904,7 +904,7 @@
 
   async function collectResultsByFetch(reason) {
     const { raceKey: override } = await getSettings();
-    const raceKey = (override && override.trim()) || extractRaceKey();
+    const raceKey = _overrideOrBoard(override, extractRaceKey(), '결과수집') || extractRaceKey();   // [2026-09-18 ⓐ]
     if (!raceKey) return { ok: false, error: 'raceKey 없음(팝업에서 입력)' };
     const url = findResultUrl();
     if (!url) return { ok: false, notReady: true, error: '/bet/result 페이지(결과 iframe)를 찾지 못함' };
@@ -1181,10 +1181,34 @@
   //   엔진이 계속 이전 경주를 수집하던 버그를 막는다(수동 버튼만 되던 증상의 원인).
   //   수동 수집('manual')·그 외는 기존대로 저장값(override)을 우선해 명시 입력을 존중한다.
   //   두 경우 모두 한쪽이 비면 다른 쪽으로 폴백한다(자동 감지 실패 시 수동값 사용).
+  // [2026-09-18 대표 승인 ⓐ] 팝업 「경주 지정」(storage raceKey)이 배당판에서 읽은 **경기장**과 다르면 팝업 값을 무시한다.
+  //   실사고: 9/17 「카와사키 1경주」가 팝업에 남아 9/18 하루 종일 그 이름으로 전송 → 서버 rkVerify 409 90건 · 오버레이 분석 생략 → 패널 안 뜸.
+  //   ⚠ 원칙 20: 둘 다 읽혔고 **경기장이 확실히 다를 때만** 무시한다. 한쪽이라도 못 읽으면 종전 그대로.
+  //   경기장 비교는 overlay._rkMatchesBoard 와 같은 포함 대조(코치/고치 · 「[륜]」 꼬리표 변형 오탐 방지).
+  function _rkVenueOf(x) {
+    const m = /([가-힣一-龥ぁ-んァ-ヶA-Za-z]+)\s*(\d{1,2})\s*(?:경주|R\b|レース)/.exec(String(x || ''));
+    return m ? m[1] : '';
+  }
+  function _rkVenueDiffers(a, b) {
+    const va = _rkVenueOf(a), vb = _rkVenueOf(b);
+    if (!va || !vb) return false;                                    // 못 읽으면 다르다고 하지 않는다
+    if (va.indexOf(vb) >= 0 || vb.indexOf(va) >= 0) return false;
+    // [2026-09-18] 토야마↔도야마 같은 표기 변형은 같은 경기장이다 — 서버 별칭표(track_alias.js)로 한 번 더 본다
+    try { if (typeof self.kbVenueSame === 'function' && self.kbVenueSame(va, vb)) return false; } catch (_) { /* 표 없으면 종전 */ }
+    return true;
+  }
+  function _overrideOrBoard(override, detected, tag) {
+    const ov = (override && override.trim()) || '';
+    if (ov && detected && _rkVenueDiffers(ov, detected)) {
+      console.log('[' + (tag || '경주 지정') + '] 팝업 지정(' + ov + ') 경기장 ≠ 배당판(' + detected + ') → 배당판 기준');
+      return detected;
+    }
+    return ov;
+  }
   function _resolveRaceKey(reason, override) {
     let detected = '';
     try { detected = extractRaceKey() || ''; } catch (_) { detected = ''; }
-    const ov = (override && override.trim()) || '';
+    const ov = _overrideOrBoard(override, detected, '수집');   // [2026-09-18 ⓐ] 경기장 다르면 배당판
     const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg' || reason === 'sport-change'
                          || reason === 'korea-auto' || reason === 'auto-fallback');
     return followBoard ? (detected || ov) : (ov || detected);
@@ -2055,7 +2079,7 @@
     if (!starters.length) { console.warn('[전적수집] DebaTable에서 전적을 추출하지 못함'); return; }
     console.log(`[전적수집] DebaTable 추출 ${starters.length}두:`, starters.slice(0, 3).map((h) => `${h.no}번 ${h.name} [${(h.recent || []).join('-')}]`).join(' / '));
     const { raceKey: override } = await getSettings();
-    const raceKey = (override && override.trim()) || extractRaceKey();
+    const raceKey = _overrideOrBoard(override, extractRaceKey(), '전적수집') || extractRaceKey();   // [2026-09-18 ⓐ]
     const { timerDeadline } = await getSettings();
     const res = await chrome.runtime.sendMessage({
       type: 'POST_JAPAN', reason: 'deba-page',
