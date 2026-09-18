@@ -465,6 +465,9 @@
       var m = /([가-힣]{2,8})\s*(\d{1,2})\s*경주/.exec(String(rk));
       if (!m) return true;
       var sameV = (m[1].indexOf(b.v) >= 0 || b.v.indexOf(m[1]) >= 0);
+      // [2026-09-18 대표 「경륜 고질병 — 글자가 틀리면 오버레이가 안 잡힌다 · 토야마」] 서버는 토야마→도야마 로 정규화해 응답하는데
+      //   여기서 글자 그대로 대조해 분석을 버렸다. 서버와 같은 별칭표(track_alias.js)+발음 정규화로 같은 경기장인지 본다.
+      try { if (!sameV && typeof self.kbVenueSame === 'function') sameV = self.kbVenueSame(m[1], b.v); } catch (_) { /* 표 없으면 종전 */ }
       return sameV && (+m[2] === b.n);
     }
     function readData() {

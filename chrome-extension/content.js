@@ -1192,7 +1192,10 @@
   function _rkVenueDiffers(a, b) {
     const va = _rkVenueOf(a), vb = _rkVenueOf(b);
     if (!va || !vb) return false;                                    // 못 읽으면 다르다고 하지 않는다
-    return !(va.indexOf(vb) >= 0 || vb.indexOf(va) >= 0);
+    if (va.indexOf(vb) >= 0 || vb.indexOf(va) >= 0) return false;
+    // [2026-09-18] 토야마↔도야마 같은 표기 변형은 같은 경기장이다 — 서버 별칭표(track_alias.js)로 한 번 더 본다
+    try { if (typeof self.kbVenueSame === 'function' && self.kbVenueSame(va, vb)) return false; } catch (_) { /* 표 없으면 종전 */ }
+    return true;
   }
   function _overrideOrBoard(override, detected, tag) {
     const ov = (override && override.trim()) || '';
