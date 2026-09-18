@@ -55,7 +55,37 @@ chrome.runtime.onInstalled.addListener(() => {
     (v) => { chrome.storage.local.set(v); syncAutoEngine(); }
   );
   scheduleKeirinDaily();   // [경륜 스케줄] 매일 08:00 자동 수집 알람 등록
+  chrome.alarms.create(RK_DAY_ALARM, { periodInMinutes: 5 });   // [2026-09-18 ⓑ] 날짜 바뀌면 경주 지정 비움
+  _clearStaleRaceKey('installed');
 });
+
+// ═══ [2026-09-18 대표 승인 ⓑ] 「경주 지정」(storage raceKey)은 **그날만** 유효하다 — 날짜가 바뀌면 비운다 ═══
+//   실사고: 9/17 「카와사키 1경주」가 9/18 까지 남아 서버 거부 90건 · 오버레이 안 뜸(세 번째 재발: 9/10 · 9/17 코치[륜] · 9/18).
+//   raceKey 가 (팝업 입력이든 자동 감지든) 비어 있지 않게 바뀐 날을 raceKeySetDay 에 적고, 5분마다 오늘과 다르면 비운다.
+//   ⚠ 자동 감지값은 다음 수집에서 다시 채워진다 — 비우는 것은 잔존값뿐이다.
+const RK_DAY_ALARM = 'rkDayCheck';
+function _ymdLocal() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+async function _clearStaleRaceKey(why) {
+  try {
+    const { raceKey, raceKeySetDay } = await chrome.storage.local.get({ raceKey: '', raceKeySetDay: '' });
+    if (!raceKey) return;
+    const today = _ymdLocal();
+    if (!raceKeySetDay) { await chrome.storage.local.set({ raceKeySetDay: today }); return; }   // 기록 없으면 오늘 것으로 간주(내일 비워진다)
+    if (raceKeySetDay !== today) {
+      await chrome.storage.local.set({ raceKey: '', raceKeySetDay: '' });
+      console.log('[경주 지정] 날짜 변경(' + raceKeySetDay + ' → ' + today + ') → 잔존값 「' + raceKey + '」 비움 (' + (why || '') + ')');
+    }
+  } catch (_) { /* 저장소 오류는 무시 — 수집을 막지 않는다 */ }
+}
+chrome.storage.onChanged.addListener((ch, area) => {
+  try {
+    if (area === 'local' && ch.raceKey && ch.raceKey.newValue) chrome.storage.local.set({ raceKeySetDay: _ymdLocal() });
+  } catch (_) { /* */ }
+});
+chrome.runtime.onStartup.addListener(() => { _clearStaleRaceKey('startup'); });
 
 // ═══ [확장 경유 경륜 스케줄 자동 수집] oddspark 경륜은 로그인 필요 → 로그인 세션 보유한 확장이
 //   KaisaiRaceList를 fetch·파싱해 서버로 POST(FETCH_RESULT_HTML과 동일 패턴). 하루 1회(오전 8시). ═══
@@ -555,6 +585,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === AUTO_ALARM || /^stageT/.test(alarm.name)) { autoTick('alarm'); return; }
   // [무변동 소프트 일시중지] 60초 뒤 재점검 → 엔진 재동기화(autoSend 유지면 자동 재개)
   if (alarm.name === 'resumeCheck') { syncAutoEngine(); return; }
+  if (alarm.name === RK_DAY_ALARM) { _clearStaleRaceKey('alarm'); return; }   // [2026-09-18 ⓑ]
   // [v2.0.1] 발주 후 결과 자동수집 알람
   if (/^resFetch\d/.test(alarm.name)) { doResultFetch(parseInt(alarm.name.replace('resFetch', ''), 10)); return; }
   // [확장 경유 경륜 스케줄] 매일 08:00 → oddspark 경륜 스케줄 fetch(로그인 세션)·서버 전송

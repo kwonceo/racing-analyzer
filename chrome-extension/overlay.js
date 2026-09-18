@@ -201,7 +201,14 @@
           if (!_rk) return;   // [v2.1.140] raceKey 비어있으면 분석 요청 생략 → "새 경주 분석 중" 무한루프 방지
           // [v2.1.146] 경주 전환 직후 이전 경주 키로 계속 분석 요청하던 잔존 차단 — 배당판 경주와 다르면
           //   탭 분석을 버리고 이번 폴은 생략(다음 수집 사이클이 새 경주 키로 갱신).
-          if (!_rkMatchesBoard(_rk)) { _tabAn = null; return; }
+          if (!_rkMatchesBoard(_rk)) {
+            _tabAn = null;
+            // [2026-09-18 대표 승인 ⓐ] 저장된 키가 배당판 경주와 다르면 **배당판 경주로** 분석한다(종전: 생략 → 패널 안 뜸).
+            //   실사고 9/18: 팝업 잔존값 「카와사키 1경주」 때문에 하루 종일 분석 생략. _rkMatchesBoard 가 false 면 배당판은 읽힌 것이다.
+            var _b = _boardRk();
+            if (!_b || !_b.v || !_b.n) return;
+            _rk = _b.v + ' ' + _b.n + '경주';
+          }
           chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk }, function (res) {
             try {
               if (chrome.runtime.lastError || !res || !res.ok || !res.data) return;
