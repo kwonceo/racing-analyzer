@@ -459,6 +459,19 @@
       _brdCache = { t: Date.now(), v: res };
       return res;
     }
+    // [2026-09-19 대표 「경륜 오버레이 안 뜬다」] 두 경주 키가 같은 경주인가 — 경기장 표기가 달라도(고마쓰시마↔小松島 · 토야마↔도야마)
+    //   서버 별칭표(track_alias.js)로 같은 곳이면 같다. 번호가 다르면 다르다. 형식을 못 읽으면 글자 비교로 돌아간다.
+    function _sameRaceKey(a, b) {
+      a = String(a || '').trim(); b = String(b || '').trim();
+      if (a === b) return true;
+      var re = /^(.*?)\s*(\d{1,2})\s*(?:경주|R)\s*$/;
+      var ma = re.exec(a), mb = re.exec(b);
+      if (!ma || !mb) return false;
+      if (+ma[2] !== +mb[2]) return false;
+      var va = ma[1].trim(), vb = mb[1].trim();
+      if (va === vb) return true;
+      try { return typeof self.kbVenueSame === 'function' && self.kbVenueSame(va, vb) === true; } catch (_) { return false; }
+    }
     function _rkMatchesBoard(rk) {
       var b = _boardRk();
       if (!b || !rk) return true;
@@ -1792,7 +1805,9 @@
           var _boardCat = st.detectedCategory || '';
           var _anaCat = (d && (d.category || (d.corePicks && d.corePicks.category))) || '';
           var _catMismatch = (_boardCat === 'korea' && _anaCat && _anaCat !== 'korea');
-          if (_catMismatch || (_liveRk && _anaRk && _liveRk !== _anaRk)) {
+          // 🔴 [2026-09-19] 종전 `_liveRk !== _anaRk` 는 글자 비교라, 서버가 정규화한 키(小松島·도야마)와 배당판 표기(고마쓰시마·토야마)가
+          //   영원히 달라 「새 경주 분석 중」에서 못 빠져나왔다(경륜 오버레이 고질병의 두 번째 자리). 같은 경주인지로 본다.
+          if (_catMismatch || (_liveRk && _anaRk && !_sameRaceKey(_liveRk, _anaRk))) {
             var trans = mk('div', 'margin:0 0 6px;padding:8px 10px;border-radius:7px;border:1px solid #38bdf8;background:rgba(56,189,248,.14)');
             trans.appendChild(mk('div', 'font-weight:900;font-size:14px;color:#7dd3fc',
               _catMismatch ? '🇰🇷 한국경마 분석 중...' : '🔄 새 경주 분석 중...'));
