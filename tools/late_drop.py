@@ -49,7 +49,14 @@ HIST_CAP = 12          # 실전이 보는 활성 캐시 틱 상한
 CORROB_ENABLED = True   # ⓑ 같은 틱 구간에서 쌍승(a>b·b>a 중 작은 쪽) 또는 두 말 단승 중 하나가 CORROB_MIN% 이상 내렸어야 한다
 CORROB_MIN = 10.0       #    쌍승·단승 값이 **둘 다 없으면** 통과(원칙 20 — 확실히 없는 것만 막는다)
 CONFIRM_TICKS = 0       # ⓐ 급락이 다음 N틱에서도 문턱을 유지해야 발송. 0 = 끔(소급 적중 19→11 로 유해)
-LAST_BLOCKED = {"corrob": 0, "confirm": 0}   # 직전 picks() 호출에서 게이트가 막은 조합 수(원칙 23 — 호출부가 계수기에 옮긴다)
+LAST_BLOCKED = {"corrob": 0, "confirm": 0, "late": 0}   # 직전 picks() 호출에서 게이트가 막은 조합 수(원칙 23 — 호출부가 계수기에 옮긴다)
+
+# 🔴🔴 [2026-09-18 대표 승인 ⓐ] 발주 MIN_SEC_BEFORE 초 안의 틱에서 잡힌 급락은 **발송하지 않는다.**
+#   실측(9/12~17 · 83경주): 발송 중앙 발주 34초 전 · 급락 틱이 발주 ±30초(mb=0)인 조합 43/97 = 45% 인데 적중 2(4.7%)
+#   ↔ 30~90초 전 틱 6/47(12.8%). 지방경마는 발주 시각에 발매가 닫혀 그 알림은 **회원이 살 수 없다.**
+#   ⚠ 「더 빨리」는 구조적으로 불가(급락 직전 드리프트 +1.1% · 전조 5% · oddspark 갱신 35초) — 남는 것은 살 수 없는 알림을 빼는 것.
+#   deadline 을 못 받으면(None) 종전과 완전히 같다(원칙 20 — 확실히 아는 것만 막는다). 🔧 되돌리기: MIN_SEC_BEFORE = 0
+MIN_SEC_BEFORE = 30.0
 
 
 def _f(v):
@@ -123,13 +130,15 @@ def _qmap(q):
     return out
 
 
-def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None):
+def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None, deadline=None):
     """마감 전 틱 목록 → 진성 급락 조합.
 
     ticks: [{minutes_before, quinella, ...}] (오염 틱은 호출부에서 이미 걸렀다고 본다)
     exclude: 이미 회원에게 나간 조합 집합(중복 발송 방지)
     now_mb: 🔴 **판정 시각**(마감 N분 전). 주면 그 시각 이후 틱을 **입력에서 제거**한다.
             None 이면 종전과 완전히 같다 — 실전 호출부(app.py)는 안 넘기므로 **동작 무변경**이다.
+    deadline: [2026-09-18 ⓐ] 발주시각(epoch 초 · odds_history.deadline_epoch). 주면 급락 틱이 발주 MIN_SEC_BEFORE 초
+            안이면 그 조합을 버리고 LAST_BLOCKED["late"] 를 센다. None 이면 종전과 같다.
     반환 [(combo, odds, drop%, mb)] — 급락이 큰 순. 없으면 [].
 
     🔴 [2026-09-05] `now_mb` 를 넣은 이유 — 아래 **반등 판정**이 `ser` 전체를 훑는다.
@@ -152,6 +161,13 @@ def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None):
     ser.sort(key=lambda x: -x[0])            # 시간순(mb 큰 것 = 이른 것)
     LAST_BLOCKED["corrob"] = 0
     LAST_BLOCKED["confirm"] = 0
+    LAST_BLOCKED["late"] = 0
+    try:
+        _dl = float(deadline) if deadline else None
+        if _dl and _dl > 1e12:
+            _dl = _dl / 1000.0                    # epoch ms 방어(app.py 는 초로 저장한다)
+    except (TypeError, ValueError):
+        _dl = None
     if len(ser) < 3:
         return []
     ex = set(exclude or ())
@@ -186,6 +202,15 @@ def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None):
             if CORROB_ENABLED and not _corroborated(pt, ct, c):
                 LAST_BLOCKED["corrob"] += 1
                 continue
+            # 🔴 [2026-09-18 대표 승인 ⓐ] 급락 틱이 발주 MIN_SEC_BEFORE 초 안이면 회원이 살 수 없다 — 버리고 센다
+            if _dl and MIN_SEC_BEFORE > 0:
+                try:
+                    _tt = float(ct.get("t") or 0)
+                except (TypeError, ValueError):
+                    _tt = 0.0
+                if _tt and (_dl - _tt) < MIN_SEC_BEFORE:
+                    LAST_BLOCKED["late"] += 1
+                    continue
             out.append((c, o, d, cmb))
     # 같은 조합이 여러 번 잡히면 급락이 큰 것 하나만
     best = {}
@@ -195,7 +220,7 @@ def picks(ticks, exclude=None, mb_max=MB_MAX, now_mb=None):
     return sorted(best.values(), key=lambda x: x[2])[:MAX_PICKS]
 
 
-def replay_live(ticks, exclude=None, mb_max=MB_MAX):
+def replay_live(ticks, exclude=None, mb_max=MB_MAX, deadline=None):
     """🔴 실전 호출을 **그대로 재현**한다 — 소급 측정은 `picks` 가 아니라 이 함수를 쓴다.
 
     실전(app.py 41262 · 40580)이 하는 일:
@@ -216,13 +241,13 @@ def replay_live(ticks, exclude=None, mb_max=MB_MAX):
         if mb > POLL_MB:                      # 아직 호출 창에 안 들어왔다
             continue
         avail = ser[:j + 1][-HIST_CAP:]       # ② 그 시점까지 · 최근 12틱
-        ps = picks(avail, exclude, mb_max, now_mb=mb)
+        ps = picks(avail, exclude, mb_max, now_mb=mb, deadline=deadline)
         if ps:
             return ps, mb                     # ③ 첫 발동에서 잠근다
     return [], None
 
 
-def lines(ps):
+def lines(ps, left_sec=None):
     """카톡 문구 — 없으면 빈 리스트.
 
     [2026-09-06 대표: 「t2 급락 신호는 강조해야 한다」] 한눈에 **다른 종류의 알림**임이 보이게 한다.
@@ -231,6 +256,7 @@ def lines(ps):
         결과 7-8. 조합은 빗나가도 「돈이 몰린 말」은 맞았다 — 회원이 짝을 스스로 고를 수 있게 말 단위를 앞세운다
       · 급락 표기는 ▼N% 로 통일(카톡은 굵게가 안 되므로 기호로 강조)
     ⚠ 판정·상한·조합 선정은 여기서 바꾸지 않는다 — 문구뿐이다.
+    [2026-09-18 대표 승인 ⓑ] left_sec(발주까지 초)를 주면 「⏱ 발주까지 약 N초」로 — 회원이 남은 시간을 보고 판단한다.
     """
     if not ps:
         return []
@@ -249,6 +275,13 @@ def lines(ps):
         pass
     for c, o, d, mb in ps:
         out.append("⚡ 복승 %s · %.1f배 · ▼%.0f%%" % ("+".join(map(str, c)), o, abs(d)))
-    out.append("⏱ 마감 임박 — 지금 결정하셔야 합니다")
+    try:
+        _ls = int(round(float(left_sec))) if left_sec is not None else None
+    except (TypeError, ValueError):
+        _ls = None
+    if _ls is not None:
+        out.append("⏱ 발주까지 약 %d초 — 지금 결정하셔야 합니다" % max(0, _ls))
+    else:
+        out.append("⏱ 마감 임박 — 지금 결정하셔야 합니다")
     out.append("※ 기존 추천은 그대로입니다. 이건 **추가**입니다")
     return out

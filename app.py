@@ -41334,7 +41334,9 @@ def _late_drop_recent(rk=None, max_age=LATE_DROP_POPUP_AGE):
             ps = [((int(p["combo"][0]), int(p["combo"][1])), p.get("odds"), float(p.get("drop") or 0), p.get("mb"))
                   for p in (r.get("picks") or []) if isinstance(p, dict) and p.get("combo")]
             try:
-                lines = _LATE_DROP.lines(ps) if _LATE_DROP is not None else []
+                # [2026-09-18 ⓑ] 적재 시점의 「발주까지 초」에서 경과를 빼 지금 남은 초로 — 없으면 종전 문구
+                _lf = (float(r["left"]) - age) if r.get("left") is not None else None
+                lines = _LATE_DROP.lines(ps, left_sec=_lf) if _LATE_DROP is not None else []
             except Exception:
                 lines = []
             out.append({"rk": r.get("rk"), "dispRk": _disp_rk(str(r.get("rk") or "")), "t": r.get("t"),
@@ -41396,11 +41398,13 @@ def _late_drop_alert(rk, an, db):
         #   측정 도구(measure_late_drop_sport)와 **같은 입력**(odds_history 스냅샷)을 읽는다 — 원칙 5.
         #   오염 틱 제외 규칙도 도구와 같다. 🔧 되돌리기: LATE_DROP_ALERT_ENABLED = False(기존 스위치).
         hist = []
+        _dl_ep = None      # [2026-09-18 대표 승인 ⓐⓑ] 발주시각(epoch 초) — 발주 30초 안 틱 차단 · 문구 「발주까지 N초」
         try:
             _lp = _analysis_log_path(rk)
             _lp = _lp[0] if isinstance(_lp, tuple) else _lp          # ⚠ 튜플(path, date, race) — 8/27 사고
             _od = _hist_read_any(_lp.replace(os.sep + "analysis_log" + os.sep,
                                              os.sep + "odds_history" + os.sep)) or {}
+            _dl_ep = _od.get("deadline_epoch")
             hist = [t for t in (_od.get("snapshots") or [])
                     if isinstance(t, dict) and t.get("minutes_before") is not None
                     and not t.get("odds_suspect") and not t.get("baseline_reset")
@@ -41416,7 +41420,7 @@ def _late_drop_alert(rk, an, db):
             c = q.get("combo") if isinstance(q, dict) else q
             if isinstance(c, (list, tuple)) and len(c) >= 2:
                 ex.add((min(int(c[0]), int(c[1])), max(int(c[0]), int(c[1]))))
-        ps = _LATE_DROP.picks(hist, ex)
+        ps = _LATE_DROP.picks(hist, ex, deadline=_dl_ep)
         # 🔴 [2026-09-08 대표 승인] 오독 게이트 계수기(원칙 23·24) — late_drop.py 의 ⓑ쌍승/단승 대조·ⓐ2틱 확인이
         #   막은 조합 수. 발동률이 0% 면 게이트가 안 도는 것이고 100% 면 본 경로가 죽은 것이다.
         try:
@@ -41425,11 +41429,13 @@ def _late_drop_alert(rk, an, db):
                 _gate_hit("late_drop_corrob_block", rk, "쌍승·단승 미동반 %d조합 보류" % _blk["corrob"], reach_only=True)
             if _blk.get("confirm"):
                 _gate_hit("late_drop_confirm_block", rk, "다음 틱 미유지 %d조합 보류" % _blk["confirm"], reach_only=True)
+            if _blk.get("late"):   # [2026-09-18 ⓐ] 발주 30초 안 틱 — 회원이 살 수 없어 버린 조합(소급 45% 예상 · 0이면 게이트가 안 도는 것)
+                _gate_hit("late_drop_late_block", rk, "발주 30초 안 틱 %d조합 차단" % _blk["late"], reach_only=True)
         except Exception:
             pass
         if not ps:
             return
-        _ln = _LATE_DROP.lines(ps)
+        _ln = _LATE_DROP.lines(ps, left_sec=(float(_dl_ep) - time.time()) if _dl_ep else None)   # [ⓑ] 발주까지 초
         _txt = "[적중왕] " + _disp_rk(rk) + "\n" + "\n".join(_ln)   # 표시 전용(저장키 무변경)
         _sr = _kakao_send_to_me(_txt)
         _LATE_DROP_SENT.add((time.strftime("%Y%m%d"), rk))
@@ -41439,6 +41445,7 @@ def _late_drop_alert(rk, an, db):
             with io.open(os.path.join(LATE_DROP_DIR, time.strftime("%Y%m%d") + ".jsonl"),
                          "a", encoding="utf-8") as _f:
                 _f.write(json.dumps({"t": time.time(), "rk": rk, "ok": bool(_sr.get("ok")),
+                                     "left": (round(float(_dl_ep) - time.time()) if _dl_ep else None),   # [ⓑ] 발주까지 초(팝업 문구용)
                                      "picks": [{"combo": list(c), "odds": o,
                                                 "drop": round(d, 1), "mb": mb}
                                                for c, o, d, mb in ps]},

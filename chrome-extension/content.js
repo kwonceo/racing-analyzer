@@ -579,7 +579,15 @@
     //   🔧 되돌리기: 아래 if 조건을 지우고 무조건 스캔하게 되돌린다.
     if (!tables.size) {
       // .odds_table 또는 (범용) 모든 표 — [프레임 대응] 동일출처 iframe(예: frm_race_run) 내부 표까지 스캔
-      for (const t of queryAllDocs('table.odds_table, table')) tables.add(t);
+      // 🔴 [2026-09-19] 새 스킨은 쌍승·복승·삼복승 표가 DOM 에 **같이 있고 하나만 보인다**(baedang_type_1/2/3).
+      //   전부 읽어 조합별 최솟값을 취하면 숨은 쌍승 표가 복승에 섞인다(8/14 「양방향 min」 오염과 같은 꼴).
+      //   ⇒ 보이는 표가 하나라도 있으면 **보이는 표만** 쓴다. 전부 안 보이면 종전대로(원칙 20 — 확실할 때만 거른다).
+      const _allT = [...queryAllDocs('table.odds_table, table')];
+      const _visT = _allT.filter((t) => { try { return t.getClientRects && t.getClientRects().length > 0; } catch (_) { return true; } });
+      if (_visT.length && _visT.length < _allT.length) {
+        try { console.log('[수집] 숨은 표 %d개 제외 — 보이는 표 %d개만 읽음(승식 표 혼입 차단)', _allT.length - _visT.length, _visT.length); } catch (_) { /* */ }
+      }
+      for (const t of (_visT.length ? _visT : _allT)) tables.add(t);
     } else {
       try { console.log('[수집] odds_class 표 %d개만 사용 — 범용 table 스캔 생략(옛 화면 혼입 차단)', tables.size); } catch (_) { /* */ }
     }
@@ -1432,6 +1440,31 @@
   // [삼복승 강화] asyukk34 사설 배당판 마권종류 탭(span.bet_type_btn)을 '정확 텍스트'로 클릭.
   //   DevTools 확인: <span class="bet_type_btn" bet_mode="11" combine_mode="triple">삼복승</span>
   //   '삼복승조합'(bet_mode=12)이 '삼복승'을 포함하므로, 반드시 정확 일치로 클릭해 혼동을 방지한다.
+  // 🔴 [2026-09-19 대표 「경륜 배당 틱이 없다 · 경륜 오버레이 안 뜬다」] 사설판 새 스킨은 승식 버튼이 **글자 없는 이미지**다.
+  //   실측(ks1 · PLACE_TYPE=JC): `<div class="buy_type_btn div_Btn_BS">`(복승) · `div_Btn_SS on_orange`(쌍승·활성) · `div_Btn_SBS`(삼복승) …
+  //   textContent 가 비어 「복승」 글자 탐색이 전부 실패 → 경륜판은 기본 화면이 쌍승이라 「복승 아님 → 수집 포기(복승 0·쌍승 0)」가
+  //   매 사이클 반복됐다(경륜 사설 틱 0의 원인). 클래스 코드로 승식을 읽는다. 글자 버튼(.bet_type_btn)이 있으면 종전 경로가 먼저다.
+  const _SPRITE_BET_CODE = { DS: '단승', BS: '복승', SS: '쌍승', BYS: '복연승', SBS: '삼복승', SSS: '삼쌍승',
+                             BSJ: '복승조합', SSJ: '쌍승조합', SBJ: '삼복승조합', SSSJ: '삼쌍승조합' };
+  function _spriteBetTabs() {
+    const out = [];
+    try {
+      for (const b of queryAllDocs('.buy_type_btn')) {
+        const m = /(?:^|\s)div_Btn_([A-Z]+)(?:\s|$)/.exec(String(b.className || ''));
+        const text = m && _SPRITE_BET_CODE[m[1]];
+        if (!text) continue;
+        const vis = b.offsetParent !== null || (b.getClientRects && b.getClientRects().length > 0);
+        out.push({ el: b, text, visible: vis, code: m[1] });
+      }
+    } catch (_) { /* */ }
+    return out;
+  }
+  function _spriteBetTabEl(labels) {
+    const want = new Set([].concat(labels || []));
+    const hit = _spriteBetTabs().find((t) => t.visible && want.has(t.text));
+    return hit ? hit.el : null;
+  }
+
   function clickAsyukkBetTab(exactText) {
     try {
       const btns = queryAllDocs('.bet_type_btn');
@@ -1440,6 +1473,9 @@
         const vis = b.offsetParent !== null || (b.getClientRects && b.getClientRects().length > 0);
         if (t === exactText && vis) { try { b.click(); } catch (_) { /* */ } return b; }
       }
+      // [2026-09-19] 글자 버튼이 없으면 이미지 버튼(클래스 코드)으로
+      const sp = _spriteBetTabEl([exactText]);
+      if (sp) { try { sp.click(); } catch (_) { /* */ } console.log('[탭클릭] 이미지 버튼(' + exactText + ') 클릭 — ' + sp.className); return sp; }
     } catch (_) { /* */ }
     return null;
   }
@@ -1468,6 +1504,13 @@
           combineMode: (b.getAttribute && b.getAttribute('combine_mode')) || null,
           active: _ACTIVE_RE.test(String(cls)) || aria === 'true',
         });
+      }
+      // [2026-09-19] 글자 버튼이 하나도 없을 때만 이미지 버튼을 본다(두 스킨이 섞여 활성 탭이 2개로 세어지는 것 방지)
+      if (!out.length) {
+        for (const s of _spriteBetTabs()) {
+          out.push({ el: s.el, text: s.text, visible: s.visible, betMode: s.code, combineMode: null,
+                     active: _ACTIVE_RE.test(String(s.el.className || '')) });
+        }
       }
     } catch (_) { /* */ }
     return out;
@@ -1562,6 +1605,10 @@
   async function clickTabAndWait(labels, prevSig, betLabel, requireChange, waitMs) {
     console.log(`[배당수집] ${betLabel} 탭 클릭 시도... (labels=${labels.join('/')})`);
     let el = findTabButton(labels);
+    if (!el && detectSite() === 'asyukk') {   // [2026-09-19] 글자 없는 이미지 버튼(새 스킨)
+      el = _spriteBetTabEl(labels);
+      if (el) console.log(`[배당수집] ${betLabel} — 이미지 버튼으로 찾음(${el.className})`);
+    }
     if (!el) {
       console.warn(`[배당수집] ⚠ ${betLabel} 탭 버튼을 찾지 못했습니다.`);
       return { clicked: false, changed: false, sig: oddsSignature() };
@@ -1639,7 +1686,10 @@
     for (const c of document.querySelectorAll('.' + (oddsClass || 'odds_content'))) {
       const t = c.closest('table'); if (t) tables.add(t);
     }
-    const scan = tables.size ? [...tables] : [...document.querySelectorAll('table.odds_table, table')];
+    let scan = tables.size ? [...tables] : [...document.querySelectorAll('table.odds_table, table')];
+    // [2026-09-19] 숨은 표 제외(위 수집 경로와 같은 규칙) — 「화면이 복승인가」 판정이 숨은 쌍승 표를 읽던 것
+    const _vis = scan.filter((t) => { try { return t.getClientRects && t.getClientRects().length > 0; } catch (_) { return true; } });
+    if (_vis.length) scan = _vis;
     const out = [];
     for (const t of scan) {
       const { pairs } = parseMatrixTable(t, oddsClass ? { oddsClass } : {});
