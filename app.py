@@ -14242,7 +14242,18 @@ def _triple_analyze(rk, rec):
             # 🔴 [2026-09-08 대표 「1번으로 진행」] 전적표 한방(FORM_EDGE_MODE · 상단 주석) — 완전 격리 · shadow 는 기록만
             try:
                 if FORM_EDGE_MODE in ("shadow", "live") and _PREVIEW is not None and form and str(_analyze_sport or "") == "horse":
-                    _fe_q = _as_qmap(curQ) or {}
+                    # 🔴 [2026-09-19] 이 자리의 curQ 는 **튜플 키**({(1,2): 배당})다. `_as_qmap` 은 "1+2" 문자열 키만 읽어
+                    #   튜플 키를 전부 버렸다 → 시장 순위 None → 축 없음 → 9/08~19 발동 0(저장 로그 재계산은 13경주). 원칙 23: 계수기가 잡았다.
+                    _fe_q = {}
+                    for _fk, _fv in (curQ or {}).items():
+                        try:
+                            _fkk = tuple(sorted(int(x) for x in (_fk if isinstance(_fk, (tuple, list)) else str(_fk).split("+"))))
+                            if len(_fkk) == 2 and float(_fv) > 0:
+                                _fe_q[_fkk] = float(_fv)
+                        except (TypeError, ValueError):
+                            continue
+                    if not _fe_q:
+                        _gate_hit("form_edge_noq", rk, "배당 맵 비어 있음", reach_only=True)
                     _fe_mr = _market_rank_from_quin(_fe_q) or {}
                     _fe_ax = [int(n) for n, rr in _fe_mr.items() if rr == 1]
                     _fe_rows = [h for h in form if isinstance(h, dict) and h.get("no") is not None]
