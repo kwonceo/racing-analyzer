@@ -41724,6 +41724,115 @@ def kakao_send_race():
     return jsonify({"ok": bool(r.get("ok")), "sentText": m["text"], "error": r.get("error")})
 
 
+# 🔒 [2026-09-19 대표 「회원 카톡에 추가로 내가 보려고 — 유력하지만 우리 기준에 누락된 복병을 따로 보내봐」]
+#   회원용 본문과 **별개 메시지**(나에게 보내기 1통 추가 · 회원 본문·판정·추천 무변경 · 전달하지 않는 대표 전용).
+#   누락 = 회원에게 나간 조합(복승·삼복승·💎)의 **어느 자리에도 없는 말** 중 아래 사유가 하나라도 붙은 말.
+#     복병 · 초반 급락 · 마감 급락 · 전적 A급 · 전적표 태그(꾸준함·회복형·상승세·반복) · 전적표 한방 · 유력마 · 경륜 💎 숨김
+#   사유가 많은 순 → 시장 순위 순 · 최대 OWNER_DARK_MAX 두 · 축(명단 1순위 조합의 앞 말)과 묶은 복승 배당을 함께 적는다.
+#   기록 logs/owner_dark/<날짜>.jsonl(나중에 사유별 입상률을 센다 · 원칙 1: 30건 전엔 판정 안 함) · 되돌리기: False
+OWNER_DARK_MSG_ENABLED = True
+OWNER_DARK_MAX = 4
+OWNER_DARK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "owner_dark")
+
+
+def _owner_dark_message(rk, an):
+    """대표 전용 「누락 복병」 본문. 없으면 None. 순수 읽기 — an·corePicks 를 바꾸지 않는다."""
+    cp = (an or {}).get("corePicks") or {}
+    sent = set()
+    for _lk in ("finalQuinellas", "finalTrifectas", "bmedSpecial"):
+        for _it in (cp.get(_lk) or []):
+            if isinstance(_it, dict) and not _it.get("shadow"):
+                for _x in (_it.get("combo") or []):
+                    try:
+                        sent.add(int(_x))
+                    except (TypeError, ValueError):
+                        pass
+    try:
+        for _c in (_kakao_trio_official(cp, (an or {}).get("sport")) or []):   # 회원에게 정식으로 나가는 삼복승
+            sent.update(int(_x) for _x in _c)
+    except Exception:
+        pass
+    why = {}
+
+    def _add(no, tag):
+        try:
+            no = int(no)
+        except (TypeError, ValueError):
+            return
+        if no in sent or no <= 0:
+            return
+        if tag not in why.setdefault(no, []):
+            why[no].append(tag)
+
+    for _d in (cp.get("darkHorsePicks") or []):
+        if isinstance(_d, dict):
+            _add(_d.get("no"), "복병" + ("(큰손)" if _d.get("smartMoney") else ""))
+    for _k, _lab in (("earlyDropHorses", "초반급락"), ("closingDropHorses", "마감급락")):
+        for _d in (cp.get(_k) or []):
+            if isinstance(_d, dict):
+                _p = _d.get("firstPct")
+                _add(_d.get("no"), "%s%s" % (_lab, (" %d%%" % int(_p)) if isinstance(_p, (int, float)) else ""))
+    for _n in (cp.get("formTopA") or []):
+        _add(_n, "전적 A급")
+    for _n in (cp.get("keyHorses") or []):
+        _add(_n, "유력마")
+    for _it in (cp.get("bmedSpecialShadow") or []):
+        if isinstance(_it, dict):
+            for _x in (_it.get("combo") or []):
+                _add(_x, "💎(숨김)")
+    _fe = cp.get("formEdge") or {}
+    if isinstance(_fe, dict) and _fe.get("combo"):
+        for _x in _fe.get("combo") or []:
+            _add(_x, "전적표 한방")
+    # 전적표 태그 — 회원 본문 「어떻게 봤나」와 같은 입력
+    _src = (an or {}).get("form") or (an or {}).get("horses") or []
+    if isinstance(_src, dict):
+        _src = list(_src.values())
+    if _PREVIEW is not None:
+        for _h in (_src or []):
+            if isinstance(_h, dict):
+                try:
+                    for _t in (_PREVIEW.form_tags(_h, None) or []):
+                        _add(_h.get("no"), _t)
+                except Exception:
+                    pass
+    if not why:
+        return None
+    qm = {}
+    try:
+        qm = _as_qmap((_triple_load().get(rk) or {}).get("quinella")) or {}
+    except Exception:
+        qm = {}
+    mr = _market_rank_from_quin(qm) or {}
+    axis = None
+    for _it in (cp.get("finalQuinellas") or []):
+        if isinstance(_it, dict) and len(_it.get("combo") or []) == 2:
+            try:
+                axis = int((_it.get("combo") or [None])[0])
+            except (TypeError, ValueError):
+                axis = None
+            break
+    rows = sorted(why.items(), key=lambda kv: (-len(kv[1]), mr.get(kv[0]) or 99, kv[0]))[:OWNER_DARK_MAX]
+    lines = ["🔒 대표 전용 · 누락 복병 — %s" % rk, "(회원 명단 어느 조합에도 없는 말 · 참고용 · 성적 미검증)"]
+    rec_rows = []
+    for no, tags in rows:
+        o = None
+        if axis and axis != no:
+            o = qm.get(tuple(sorted((axis, no))))
+        lines.append("%d번 — %s%s%s" % (
+            no, " · ".join(tags),
+            (" · 시장 %d위" % mr[no]) if mr.get(no) else "",
+            (" · %d+%d %s배" % (min(axis, no), max(axis, no), o)) if o else ""))
+        rec_rows.append({"no": no, "tags": tags, "mrank": mr.get(no), "axis": axis, "odds": o})
+    try:
+        os.makedirs(OWNER_DARK_DIR, exist_ok=True)
+        with io.open(os.path.join(OWNER_DARK_DIR, time.strftime("%Y%m%d") + ".jsonl"), "a", encoding="utf-8") as _f:
+            _f.write(json.dumps({"t": time.time(), "rk": rk, "sent": sorted(sent), "rows": rec_rows}, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+    return "\n".join(lines)
+
+
 def _kakao_build_message(rk, phase, an, snap):
     """카카오 알림 텍스트 구성. T-7=1차 확정 / T-5=최종 확정('지금 사세요!'). 복승·복병·배당판 링크 포함."""
     main = (snap or {}).get("main") or []
@@ -41908,6 +42017,16 @@ def _kakao_notify_race(rk, phase, an, snap):
             msg["sentMe"] = bool(_sr.get("ok"))
             if not _sr.get("ok") and "미연동" not in str(_sr.get("error") or ""):
                 print("[카카오 나에게] 발송 실패:", _sr.get("error") or _sr.get("raw"))
+            # 🔒 [2026-09-19 대표] 대표 전용 「누락 복병」 1통 추가 — 완전 격리 · 회원 본문·발송 기록(sent 명단)에 안 섞는다
+            try:
+                if OWNER_DARK_MSG_ENABLED and phase == "T-5":
+                    _gate_hit("owner_dark_msg", rk, "도달", reach_only=True)
+                    _od_txt = _owner_dark_message(rk, an)
+                    if _od_txt:
+                        _od_r = _kakao_send_to_me(_od_txt)
+                        _gate_hit("owner_dark_msg", rk, "발송 %s" % ("ok" if _od_r.get("ok") else "실패"), once_key=rk)
+            except Exception as _ode:
+                print("[누락 복병] 스킵(무시):", str(_ode)[:90])
             # [카톡 발송본 기록 (2026-07-22 소노다 5R)] 발송된 조합 명단 저장 → 마감 확정본(displayedCombos)과
             #   다르면 T+1에 '🔁 최종 변경' 카톡 발송. 카톡에 없던 조합이 적중 처리되는 신뢰 문제 해소.
             if _sr.get("ok"):
