@@ -20461,6 +20461,22 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
         "result": {k: result.get(k) for k in ("1st", "2nd", "3rd", "4th") if result.get(k) not in (None, "")},
         "payouts": (_payouts_top or None),                                        # [회수율 정직화] 성적표 참조 위치
         "payouts_approx": bool(_payouts_top.get("quinella") is not None and _q_official is None),
+        # 🔴 [2026-09-22] 배당 출처를 **있는 그대로** 적는다(추가만 · 기존 키·동작 무변경 · 관측 전용).
+        #   왜: `payouts` 는 **적중일 때만** 배당을 담고 미적중은 0 을 담는다(24791 부근).
+        #     그 0 이 `_safe_num(0)=0.0` 이라 `_q_official is None` 이 거짓이 되어
+        #     🔴 **미적중 경주가 전부 「확정」으로 표기된다** — 실제 값은 시장배당에서 온 근사인데도.
+        #     반대로 한국은 공식 배당이 아예 안 들어와(32341 이 _KRA_TRACK_RE 로 한국을 건너뛴다)
+        #     적중 경주가 전부 `payouts_estimated=True` → 「근사」가 된다.
+        #   ⇒ 실측(2026-08~09 한국): 확정 표기 175경주 적중 **0** · 근사 표기 94경주 적중 **94**.
+        #     「확정만」으로 거르면 **적중이 통째로 빠지고 미적중만 남아** 회수율이 0% 로 나온다(원칙 8·30).
+        #   ⚠ `payouts_approx` 는 **건드리지 않았다** — 그 값으로 거르는 도구가 여럿이라
+        #     지금 뒤집으면 미적중이 분모에서 빠져 적중률이 거꾸로 부풀 수 있다(원칙 29 계열).
+        #     새 키를 읽는 쪽부터 옮겨 간 뒤에 `payouts_approx` 를 정리한다.
+        "payout_source": ("input" if _safe_num(inputs.get("quinella_odds")) is not None
+                          else "official" if (not record.get("payouts_estimated")
+                                              and _safe_num((record.get("payouts") or {}).get("quinella")))
+                          else "market_est" if _payouts_top.get("quinella") is not None
+                          else None),
         # 🔴 확정배당이 마감 배당판과 크게 어긋날 때만 붙는다(정상이면 None). 막지 않는다 — 표식이다.
         "payouts_suspect": _pay_suspect,
         "odds_at_start": odds_start,
