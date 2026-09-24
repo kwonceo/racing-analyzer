@@ -1688,12 +1688,52 @@ _KEIRIN_JO_MISSING = {}
 _VENUE_CODE_MISSING = {}
 
 
+# 🔴 [2026-09-25 · A-1 「고치는 것이 아니라 가르는 것」] 전적 저장소가 분석 시점에 통째로 비어 있는 일이 잦다.
+#   실측(2026-09-21): 06:01 [중앙 선수집] 이 jra 12경주를 **저장 성공**했는데, 같은 날 분석 시점에는
+#     한신 1~12경주가 전부 `form_skip_nostore`(form_ok 0/12)였고 22시 저장소에는 jra 레코드가 0이었다.
+#     14:27:10~24 에는 서로 다른 4경주가 **14초 안에 동시에** 전적을 잃었다 — 경주별 문제가 아니라 파일 전체가 날아간 신호다.
+#     지방·경륜은 배당 사이클이 하루 종일 전적을 다시 써서 복구되지만, 중앙은 06~09시 1회 + `if source=="jra": skip`
+#     이라 **한 번 지워지면 그날은 끝**이다. 이것이 「중앙 전적 0」의 전부다.
+#   🔴 그런데 원인이 둘로 갈리고 **아직 숫자로 안 갈렸다**:
+#     ⓐ truncate 중 읽기 실패 — `_starters_save` 가 `open(path,"w")` 로 여는 찰나 파일이 0바이트가 된다.
+#        그때 다른 스레드가 여기서 json.load 에 실패하면 `except` 가 {} 를 돌려주고, 그 {} 에 자기 1건만
+#        담아 저장해 **전량 소실**된다(원칙 9 · 와카야마 8R 20틱 소실과 같은 구조).
+#     ⓑ lost update — 읽기는 성공했는데 내가 읽은 뒤 남이 쓴 것을 내 스냅샷이 덮는다.
+#   ⇒ **이번 단계는 고치지 않는다. 가른다.** 저장 경로와 반환 계약(dict · 실패 시 {})을 한 글자도 안 바꾸므로
+#     호출부 34곳·저장 13곳 전부 무변경이다. 재시도로 ⓐ 를 흡수하되 **몇 번 흡수했는지 센다**(원칙 21·24 —
+#     계수기 없는 방어는 침묵 장치다). 다음 개최일 판정:
+#       `starters_load_fail` 이 오른다      → ⓐ(truncate) — A-2 저장 원자화로 간다
+#       0 인데도 전적이 사라진다             → ⓑ(lost update) — 병합 저장이 필요하다
+#   ⚠ 여기를 raise 로 바꾸는 것은 A-2 에서 호출부 정리와 **함께** 한다. 지금 바꾸면 34곳이 예외를 받는다.
+#   되돌리기: STARTERS_LOAD_RETRY = 0  (종전과 완전히 같은 동작)
+STARTERS_LOAD_RETRY = 3
+
+
 def _starters_load():
+    _last = None
+    for _i in range(max(1, STARTERS_LOAD_RETRY + 1)):
+        try:
+            with open(STARTERS_STORE, encoding="utf-8") as f:
+                _db = json.load(f)
+            if _i:                                     # 재시도 끝에 성공 = truncate 창을 실제로 건넌 것
+                try:
+                    _gate_hit("starters_load_retry", None,
+                              "%d회째 성공 · %d키 · %s" % (_i + 1, len(_db), str(_last)[:50]))
+                except Exception:
+                    pass
+            return _db
+        except FileNotFoundError:                      # 파일이 아예 없는 것은 정상(첫 기동) — 재시도 의미 없다
+            return {}
+        except Exception as _e:
+            _last = _e
+            if _i < STARTERS_LOAD_RETRY:
+                time.sleep(0.04 * (_i + 1))            # 최대 0.04+0.08+0.12 = 0.24초
     try:
-        with open(STARTERS_STORE, encoding="utf-8") as f:
-            return json.load(f)
+        _gate_hit("starters_load_fail", None,
+                  "%s · 재시도 %d회 소진" % (str(_last)[:70], STARTERS_LOAD_RETRY))
     except Exception:
-        return {}
+        pass
+    return {}                                          # ⚠ 종전과 동일 — 호출부를 안 건드린다
 
 
 def _starters_save(db):
