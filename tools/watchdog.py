@@ -214,7 +214,24 @@ def _dedupe_listeners(dry=False):
     return len([k for k in killed if k > 0])
 
 
+HEARTBEAT = os.path.join(LOG_DIR, "watchdog_last.txt")
+
+
+def _heartbeat(note):
+    """🔴 [2026-09-25 원칙 23] 정상 틱에도 흔적을 남긴다.
+    watchdog.jsonl 은 사건(down·restart·hung…)만 적어서 「안 도는 것」과 「조용한 것」이 구분되지 않았다 —
+    9/20 이후 0줄인 채로 9/24 서버가 24시간 죽어 있었는데, 예약작업이 도는지 못 도는지를 이 파일 없이는 알 수 없었다.
+    SYSTEM 작업은 비상승 셸에서 schtasks 조회가 거부되므로 이 파일의 mtime 이 유일한 비상승 증거다."""
+    try:
+        os.makedirs(LOG_DIR, exist_ok=True)
+        with open(HEARTBEAT, "w", encoding="utf-8") as f:
+            f.write("%s %s pid=%d user=%s" % (_now(), note, os.getpid(), os.environ.get("USERNAME") or "?") + chr(10))
+    except Exception:
+        pass
+
+
 def main():
+    _heartbeat("tick")
     try:
         _dedupe_listeners(dry=bool(os.environ.get("WATCHDOG_DRY")))
     except Exception as e:
@@ -227,6 +244,7 @@ def main():
             if last in ("down", "restart", "giveup", "starting", "hung"):
                 _append("recovered")
         print("[watchdog] alive")
+        _heartbeat("alive")
         return 0
 
     # ---- HTTP 는 안 온다. 그런데 프로세스가 있나? (죽음 ↔ 뜨는 중 ↔ 멈춤을 가른다) ----
