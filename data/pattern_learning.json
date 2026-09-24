@@ -5092,23 +5092,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2712,
+    "count": 2713,
     "hit": 2057,
     "cases": [
-      {
-        "race": "미즈사와 7경주",
-        "date": "2026-09-22",
-        "smart_horses": [
-          9,
-          6,
-          7
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 9.6,
-        "high_odds": false
-      },
       {
         "race": "카사마츠 9경주",
         "date": "2026-09-22",
@@ -6614,6 +6600,20 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 1.4,
+        "high_odds": false
+      },
+      {
+        "race": "카와사키 7경주",
+        "date": "2026-09-24",
+        "smart_horses": [
+          4,
+          6,
+          3
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": 3.0,
         "high_odds": false
       }
     ],
