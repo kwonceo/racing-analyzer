@@ -1688,12 +1688,52 @@ _KEIRIN_JO_MISSING = {}
 _VENUE_CODE_MISSING = {}
 
 
+# 🔴 [2026-09-25 · A-1 「고치는 것이 아니라 가르는 것」] 전적 저장소가 분석 시점에 통째로 비어 있는 일이 잦다.
+#   실측(2026-09-21): 06:01 [중앙 선수집] 이 jra 12경주를 **저장 성공**했는데, 같은 날 분석 시점에는
+#     한신 1~12경주가 전부 `form_skip_nostore`(form_ok 0/12)였고 22시 저장소에는 jra 레코드가 0이었다.
+#     14:27:10~24 에는 서로 다른 4경주가 **14초 안에 동시에** 전적을 잃었다 — 경주별 문제가 아니라 파일 전체가 날아간 신호다.
+#     지방·경륜은 배당 사이클이 하루 종일 전적을 다시 써서 복구되지만, 중앙은 06~09시 1회 + `if source=="jra": skip`
+#     이라 **한 번 지워지면 그날은 끝**이다. 이것이 「중앙 전적 0」의 전부다.
+#   🔴 그런데 원인이 둘로 갈리고 **아직 숫자로 안 갈렸다**:
+#     ⓐ truncate 중 읽기 실패 — `_starters_save` 가 `open(path,"w")` 로 여는 찰나 파일이 0바이트가 된다.
+#        그때 다른 스레드가 여기서 json.load 에 실패하면 `except` 가 {} 를 돌려주고, 그 {} 에 자기 1건만
+#        담아 저장해 **전량 소실**된다(원칙 9 · 와카야마 8R 20틱 소실과 같은 구조).
+#     ⓑ lost update — 읽기는 성공했는데 내가 읽은 뒤 남이 쓴 것을 내 스냅샷이 덮는다.
+#   ⇒ **이번 단계는 고치지 않는다. 가른다.** 저장 경로와 반환 계약(dict · 실패 시 {})을 한 글자도 안 바꾸므로
+#     호출부 34곳·저장 13곳 전부 무변경이다. 재시도로 ⓐ 를 흡수하되 **몇 번 흡수했는지 센다**(원칙 21·24 —
+#     계수기 없는 방어는 침묵 장치다). 다음 개최일 판정:
+#       `starters_load_fail` 이 오른다      → ⓐ(truncate) — A-2 저장 원자화로 간다
+#       0 인데도 전적이 사라진다             → ⓑ(lost update) — 병합 저장이 필요하다
+#   ⚠ 여기를 raise 로 바꾸는 것은 A-2 에서 호출부 정리와 **함께** 한다. 지금 바꾸면 34곳이 예외를 받는다.
+#   되돌리기: STARTERS_LOAD_RETRY = 0  (종전과 완전히 같은 동작)
+STARTERS_LOAD_RETRY = 3
+
+
 def _starters_load():
+    _last = None
+    for _i in range(max(1, STARTERS_LOAD_RETRY + 1)):
+        try:
+            with open(STARTERS_STORE, encoding="utf-8") as f:
+                _db = json.load(f)
+            if _i:                                     # 재시도 끝에 성공 = truncate 창을 실제로 건넌 것
+                try:
+                    _gate_hit("starters_load_retry", None,
+                              "%d회째 성공 · %d키 · %s" % (_i + 1, len(_db), str(_last)[:50]))
+                except Exception:
+                    pass
+            return _db
+        except FileNotFoundError:                      # 파일이 아예 없는 것은 정상(첫 기동) — 재시도 의미 없다
+            return {}
+        except Exception as _e:
+            _last = _e
+            if _i < STARTERS_LOAD_RETRY:
+                time.sleep(0.04 * (_i + 1))            # 최대 0.04+0.08+0.12 = 0.24초
     try:
-        with open(STARTERS_STORE, encoding="utf-8") as f:
-            return json.load(f)
+        _gate_hit("starters_load_fail", None,
+                  "%s · 재시도 %d회 소진" % (str(_last)[:70], STARTERS_LOAD_RETRY))
     except Exception:
-        return {}
+        pass
+    return {}                                          # ⚠ 종전과 동일 — 호출부를 안 건드린다
 
 
 def _starters_save(db):
@@ -14242,7 +14282,18 @@ def _triple_analyze(rk, rec):
             # 🔴 [2026-09-08 대표 「1번으로 진행」] 전적표 한방(FORM_EDGE_MODE · 상단 주석) — 완전 격리 · shadow 는 기록만
             try:
                 if FORM_EDGE_MODE in ("shadow", "live") and _PREVIEW is not None and form and str(_analyze_sport or "") == "horse":
-                    _fe_q = _as_qmap(curQ) or {}
+                    # 🔴 [2026-09-19] 이 자리의 curQ 는 **튜플 키**({(1,2): 배당})다. `_as_qmap` 은 "1+2" 문자열 키만 읽어
+                    #   튜플 키를 전부 버렸다 → 시장 순위 None → 축 없음 → 9/08~19 발동 0(저장 로그 재계산은 13경주). 원칙 23: 계수기가 잡았다.
+                    _fe_q = {}
+                    for _fk, _fv in (curQ or {}).items():
+                        try:
+                            _fkk = tuple(sorted(int(x) for x in (_fk if isinstance(_fk, (tuple, list)) else str(_fk).split("+"))))
+                            if len(_fkk) == 2 and float(_fv) > 0:
+                                _fe_q[_fkk] = float(_fv)
+                        except (TypeError, ValueError):
+                            continue
+                    if not _fe_q:
+                        _gate_hit("form_edge_noq", rk, "배당 맵 비어 있음", reach_only=True)
                     _fe_mr = _market_rank_from_quin(_fe_q) or {}
                     _fe_ax = [int(n) for n, rr in _fe_mr.items() if rr == 1]
                     _fe_rows = [h for h in form if isinstance(h, dict) and h.get("no") is not None]
@@ -20450,6 +20501,22 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
         "result": {k: result.get(k) for k in ("1st", "2nd", "3rd", "4th") if result.get(k) not in (None, "")},
         "payouts": (_payouts_top or None),                                        # [회수율 정직화] 성적표 참조 위치
         "payouts_approx": bool(_payouts_top.get("quinella") is not None and _q_official is None),
+        # 🔴 [2026-09-22] 배당 출처를 **있는 그대로** 적는다(추가만 · 기존 키·동작 무변경 · 관측 전용).
+        #   왜: `payouts` 는 **적중일 때만** 배당을 담고 미적중은 0 을 담는다(24791 부근).
+        #     그 0 이 `_safe_num(0)=0.0` 이라 `_q_official is None` 이 거짓이 되어
+        #     🔴 **미적중 경주가 전부 「확정」으로 표기된다** — 실제 값은 시장배당에서 온 근사인데도.
+        #     반대로 한국은 공식 배당이 아예 안 들어와(32341 이 _KRA_TRACK_RE 로 한국을 건너뛴다)
+        #     적중 경주가 전부 `payouts_estimated=True` → 「근사」가 된다.
+        #   ⇒ 실측(2026-08~09 한국): 확정 표기 175경주 적중 **0** · 근사 표기 94경주 적중 **94**.
+        #     「확정만」으로 거르면 **적중이 통째로 빠지고 미적중만 남아** 회수율이 0% 로 나온다(원칙 8·30).
+        #   ⚠ `payouts_approx` 는 **건드리지 않았다** — 그 값으로 거르는 도구가 여럿이라
+        #     지금 뒤집으면 미적중이 분모에서 빠져 적중률이 거꾸로 부풀 수 있다(원칙 29 계열).
+        #     새 키를 읽는 쪽부터 옮겨 간 뒤에 `payouts_approx` 를 정리한다.
+        "payout_source": ("input" if _safe_num(inputs.get("quinella_odds")) is not None
+                          else "official" if (not record.get("payouts_estimated")
+                                              and _safe_num((record.get("payouts") or {}).get("quinella")))
+                          else "market_est" if _payouts_top.get("quinella") is not None
+                          else None),
         # 🔴 확정배당이 마감 배당판과 크게 어긋날 때만 붙는다(정상이면 None). 막지 않는다 — 표식이다.
         "payouts_suspect": _pay_suspect,
         "odds_at_start": odds_start,
@@ -41713,6 +41780,115 @@ def kakao_send_race():
     return jsonify({"ok": bool(r.get("ok")), "sentText": m["text"], "error": r.get("error")})
 
 
+# 🔒 [2026-09-19 대표 「회원 카톡에 추가로 내가 보려고 — 유력하지만 우리 기준에 누락된 복병을 따로 보내봐」]
+#   회원용 본문과 **별개 메시지**(나에게 보내기 1통 추가 · 회원 본문·판정·추천 무변경 · 전달하지 않는 대표 전용).
+#   누락 = 회원에게 나간 조합(복승·삼복승·💎)의 **어느 자리에도 없는 말** 중 아래 사유가 하나라도 붙은 말.
+#     복병 · 초반 급락 · 마감 급락 · 전적 A급 · 전적표 태그(꾸준함·회복형·상승세·반복) · 전적표 한방 · 유력마 · 경륜 💎 숨김
+#   사유가 많은 순 → 시장 순위 순 · 최대 OWNER_DARK_MAX 두 · 축(명단 1순위 조합의 앞 말)과 묶은 복승 배당을 함께 적는다.
+#   기록 logs/owner_dark/<날짜>.jsonl(나중에 사유별 입상률을 센다 · 원칙 1: 30건 전엔 판정 안 함) · 되돌리기: False
+OWNER_DARK_MSG_ENABLED = True
+OWNER_DARK_MAX = 4
+OWNER_DARK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "owner_dark")
+
+
+def _owner_dark_message(rk, an):
+    """대표 전용 「누락 복병」 본문. 없으면 None. 순수 읽기 — an·corePicks 를 바꾸지 않는다."""
+    cp = (an or {}).get("corePicks") or {}
+    sent = set()
+    for _lk in ("finalQuinellas", "finalTrifectas", "bmedSpecial"):
+        for _it in (cp.get(_lk) or []):
+            if isinstance(_it, dict) and not _it.get("shadow"):
+                for _x in (_it.get("combo") or []):
+                    try:
+                        sent.add(int(_x))
+                    except (TypeError, ValueError):
+                        pass
+    try:
+        for _c in (_kakao_trio_official(cp, (an or {}).get("sport")) or []):   # 회원에게 정식으로 나가는 삼복승
+            sent.update(int(_x) for _x in _c)
+    except Exception:
+        pass
+    why = {}
+
+    def _add(no, tag):
+        try:
+            no = int(no)
+        except (TypeError, ValueError):
+            return
+        if no in sent or no <= 0:
+            return
+        if tag not in why.setdefault(no, []):
+            why[no].append(tag)
+
+    for _d in (cp.get("darkHorsePicks") or []):
+        if isinstance(_d, dict):
+            _add(_d.get("no"), "복병" + ("(큰손)" if _d.get("smartMoney") else ""))
+    for _k, _lab in (("earlyDropHorses", "초반급락"), ("closingDropHorses", "마감급락")):
+        for _d in (cp.get(_k) or []):
+            if isinstance(_d, dict):
+                _p = _d.get("firstPct")
+                _add(_d.get("no"), "%s%s" % (_lab, (" %d%%" % int(_p)) if isinstance(_p, (int, float)) else ""))
+    for _n in (cp.get("formTopA") or []):
+        _add(_n, "전적 A급")
+    for _n in (cp.get("keyHorses") or []):
+        _add(_n, "유력마")
+    for _it in (cp.get("bmedSpecialShadow") or []):
+        if isinstance(_it, dict):
+            for _x in (_it.get("combo") or []):
+                _add(_x, "💎(숨김)")
+    _fe = cp.get("formEdge") or {}
+    if isinstance(_fe, dict) and _fe.get("combo"):
+        for _x in _fe.get("combo") or []:
+            _add(_x, "전적표 한방")
+    # 전적표 태그 — 회원 본문 「어떻게 봤나」와 같은 입력
+    _src = (an or {}).get("form") or (an or {}).get("horses") or []
+    if isinstance(_src, dict):
+        _src = list(_src.values())
+    if _PREVIEW is not None:
+        for _h in (_src or []):
+            if isinstance(_h, dict):
+                try:
+                    for _t in (_PREVIEW.form_tags(_h, None) or []):
+                        _add(_h.get("no"), _t)
+                except Exception:
+                    pass
+    if not why:
+        return None
+    qm = {}
+    try:
+        qm = _as_qmap((_triple_load().get(rk) or {}).get("quinella")) or {}
+    except Exception:
+        qm = {}
+    mr = _market_rank_from_quin(qm) or {}
+    axis = None
+    for _it in (cp.get("finalQuinellas") or []):
+        if isinstance(_it, dict) and len(_it.get("combo") or []) == 2:
+            try:
+                axis = int((_it.get("combo") or [None])[0])
+            except (TypeError, ValueError):
+                axis = None
+            break
+    rows = sorted(why.items(), key=lambda kv: (-len(kv[1]), mr.get(kv[0]) or 99, kv[0]))[:OWNER_DARK_MAX]
+    lines = ["🔒 대표 전용 · 누락 복병 — %s" % rk, "(회원 명단 어느 조합에도 없는 말 · 참고용 · 성적 미검증)"]
+    rec_rows = []
+    for no, tags in rows:
+        o = None
+        if axis and axis != no:
+            o = qm.get(tuple(sorted((axis, no))))
+        lines.append("%d번 — %s%s%s" % (
+            no, " · ".join(tags),
+            (" · 시장 %d위" % mr[no]) if mr.get(no) else "",
+            (" · %d+%d %s배" % (min(axis, no), max(axis, no), o)) if o else ""))
+        rec_rows.append({"no": no, "tags": tags, "mrank": mr.get(no), "axis": axis, "odds": o})
+    try:
+        os.makedirs(OWNER_DARK_DIR, exist_ok=True)
+        with io.open(os.path.join(OWNER_DARK_DIR, time.strftime("%Y%m%d") + ".jsonl"), "a", encoding="utf-8") as _f:
+            _f.write(json.dumps({"t": time.time(), "rk": rk, "sent": sorted(sent), "rows": rec_rows}, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+    return "\n".join(lines)
+
+
 def _kakao_build_message(rk, phase, an, snap):
     """카카오 알림 텍스트 구성. T-7=1차 확정 / T-5=최종 확정('지금 사세요!'). 복승·복병·배당판 링크 포함."""
     main = (snap or {}).get("main") or []
@@ -41897,6 +42073,16 @@ def _kakao_notify_race(rk, phase, an, snap):
             msg["sentMe"] = bool(_sr.get("ok"))
             if not _sr.get("ok") and "미연동" not in str(_sr.get("error") or ""):
                 print("[카카오 나에게] 발송 실패:", _sr.get("error") or _sr.get("raw"))
+            # 🔒 [2026-09-19 대표] 대표 전용 「누락 복병」 1통 추가 — 완전 격리 · 회원 본문·발송 기록(sent 명단)에 안 섞는다
+            try:
+                if OWNER_DARK_MSG_ENABLED and phase == "T-5":
+                    _gate_hit("owner_dark_msg", rk, "도달", reach_only=True)
+                    _od_txt = _owner_dark_message(rk, an)
+                    if _od_txt:
+                        _od_r = _kakao_send_to_me(_od_txt)
+                        _gate_hit("owner_dark_msg", rk, "발송 %s" % ("ok" if _od_r.get("ok") else "실패"), once_key=rk)
+            except Exception as _ode:
+                print("[누락 복병] 스킵(무시):", str(_ode)[:90])
             # [카톡 발송본 기록 (2026-07-22 소노다 5R)] 발송된 조합 명단 저장 → 마감 확정본(displayedCombos)과
             #   다르면 T+1에 '🔁 최종 변경' 카톡 발송. 카톡에 없던 조합이 적중 처리되는 신뢰 문제 해소.
             if _sr.get("ok"):
