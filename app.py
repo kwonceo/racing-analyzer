@@ -14748,6 +14748,12 @@ def _triple_analyze(rk, rec):
         _apply_t5_freeze(rk, _an_out)
     except Exception as _t5e:
         print("[T5동결] 적용 실패(무시·원본 표시):", _t5e)
+    # [삼복승 ↔ 복승① 정합 (2026-09-25 대표 「추천으로 4-5를 보내고 삼복승에는 없는 게 문제 · 확실하게 수정해」)]
+    #   ⚠ T-5 동결 **뒤** · T-2 잠금 **앞** — 복승 순서가 최종으로 정해진 뒤에 맞춰야 한다(함수 주석 참조).
+    try:
+        _sync_trio_to_q1(rk, _an_out)
+    except Exception as _tqe:
+        print("[삼복승 정합] 실패(무시·원본 표시):", str(_tqe)[:90])
     # [T-2 화면 잠금 (2026-09-06 대표 승인)] 최종 명단이 확정된 **마지막** 자리 — 이 뒤로는 표시 필드를 건드리는 단계가 없다.
     #   실패 시 원본 그대로(잠금 없음). 🔧 되돌리기: T2_DISPLAY_LOCK_ENABLED = False
     # [⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 표시 전용 — T-2 잠금 **앞**에 계산해 함께 잠긴다(_T2_LOCK_KEYS).
@@ -14757,6 +14763,12 @@ def _triple_analyze(rk, rec):
             _an_out["corePicks"]["keyPairsRef"] = _kpr
     except Exception as _kpe:
         print("[유력마 전조합 참고] 실패(무시):", _kpe)
+    try:
+        _ctr = _conf_top1_ref(rk, _an_out, curQ)
+        if isinstance(_an_out.get("corePicks"), dict):
+            _an_out["corePicks"]["confTop1Ref"] = _ctr
+    except Exception as _cte:
+        print("[확신1위 짝 참고] 실패(무시):", _cte)
     try:
         _apply_t2_display_lock(rk, _an_out, cur_mb, after_close, curQ)
     except Exception as _t2le:
@@ -15000,7 +15012,7 @@ def _t5_items(fq):
 T2_DISPLAY_LOCK_ENABLED = True   # [2026-09-06 대표 승인] 🔧 되돌리기: False (한 줄)
 T2_DISPLAY_LOCK_MB = 2.0         # 마감 2분 전부터 회원 화면 명단을 잠근다(카톡 T-2 번복 차단과 같은 기준)
 _T2_LOCK = {}                    # rk → {"day", "at", "mb", "keys": {필드: 사본}}  (메모리 · 날짜 바뀌면 소멸)
-_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra", "keyPairsRef")   # 회원이 받는 것 전부(8/29 정의)
+_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra", "keyPairsRef", "confTop1Ref")   # 회원이 받는 것 전부(8/29 정의)
 
 
 def _t2_combos(v):
@@ -15135,6 +15147,118 @@ def _key_pairs_ref(an, curQ=None):
         return out
     except Exception:
         return None
+
+
+# [🧠 확신1위 짝 참고 (2026-09-25 대표 「참고 한 줄 표시 · 오버레이에도」)] 유력마 1위 + 종합확신 1위 복승 — **표시 전용**
+#   실물: 소노다 10R(9/25) 결과 5-12-7 · 5+12 60배+ — 12번이 종합확신 1위였는데 어느 복승 명단에도 없었다.
+#   소급(7~9월 · 시장순위=발주 5분+ 전 복승): 경마 확신1위 말 1·2착률이 같은 시장순위 다른 말보다 전 순위에서 +4~18%p
+#     ↔ 🔴 경륜은 시장 1·2위에서 −14/−9%p(반대) ⇒ **경마만**(한국 제외 · 측정 표본 밖)
+#   🔴 사는 규칙이 아니다 — 짝 추가 규칙은 450구좌 3제외 73.3(3분할 38/57/16)으로 판정 불가. 「참고」 문구를 함께 단다.
+#   displayedCombos·finalQuinellas·판정·학습 무변경. 되돌리기 CONF_TOP1_REF_SPORTS = () · 계수기 conf_top1_ref
+CONF_TOP1_REF_SPORTS = ("horse",)
+
+
+def _conf_top1_ref(rk, an, curQ=None):
+    """반환 {combo, odds, inList, conf} 또는 None(종목 밖·확신1위=유력마1위·재료 없음)."""
+    try:
+        if str((an or {}).get("sport") or "") == "cycle" or "horse" not in CONF_TOP1_REF_SPORTS:
+            return None
+        if str(an.get("category") or "") == "korea":
+            return None
+        cp = an.get("corePicks") or {}
+        _gate_hit("conf_top1_ref", rk, None, reach_only=True)
+        ct = int(cp.get("confTop1"))
+        k0 = int((an.get("keyHorses") or cp.get("keyHorses") or [])[0])
+        if ct == k0:
+            return None
+        pair = (min(ct, k0), max(ct, k0))
+        have = set()
+        for k in ("finalQuinellas", "bmedSpecial", "kakaoExtra"):
+            for q in (cp.get(k) or []):
+                c = q.get("combo") if isinstance(q, dict) else q
+                try:
+                    have.add((min(int(c[0]), int(c[1])), max(int(c[0]), int(c[1]))))
+                except (TypeError, ValueError, IndexError):
+                    pass
+        o = None
+        try:
+            _v = curQ.get(pair) if isinstance(curQ, dict) else None
+            o = round(float(_v), 1) if (_v is not None and float(_v) > 0) else None
+        except (TypeError, ValueError):
+            o = None
+        _gate_hit("conf_top1_ref", rk, None)
+        return {"combo": list(pair), "odds": o, "inList": pair in have, "conf": ct}
+    except Exception:
+        return None
+
+
+# 🔴 [2026-09-25 대표 「추천으로 4-5를 보내고 삼복승에는 없는 게 문제 · 확실하게 수정해」]
+#   삼복승 메인은 `_final_picks` 안에서 **그 시점의** 복승 1순위(final_q[0])로 만든다. 그런데 그 뒤
+#   히스테리시스 → 베팅 규칙 → T-5 동결이 복승 순서를 바꾸고, 삼복승은 다시 맞추지 않는다.
+#   실물: 小松島 7R(9/25) 복승① 4+5 ↔ 삼복승 메인 1+3+4 · 1+2+3(조립 때 1순위는 1+3이었다).
+#   전수(8~9월): 복승① 쌍이 판정 삼복승(앞 2개)에 없음 경륜 7.2% · 경마 12.3% — 원칙 7 「위반 11.6%」와 같은 결함.
+#   🔴 리플레이(tools/replay_trio_q1_sync.py · 삼복승 확정배당 · 구좌=조합1) — **종목별로 반대**다:
+#     경마 297경주 발동: 들어오는 조합 적중 21·배당합 173.3 ↔ 빠지는 원래 메인2 적중 11·110.5 ⇒ 순증 +10 · +62.8구좌(3분할 +66/−32/+28)
+#     경륜 321경주 발동: 들어오는 조합 적중 18·159.9 ↔ 빠지는 원래 메인2 적중 32·268.4 ⇒ 순증 −14 · −108.5구좌 🔴
+#   ⇒ **경마만 켠다.** 경륜은 원래 2번째 메인이 더 잘 맞혀 동기화가 손해다. ⚠ 경마도 적중 21↔11 로 30건 미만 — 계수기로 실전 누적을 본다.
+#   규칙: 앞 2개 어디에도 복승① 두 말이 같이 없으면 [복승① 두 말 + 셋째]를 첫자리에 넣는다(원래 1번째 → 2번째, 원래 2번째 → 보조).
+#         셋째 = 확신도1위 → 유력마 → 원래 메인1의 쌍 밖 말. 이미 목록에 있는 조합이면 그 조합을 앞으로 올린다(중복 생성 안 함).
+#   되돌리기: TRIO_Q1_SYNC_SPORTS = ()   · 계수기 trio_q1_sync(도달=검사 · 발동=교체)
+TRIO_Q1_SYNC_SPORTS = ("horse",)
+
+
+def _sync_trio_to_q1(rk, an):
+    cp = (an or {}).get("corePicks")
+    if not isinstance(cp, dict):
+        return
+    sport = "cycle" if str((an or {}).get("sport") or "") == "cycle" else "horse"
+    if sport not in TRIO_Q1_SYNC_SPORTS or cp.get("dansung"):
+        return
+    fq = [q for q in (cp.get("finalQuinellas") or []) if isinstance(q, dict) and len(q.get("combo") or []) == 2]
+    ft = list(cp.get("finalTrifectas") or [])
+    if not fq or not ft:
+        return
+    try:
+        pair = set(int(x) for x in fq[0]["combo"])
+    except (TypeError, ValueError):
+        return
+    _gate_hit("trio_q1_sync", rk, None, reach_only=True)
+
+    def _cs(t):
+        try:
+            return set(int(x) for x in ((t or {}).get("combo") or []))
+        except (TypeError, ValueError):
+            return set()
+    if any(pair <= _cs(t) for t in ft[:2]):
+        return
+    # 이미 목록 뒤쪽에 복승① 쌍을 담은 조합이 있으면 그것을 올린다
+    idx = next((i for i, t in enumerate(ft) if i >= 2 and pair <= _cs(t) and len(_cs(t)) == 3), None)
+    if idx is not None:
+        item = dict(ft.pop(idx))
+    else:
+        cands = []
+        for v in [cp.get("confTop1")] + list(cp.get("keyHorses") or []) + sorted(_cs(ft[0]) - pair):
+            try:
+                v = int(v)
+            except (TypeError, ValueError):
+                continue
+            if v not in pair and v not in cands:
+                cands.append(v)
+        vs = set()
+        try:
+            vs = set(int(x) for x in (cp.get("rosterNos") or []))
+        except (TypeError, ValueError):
+            vs = set()
+        cands = [v for v in cands if not vs or v in vs]
+        if not cands:
+            return
+        item = {"combo": sorted(pair | {cands[0]}), "odds": None, "estimated": True}
+    item["reason"] = "삼복승 메인(복승① %s + %d번)" % ("+".join(str(x) for x in sorted(pair)),
+                                                   (sorted(_cs(item) - pair) or [0])[0])
+    item["q1Sync"] = True
+    ft.insert(0, item)
+    cp["finalTrifectas"] = ft
+    _gate_hit("trio_q1_sync", rk, "%s ← 복승① %s" % (item["combo"], sorted(pair)), once_key=rk)
 
 
 def _apply_t5_freeze(rk, an):
@@ -41689,6 +41813,15 @@ def _kakao_rich_message(rk, phase, an):
                           (" (%s배)" % x.get("odds")) if x.get("odds") else "")
                 for x in _kpr[:3]))
             lines.append("  ※ 참고만 — 매번 다 사면 손해(8월 3제외 회수 57%)")
+    except Exception:
+        pass
+    # [🧠 확신1위 짝 참고 (2026-09-25 대표 승인)] 경마만 · 명단에 없을 때만 · 사는 규칙 아님(_conf_top1_ref 주석)
+    try:
+        _ctr = cp.get("confTop1Ref")
+        if isinstance(_ctr, dict) and not _ctr.get("inList") and _ctr.get("combo"):
+            lines.append("🧠 확신1위 %s번 짝 · 참고: %s%s" % (
+                _ctr.get("conf"), "+".join(map(str, _ctr["combo"])),
+                (" (%s배)" % _ctr.get("odds")) if _ctr.get("odds") else ""))
     except Exception:
         pass
     if not lines:
