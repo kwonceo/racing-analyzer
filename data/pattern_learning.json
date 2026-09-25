@@ -5072,23 +5072,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2721,
-    "hit": 2064,
+    "count": 2722,
+    "hit": 2065,
     "cases": [
-      {
-        "race": "미즈사와 8경주",
-        "date": "2026-09-22",
-        "smart_horses": [
-          7,
-          11,
-          6
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "오가키 11경주",
         "date": "2026-09-22",
@@ -6594,6 +6580,23 @@
         "placed": [
           2,
           3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "벳푸 1경주",
+        "date": "2026-09-25",
+        "smart_horses": [
+          6,
+          5,
+          2
+        ],
+        "placed": [
+          6,
+          2
         ],
         "hit": true,
         "trifecta_odds": null,
