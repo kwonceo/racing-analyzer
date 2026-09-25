@@ -18,6 +18,10 @@ set "PYTHONIOENCODING=utf-8"
 set "LOGDIR=%CD%\logs"
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 
+REM ---- [2026-09-25] 보조 4개(8012·8013·경마/경륜 예측 데몬)는 8011 과 무관하게 먼저 확인한다 ----
+REM  8011 이 살아 있어 아래서 SKIP 하더라도 보조는 죽어 있을 수 있다(9/09~25 실사고).
+if exist "%~dp0start_aux.bat" call "%~dp0start_aux.bat" >nul 2>&1
+
 REM ---- 중복 기동 방지: 8011 이 LISTENING 이면 아무것도 안 한다 ----
 REM  ESTABLISHED/TIME_WAIT 는 세지 않는다. LISTENING 만 본다.
 set "SRV_PID="
