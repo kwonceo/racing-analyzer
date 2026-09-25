@@ -1,37 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 11경주",
-      "horse_no": 5,
-      "recent_avg": 6.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-09-13"
-    },
-    {
-      "race": "카나자와 11경주",
-      "horse_no": 4,
-      "recent_avg": 6.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-13"
-    },
-    {
-      "pattern": "대규모급락",
-      "raceKey": "오가키 3경주",
-      "total_combos_dropped": 7,
-      "drop_ratio": 0.412,
-      "result": "2+4",
-      "result_odds": "미상",
-      "result_quinella_odds": null,
-      "signal_result_combo": "-40.8%",
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1789346846.374734
-    },
-    {
       "race": "미즈사와 1경주",
       "horse_no": 9,
       "recent_avg": 6.6,
@@ -4680,16 +4649,42 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-09-25"
+    },
+    {
+      "race": "우라와 6경주",
+      "horse_no": 4,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
+    },
+    {
+      "race": "우라와 6경주",
+      "horse_no": 11,
+      "recent_avg": 4.6,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-09-25"
+    },
+    {
+      "race": "우라와 6경주",
+      "horse_no": 1,
+      "recent_avg": 6.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-09-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9164,
-      "hit": 1435
+      "count": 9172,
+      "hit": 1437
     },
     "전체부진마": {
-      "count": 15115,
-      "hit": 3976
+      "count": 15126,
+      "hit": 3979
     },
     "대규모급락": {
       "count": 11,
@@ -4699,8 +4694,8 @@
       "hit_rate": 45.5
     },
     "이상감지동반": {
-      "count": 5951,
-      "hit": 2541
+      "count": 5954,
+      "hit": 2542
     },
     "급락동반": {
       "count": 768,
@@ -5077,24 +5072,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2718,
-    "hit": 2061,
+    "count": 2719,
+    "hit": 2062,
     "cases": [
-      {
-        "race": "우라와 6경주",
-        "date": "2026-09-22",
-        "smart_horses": [
-          3,
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "코치 3경주",
         "date": "2026-09-22",
@@ -6598,6 +6578,22 @@
         ],
         "placed": [
           8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 6경주",
+        "date": "2026-09-25",
+        "smart_horses": [
+          9,
+          11,
+          7
+        ],
+        "placed": [
+          11
         ],
         "hit": true,
         "trifecta_odds": null,
