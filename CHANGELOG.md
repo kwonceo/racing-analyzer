@@ -18,6 +18,7 @@
 
 ### 수정된 버그
 - [2026-09-25] 삼복승 메인을 최종 복승①과 맞춤 `_sync_trio_to_q1`(경마만 · 경륜은 리플레이 손해라 제외 · `TRIO_Q1_SYNC_SPORTS`)
+- [2026-09-25] 🧠 확신1위 짝 참고(경마만 · 유력마1위+종합확신1위 · 명단 밖일 때) — 카톡 한 줄 + 오버레이 상자 · 표시 전용 · `CONF_TOP1_REF_SPORTS` · 계수기 conf_top1_ref · 확장 2.1.175 (소노다 10R 5+12 60배 계기 · 경륜은 소급 반대라 제외)
 - [2026-09-25] `tools/watchdog.py` 정상 틱 스탬프 `logs/watchdog_last.txt`(시각·pid·계정) — 사건만 기록해 「안 돎」과 「조용함」이 안 갈리던 것 · 예약작업 KeibaServerWatchdog/AutoStart 재등록·실발동 확인
 - [2026-09-25] `tools/review_ui.py`(8013) 대표 복기 화면 — 발주 전 예측/후 복기 자동 구분 · 말별 태그 · 터짐 예상 · 시장 스냅샷 · 자동 채점 · logs/review_owner/
 - [2026-09-25] 전적 저장소 읽기 재시도 + 계수기(`STARTERS_LOAD_RETRY` · `starters_load_retry`/`starters_load_fail`) — 전적이 저장 뒤 분석 시점에 사라지는 원인을 truncate ↔ lost update 로 가르기 위한 관측 단계(저장 경로 무변경)

@@ -2022,6 +2022,15 @@
               kpBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8', '※ 참고만 — 매번 다 사면 손해(8월 3제외 회수 57%)'));
               cpBox.appendChild(kpBox);
             }
+            // [🧠 확신1위 짝 참고 (2026-09-25 대표 승인)] 경마만 · 유력마1위+종합확신1위 · 명단에 없을 때만 — 표시 전용
+            var _ctr = cp && cp.confTop1Ref;
+            if (_ctr && !_ctr.inList && _ctr.combo) {
+              var ctrBox = mk('div', 'margin-top:6px;padding:6px 9px;border:1px dashed #a78bfa;border-radius:8px;background:rgba(167,139,250,.08)');
+              ctrBox.appendChild(mk('div', 'font-weight:800;font-size:13px;color:#c4b5fd',
+                '🧠 확신1위 ' + _ctr.conf + '번 짝 · 참고: ' + _ctr.combo.join('+') + (_ctr.odds != null ? ' (' + _ctr.odds + '배)' : '')));
+              ctrBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8', '※ 참고만 — 확신1위 말은 같은 인기 말보다 잘 들어오지만 짝 규칙은 미검증'));
+              cpBox.appendChild(ctrBox);
+            }
           } catch (_ce) { /* 표시 실패는 무시 — 추천 본문에 영향 주지 않는다 */ }
           // 🔴 [빠진 조합] 부산 4R 5+8 이 4초만 본선이었고 96배였는데 대표가 물어보고서야 알았다.
           try {
