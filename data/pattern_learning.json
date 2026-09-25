@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "미즈사와 8경주",
-      "horse_no": 10,
-      "recent_avg": 9.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-14"
-    },
-    {
-      "race": "미즈사와 8경주",
       "horse_no": 9,
       "recent_avg": 6.0,
       "win_place": 1,
@@ -4673,16 +4663,26 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-09-25"
+    },
+    {
+      "race": "소노다 12경주",
+      "horse_no": 1,
+      "recent_avg": 6.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9253,
+      "count": 9259,
       "hit": 1448
     },
     "전체부진마": {
-      "count": 15241,
-      "hit": 4006
+      "count": 15250,
+      "hit": 4007
     },
     "대규모급락": {
       "count": 5,
@@ -4692,8 +4692,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 5988,
-      "hit": 2558
+      "count": 5991,
+      "hit": 2559
     },
     "급락동반": {
       "count": 775,
@@ -5070,26 +5070,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2737,
-    "hit": 2075,
+    "count": 2738,
+    "hit": 2076,
     "cases": [
-      {
-        "race": "몬베츠 8경주",
-        "date": "2026-09-22",
-        "smart_horses": [
-          9,
-          4,
-          11
-        ],
-        "placed": [
-          4,
-          11
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "우라와 11경주",
         "date": "2026-09-22",
@@ -6595,6 +6578,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "야히코 1경주",
+        "date": "2026-09-25",
+        "smart_horses": [
+          2,
+          5,
+          7
+        ],
+        "placed": [
+          2,
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": 14.0,
+        "quinella_odds": 3.5,
         "high_odds": false
       }
     ],
