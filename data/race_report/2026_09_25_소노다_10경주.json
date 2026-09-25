@@ -1,0 +1,155 @@
+{
+ "race": "소노다 10경주",
+ "raceKey": "소노다 10경주",
+ "date": "2026-09-25",
+ "result": {
+  "1st": 5,
+  "2nd": 12,
+  "3rd": 7,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.875,
+   "record_score": 61.2,
+   "confidence": 100.0,
+   "reason": "쌍승역전"
+  },
+  "signal_12": {
+   "horse": 12,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 67.1,
+   "confidence": 60.0,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": 92.0,
+   "reason": "일반"
+  },
+  "signal_9": {
+   "horse": 9,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.77,
+   "record_score": 45.0,
+   "confidence": 71.8,
+   "reason": "쌍승역전"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 40.0,
+   "confidence": 92.0,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  9,
+  5,
+  6
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 5번 61.2점",
+  "2. 배당 수집 시작 19:00:43",
+  "4. 쌍승 역전: 9→7(11.3) < 7→9(18.0) → 9번 실질 상위 신호",
+  "4. 쌍승 역전: 2→7(13.0) < 7→2(19.9) → 2번 실질 상위 신호",
+  "5. 종합 신뢰도 100.0점(상) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 5,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 2,
+  "quinella_mismatch_score": 0,
+  "record_score": 61.2,
+  "total": 100.0,
+  "grade": "상"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 61.2,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   9,
+   2,
+   5
+  ],
+  "inverseHit": [
+   5
+  ],
+  "confidence": 100.0,
+  "reason": "역배열 감지말 5번 입상 · 제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 16
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-09-25 19:50:22"
+}

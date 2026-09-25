@@ -1,40 +1,6 @@
 {
   "patterns": [
     {
-      "race": "나고야 3경주",
-      "horse_no": 9,
-      "recent_avg": 14.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-09-14"
-    },
-    {
-      "race": "나고야 3경주",
-      "horse_no": 7,
-      "recent_avg": 10.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-14"
-    },
-    {
-      "race": "미즈사와 7경주",
-      "horse_no": 3,
-      "recent_avg": 7.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-09-14"
-    },
-    {
-      "race": "미즈사와 7경주",
-      "horse_no": 6,
-      "recent_avg": 7.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-09-14"
-    },
-    {
       "race": "미즈사와 7경주",
       "horse_no": 7,
       "recent_avg": 9.8,
@@ -4669,31 +4635,81 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-09-25"
+    },
+    {
+      "race": "소노다 10경주",
+      "horse_no": 5,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
+    },
+    {
+      "race": "소노다 10경주",
+      "horse_no": 7,
+      "recent_avg": 7.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-09-25"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 1,
+      "recent_avg": 6.2,
+      "win_place": 3,
+      "conditions": [
+        "급락69%",
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 3,
+      "recent_avg": 5.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-09-25"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "우라와 12경주",
+      "total_combos_dropped": 20,
+      "drop_ratio": 0.357,
+      "result": "3+11",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1790333449.95109
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9242,
-      "hit": 1445
+      "count": 9248,
+      "hit": 1447
     },
     "전체부진마": {
-      "count": 15223,
-      "hit": 4001
+      "count": 15236,
+      "hit": 4005
     },
     "대규모급락": {
-      "count": 11,
+      "count": 5,
       "high_odds": 0,
-      "recommended_hit": 5,
+      "recommended_hit": 2,
       "high_odds_rate": 0.0,
-      "hit_rate": 45.5
+      "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 5981,
-      "hit": 2556
+      "count": 5988,
+      "hit": 2558
     },
     "급락동반": {
-      "count": 770,
-      "hit": 211
+      "count": 775,
+      "hit": 212
     }
   },
   "bokbyeong_patterns": [
