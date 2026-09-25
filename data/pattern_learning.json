@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "미즈사와 3경주",
-      "horse_no": 1,
-      "recent_avg": 7.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-14"
-    },
-    {
-      "race": "미즈사와 3경주",
       "horse_no": 8,
       "recent_avg": 5.8,
       "win_place": 3,
@@ -4677,16 +4667,26 @@
         "복승이상감지"
       ],
       "date": "2026-09-25"
+    },
+    {
+      "race": "우라와 7경주",
+      "horse_no": 5,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9184,
+      "count": 9191,
       "hit": 1438
     },
     "전체부진마": {
-      "count": 15144,
-      "hit": 3984
+      "count": 15152,
+      "hit": 3985
     },
     "대규모급락": {
       "count": 11,
@@ -4696,8 +4696,8 @@
       "hit_rate": 45.5
     },
     "이상감지동반": {
-      "count": 5960,
-      "hit": 2546
+      "count": 5961,
+      "hit": 2547
     },
     "급락동반": {
       "count": 768,
