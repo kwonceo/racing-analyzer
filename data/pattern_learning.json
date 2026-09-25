@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 3경주",
-      "horse_no": 12,
-      "recent_avg": 7.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-09-13"
-    },
-    {
-      "race": "카나자와 3경주",
-      "horse_no": 8,
-      "recent_avg": 13.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-13"
-    },
-    {
-      "race": "카나자와 4경주",
-      "horse_no": 6,
-      "recent_avg": 4.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-13"
-    },
-    {
       "race": "카나자와 4경주",
       "horse_no": 7,
       "recent_avg": 5.2,
@@ -4697,16 +4669,46 @@
         "복승이상감지"
       ],
       "date": "2026-09-25"
+    },
+    {
+      "race": "카사마츠 3경주",
+      "horse_no": 1,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
+    },
+    {
+      "race": "카사마츠 3경주",
+      "horse_no": 4,
+      "recent_avg": 9.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
+    },
+    {
+      "race": "카사마츠 3경주",
+      "horse_no": 2,
+      "recent_avg": 10.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9106,
+      "count": 9109,
       "hit": 1424
     },
     "전체부진마": {
-      "count": 15016,
-      "hit": 3946
+      "count": 15023,
+      "hit": 3949
     },
     "대규모급락": {
       "count": 11,
@@ -4716,8 +4718,8 @@
       "hit_rate": 45.5
     },
     "이상감지동반": {
-      "count": 5910,
-      "hit": 2522
+      "count": 5914,
+      "hit": 2525
     },
     "급락동반": {
       "count": 768,
