@@ -6822,7 +6822,7 @@ def _reversal_axis_roles(wx_reversals, hist, fav_rank, curWin, curQ):
     return out
 
 
-def _win_exacta_reversal(fav_rank, curD, max_rank=4):
+def _win_exacta_reversal(fav_rank, curD, max_rank=4, src="단승"):
     """[1번] 쌍승 역전 감지 공식. 단승 유력마 A vs 다른 말 B 방향 비교.
       역전비율 = 쌍승(B→A) / 쌍승(A→B).  A가 유력한데 B→A가 더 싸면(비율<1) 시장은 B를 실질 1착으로 봄.
         <0.95 🟡 역전 / <0.80 🔴 강한역전 / <0.60 🔴🔴 압도적역전.
@@ -6851,9 +6851,11 @@ def _win_exacta_reversal(fav_rank, curD, max_rank=4):
         if multi:
             base["text"] = (f"🔄 역전감지[{ai + 1}·{bi + 1}위 간]: 단승 {a}번({ai + 1}위) vs {b}번({bi + 1}위) — "
                             f"쌍승 {b}→{a}({ba})가 {a}→{b}({ab})보다 낮음 → 상위권 실질순위 역전: {b}번 우세 ({tag} {ratio})")
-        else:                          # 기존 primary 문구 그대로 보존
-            base["text"] = (f"🔄 역전감지: 단승 {a}번 유력이나 쌍승에서 {b}번 1착({ba})이 "
-                            f"{a}번 1착({ab})보다 낮음 → 실질 1착: {b}번 가능성 ({tag} {ratio})")
+        else:
+            # [문구 수정 (2026-09-26 대표 승인 · 아오모리 3R)] 단승 미수집이면 「단승 7번 유력」이 거짓이었다 —
+            #   fav_rank 가 복승 인기 순위인데 문구는 늘 「단승」. src 로 실제 출처를 적는다(값·판정 무변경).
+            base["text"] = (f"🔄 역전감지: {src} {a}번 유력이나 쌍승 {b}→{a}({ba})가 "
+                            f"{a}→{b}({ab})보다 쌈 → 실질 1착: {b}번 가능성 ({tag} {ratio})")
         return base
 
     # primary: 최유력마(1위) vs 나머지 — 기존 동작(임계 0.95)
@@ -6863,6 +6865,21 @@ def _win_exacta_reversal(fav_rank, curD, max_rank=4):
         if it:
             primary.append(it)
     primary.sort(key=lambda r: r["ratio"])
+    # [문구 묶음 (2026-09-26 대표 승인 · 아오모리 3R)] 같은 1위 말 기준 역전이 여럿이면 뜻은 하나다 —
+    #   「그 말은 1착보다 2착으로 보인다(경륜 番手형)」. 5줄이 「실질 1착 5번·3번·4번·2번」으로 서로 다른 말을
+    #   지목하는 것처럼 읽혀 오해를 낳았다. 가장 강한 1건만 원문, 나머지는 2착형 설명으로 바꾼다.
+    #   ⚠ 항목·ratio·challenger·role 은 그대로 둔다(점수·축 판정 소비처 무변경) — text 만 바꾼다.
+    #   🔴 대표 줄은 ratio 최소가 아니라 **역방향 쌍승이 가장 싼 것**(실제로 이길 법한 말) — ratio 로 고르면
+    #     5→7 66.1 ↔ 7→5 412.8(0.16) 같은 고배당끼리 비율이 「압도적」으로 뽑혀 1→7 2.2 가 묻힌다(실측).
+    #     목록 순서(ratio 순)는 그대로 둔다 — wx[0] 소비처 무변경.
+    _head = min(primary, key=lambda r: r["reverseExacta"]) if primary else None
+    for _it in primary:
+        if _it is _head:
+            continue
+        _it["text"] = (f"↳ {_it['favorite']}번 2착형: {_it['challenger']}→{_it['favorite']}"
+                       f"({_it['reverseExacta']})가 {_it['favorite']}→{_it['challenger']}"
+                       f"({_it['favoredExacta']})보다 쌈 — {_it['challenger']}번 1착 근거로 쓰지 않음 ({_it['tag']} {_it['ratio']})")
+        _it["textGrouped"] = True
 
     # multiRank: 상위권 다른 순위쌍(ai>=1, ai<bi) 역전 — 강한 역전(<0.80)만
     multi = []
@@ -12095,7 +12112,7 @@ def _triple_analyze(rk, rec):
     # [1·2·4번] 핵심 이상감지 공식: 쌍승역전·복승불일치·종합신뢰도
     #   단승 미수집(일본)이면 복승인기 순위(ranked)를 유력마 순위로 대체
     fav_rank = single_rank if single_rank else ranked
-    wx_reversals = _win_exacta_reversal(fav_rank, curD)
+    wx_reversals = _win_exacta_reversal(fav_rank, curD, src=("단승" if single_rank else "복승인기"))
     quin_mismatch = _quinella_mismatch(fav_rank, curQ)
     signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
     # [역배열/추천게이트 공유] 전적 등급을 여기서 미리 계산 → 역배열 '전적 우수·시장 비인기' 판정에 재사용
@@ -13104,7 +13121,8 @@ def _triple_analyze(rk, rec):
                             "text": f"쌍승 {r['favored'][0]}→{r['favored'][1]} ({r['favoredOdds']}) < {r['favored'][1]}→{r['favored'][0]} ({r['otherOdds']})",
                             "detail": f"시장이 {r['favored'][0]}번을 실질 1착으로 판단"})
     # [1번] 쌍승 역전 감지 공식 — 단승(복승인기) 유력마 vs 쌍승 방향 역전(비율 기반)
-    for r in wx_reversals[:5]:
+    # [2026-09-26] 표시 순서만 — 대표 줄(textGrouped 아님)을 맨 위로(안정 정렬 · 목록 자체는 무변경)
+    for r in sorted(wx_reversals, key=lambda _r: bool(_r.get("textGrouped")))[:5]:
         signals.append({"level": r["level"], "type": "쌍승역전공식", "horse": r["challenger"],
                         "text": r["text"],
                         "detail": f"역전비율 = 쌍승({r['challenger']}→{r['favorite']}) {r['reverseExacta']} / "
