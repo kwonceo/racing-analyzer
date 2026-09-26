@@ -1630,6 +1630,18 @@ c8105d75a · e825326a3   「결과 자동백업: 이토 5경주 2-5-3」
 ⏸ 승인 메인 2개 중 ≥1개가 복승① 쌍 포함 — 켜기 전 삼복승 확정배당으로 얻는 것·잃는 것 리플레이(추천 경로)
 ```
 
+# ✅ [2026-09-26 23:55] **ⓐⓑ 백업 재발 방지 적용 · 중앙경마 전적표 분석(누를 때만)** (대표 「ab 승인 · 중앙경마도 진행」)
+```
+ⓐ 게이트  운영 .git/hooks/pre-commit — staged 전부 data/·logs/ 면 테스트 생략(표식은 남김 · --no-verify 아님) · 자기검증 데이터 0초 rc0 · 코드 섞임 57초 전체검사
+          🟢 적용 직후 서버 자동 백업 재개 확인(「결과 자동백업: 카와사키 6경주」) · ⚠ 훅은 git 추적 밖 — 원본 폴더 훅은 별개(서버는 운영만)
+ⓑ 서버    _run_data_git_backup: TimeoutExpired 뒤 tasklist 로 git.exe 없을 때만 index.lock 사본(.stale_<t>) 뒤 삭제 · 계수기 data_backup_lock_cleanup(도달=보류)
+          ⚠ shutil 이 상단 import 에 없다 — 지역 import(원칙 21) · 자기검증 git없음→정리·사본1 / git있음→보류
+중앙      tools/jra_forecast.py — race_list_sub → race_id → shutuba_past → 본문(말 16두 · 약 1만 자) → form_forecast 모델·검증기 + JRA 읽는 법 주석
+          🔴 금지 입력 제거: 말마다 「마체중 | 단승오즈 | 인기」 칸 · netkeiba 「レース展開予想」(남의 예측) · 범례
+          8012 resolve_key 중앙 경기장 → kind "jra" · api_forecast 갈래 · 데몬 없음(대표 「필요할 때만」) · 채점 미연결(별건)
+          시험 한신 6R(13-4-3) 축 13 ✅ · 상대 11·15·2·8 · 4번 ✗(분석기와 같은 자리에서 놓침) · 37초
+```
+
 # 🔴 [2026-09-26 22:30] **자동 백업이 하루 두 번 멈췄다 — 커밋 게이트(테스트 전체)가 데이터 커밋에도 돌아 60초 초과 → 강제 종료 → index.lock 잔존** · 3층 채팅 기록 · 오비히로 예측 복구
 ```
 백업   04:55 「주기적 안전 백업(6시간)」·13:20 「결과 자동백업: 나카야마 7경주」 commit 이 timed out after 60 seconds(server_stdout.log)

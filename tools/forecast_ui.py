@@ -16,6 +16,7 @@ sys.path.insert(0, HERE)
 import form_forecast as FF
 import keirin_forecast as KF
 import forecast_review as RV
+import jra_forecast as JF          # [2026-09-26] 중앙경마 전적표(netkeiba 馬柱) — 누를 때만(데몬 없음)
 
 PORT = int(os.environ.get("FORECAST_UI_PORT", "8012"))
 LOCK = threading.Lock()
@@ -238,6 +239,10 @@ def resolve_key(rk, sport):
     for t in cands:
         if t in HORSE_BABA:
             return "horse", "%s|%d" % (HORSE_BABA[t], rno), None
+    # [2026-09-26 대표 「중앙경마도 · 필요할 때만」] 중앙 경기장이면 netkeiba 馬柱 갈래
+    for t in cands:
+        if JF.venue_code(t):
+            return "jra", "%s|%d" % (JF.TRACK[JF.venue_code(t)][0], rno), None
     return None, None, "지원하지 않는 경기장/종목: %s (%s)" % (track, sport)
 
 
@@ -294,6 +299,16 @@ def api_forecast(qs):
                 try: FF.grade(_today_h().replace("/", ""))
                 except Exception: pass
             rec = FF._load(path)
+        elif kind == "jra":
+            # [2026-09-26] 중앙경마 — 누를 때만 netkeiba 馬柱(경주당 요청 ≤2 · 서버와 같은 netkeiba_guard 상한 공유)
+            venue, rno = key.split("|"); rno = int(rno)
+            _ymd = _today_h().replace("/", "")
+            _d, path, _ = JF._paths(_ymd, venue, rno)
+            cached = os.path.exists(path) and not force
+            with LOCK:
+                rec, jerr = JF.forecast_one(venue, rno, _ymd, force=force)
+            if jerr:
+                return {"ok": False, "error": jerr}
         else:
             path, _ = KF._paths(_today_k(), key)
             cached = os.path.exists(path) and not force
