@@ -21368,6 +21368,30 @@ def _run_data_git_backup(label):
             print(f"[데이터백업] ✅ GitHub 반영: {msg}")
     except Exception as e:
         print("[데이터백업] 예외:", e)
+        # 🔴 [2026-09-26 대표 승인 ⓑ] 시간 초과로 git 이 강제 종료되면 .git/index.lock 이 남아 **이후 백업이 전부 막힌다**
+        #   (9/26 04:55 · 13:20 — 각 5·9시간 정지). 그 자리에 살아 있는 git 이 없을 때만 잠금을 사본 뜬 뒤 지운다.
+        #   ⚠ git 이 살아 있으면 건드리지 않는다(진행 중인 커밋의 잠금일 수 있다). 계수기 data_backup_lock_cleanup.
+        if isinstance(e, subprocess.TimeoutExpired):
+            try:
+                _lk = os.path.join(root, ".git", "index.lock")
+                if os.path.exists(_lk):
+                    _alive = False
+                    try:
+                        _tl = subprocess.run(["tasklist", "/FI", "IMAGENAME eq git.exe", "/NH"],
+                                             capture_output=True, text=True, timeout=10)
+                        _alive = "git.exe" in (_tl.stdout or "")
+                    except Exception:
+                        _alive = True                      # 판정 못 하면 안전하게 건드리지 않는다
+                    if not _alive:
+                        import shutil as _shu               # ⚠ 상단 import 에 shutil 없음(원칙 21 — NameError 가 조용히 삼켜진다)
+                        _shu.copy2(_lk, _lk + ".stale_%d" % int(time.time()))
+                        os.remove(_lk)
+                        _gate_hit("data_backup_lock_cleanup", None, "시간초과 뒤 잠금 정리")
+                        print("[데이터백업] 🧹 시간초과 뒤 남은 index.lock 정리(git 없음 · 사본 보존)")
+                    else:
+                        _gate_hit("data_backup_lock_cleanup", None, "git 살아 있어 보류", reach_only=True)
+            except Exception as _le:
+                print("[데이터백업] 잠금 정리 실패(무시):", str(_le)[:80])
     finally:
         _data_backup_lock.release()
 
