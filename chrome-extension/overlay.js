@@ -2031,6 +2031,16 @@
               ctrBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8', '※ 참고만 — 확신1위 말은 같은 인기 말보다 잘 들어오지만 짝 규칙은 미검증'));
               cpBox.appendChild(ctrBox);
             }
+            // [⚡ 급락마 × 유력마 짝 참고 (2026-09-26 대표 승인)] 경마 · 10~30배 · 명단 밖 · 표시 전용
+            var _dkr = ((cp && cp.dropKeyRef) || []).filter(function (x) { return x && x.combo; });
+            if (_dkr.length) {
+              var dkrBox = mk('div', 'margin-top:6px;padding:6px 9px;border:1px dashed #fbbf24;border-radius:8px;background:rgba(251,191,36,.08)');
+              dkrBox.appendChild(mk('div', 'font-weight:800;font-size:13px;color:#fcd34d',
+                '⚡ 급락×유력 짝 · 참고: ' + _dkr.map(function (x) {
+                  return x.combo.join('+') + ' (' + x.odds + '배 · 급락' + x.drop + '×유력' + x.key + ')'; }).join(' · ')));
+              dkrBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8', '※ 참고만 — 같은 배당 짝보다 잘 들어오지만(10~30배) 사면 이기는 수준은 미검증'));
+              cpBox.appendChild(dkrBox);
+            }
           } catch (_ce) { /* 표시 실패는 무시 — 추천 본문에 영향 주지 않는다 */ }
           // 🔴 [빠진 조합] 부산 4R 5+8 이 4초만 본선이었고 96배였는데 대표가 물어보고서야 알았다.
           try {

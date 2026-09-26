@@ -14788,6 +14788,12 @@ def _triple_analyze(rk, rec):
     except Exception as _cte:
         print("[확신1위 짝 참고] 실패(무시):", _cte)
     try:
+        _dkr = _drop_key_ref(rk, _an_out, curQ)
+        if isinstance(_an_out.get("corePicks"), dict):
+            _an_out["corePicks"]["dropKeyRef"] = _dkr
+    except Exception as _dke:
+        print("[급락×유력 짝 참고] 실패(무시):", _dke)
+    try:
         _apply_t2_display_lock(rk, _an_out, cur_mb, after_close, curQ)
     except Exception as _t2le:
         print("[T-2 화면잠금] 적용 실패(무시·원본 표시):", _t2le)
@@ -15030,7 +15036,7 @@ def _t5_items(fq):
 T2_DISPLAY_LOCK_ENABLED = True   # [2026-09-06 대표 승인] 🔧 되돌리기: False (한 줄)
 T2_DISPLAY_LOCK_MB = 2.0         # 마감 2분 전부터 회원 화면 명단을 잠근다(카톡 T-2 번복 차단과 같은 기준)
 _T2_LOCK = {}                    # rk → {"day", "at", "mb", "keys": {필드: 사본}}  (메모리 · 날짜 바뀌면 소멸)
-_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra", "keyPairsRef", "confTop1Ref")   # 회원이 받는 것 전부(8/29 정의)
+_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra", "keyPairsRef", "confTop1Ref", "dropKeyRef")   # 회원이 받는 것 전부(8/29 정의)
 
 
 def _t2_combos(v):
@@ -15206,6 +15212,79 @@ def _conf_top1_ref(rk, an, curQ=None):
             o = None
         _gate_hit("conf_top1_ref", rk, None)
         return {"combo": list(pair), "odds": o, "inList": pair in have, "conf": ct}
+    except Exception:
+        return None
+
+
+# [⚡ 급락마 × 유력마 짝 참고 (2026-09-26 대표 승인 「참고 한 줄 넣어」)] — **표시 전용**
+#   실물: 한신 6R(9/26) 13-4-3 · 4+13 33배 — 13번 신호·4번 유력마 2위였는데 둘을 잇는 짝이 어디에도 없었다.
+#   소급(7~9월 · 급락=earlyDropHorses firstMb≥5 · 유력마=T-5 keyHorses[:3] · 명단 밖 · 구좌=조합1):
+#     경마 10~30배 2,194구좌 적중 101 회수 77.3 3제외 71.8(3분할 70/61/58) ↔ 같은 배당대 무작위 짝 중앙 49.0 · 95% 57.3
+#     🔴 <10배(53.0 ↔ 61.1)·30배+(45.1 ↔ 59.4)는 무작위 이하 ⇒ **경마 · 10~30배만** · 판정선 74.5 미달이라 「참고」
+#   ⚠ 원칙 27: 급락은 firstMb≥5(발주 5분 이상 전)만 쓴다.
+#   🔴 표시는 **해당 짝 전부(최대 3 · 배당 오름차순)** — 「가장 싼 1개」만 고르면 신호가 사라진다(재측정):
+#     전부 2,146구좌 3제외 72.8(무작위 95% 55.8) ↔ 가장 싼 1개 817구좌 53.7(무작위 95% 59.1 = 우연 수준)
+#   ⚠ 소급에서 小松島·오가키(경륜장인데 sport=horse 오분류)를 뺐다 — 여기서도 _DROP_KEY_REF_SKIP 로 막는다.
+#   displayedCombos·finalQuinellas·판정·학습 무변경. 되돌리기 DROP_KEY_REF_SPORTS = () · 계수기 drop_key_ref
+DROP_KEY_REF_SPORTS = ("horse",)
+DROP_KEY_REF_BAND = (10.0, 30.0)
+DROP_KEY_REF_MAX = 3
+_DROP_KEY_REF_SKIP = re.compile(r"(小松島|고마쓰시마|고마츠시마|코마츠시마|오가키|大垣)")
+
+
+def _drop_key_ref(rk, an, curQ=None):
+    """반환 [{combo, odds, drop, key}, …](최대 DROP_KEY_REF_MAX · 배당 오름차순) 또는 None."""
+    try:
+        if str((an or {}).get("sport") or "") == "cycle" or "horse" not in DROP_KEY_REF_SPORTS:
+            return None
+        if _DROP_KEY_REF_SKIP.search(str(rk or "")):
+            return None
+        if str(an.get("category") or "") == "korea" or not isinstance(curQ, dict):
+            return None
+        cp = an.get("corePicks") or {}
+        ed = []
+        for x in (cp.get("earlyDropHorses") or []):
+            try:
+                if isinstance(x, dict) and (x.get("firstMb") or 0) >= 5:
+                    ed.append(int(x.get("no")))
+            except (TypeError, ValueError):
+                continue
+        kh = []
+        for x in (an.get("keyHorses") or cp.get("keyHorses") or [])[:3]:
+            try:
+                kh.append(int(x))
+            except (TypeError, ValueError):
+                continue
+        if not ed or not kh:
+            return None
+        _gate_hit("drop_key_ref", rk, None, reach_only=True)
+        have = set()
+        for k in ("finalQuinellas", "bmedSpecial", "kakaoExtra"):
+            for q in (cp.get(k) or []):
+                c = q.get("combo") if isinstance(q, dict) else q
+                try:
+                    have.add((min(int(c[0]), int(c[1])), max(int(c[0]), int(c[1]))))
+                except (TypeError, ValueError, IndexError):
+                    pass
+        lo, hi = DROP_KEY_REF_BAND
+        found = {}
+        for e in ed:
+            for k in kh:
+                if e == k:
+                    continue
+                pair = (min(e, k), max(e, k))
+                if pair in have or pair in found:
+                    continue
+                try:
+                    o = float(curQ.get(pair))
+                except (TypeError, ValueError):
+                    continue
+                if lo <= o < hi:
+                    found[pair] = {"combo": list(pair), "odds": round(o, 1), "drop": e, "key": k}
+        if not found:
+            return None
+        _gate_hit("drop_key_ref", rk, None)
+        return sorted(found.values(), key=lambda x: x["odds"])[:DROP_KEY_REF_MAX]
     except Exception:
         return None
 
@@ -41840,6 +41919,14 @@ def _kakao_rich_message(rk, phase, an):
             lines.append("🧠 확신1위 %s번 짝 · 참고: %s%s" % (
                 _ctr.get("conf"), "+".join(map(str, _ctr["combo"])),
                 (" (%s배)" % _ctr.get("odds")) if _ctr.get("odds") else ""))
+    except Exception:
+        pass
+    # [⚡ 급락마 × 유력마 짝 참고 (2026-09-26 대표 승인)] 경마 · 10~30배 · 명단 밖 · 해당 짝 전부 최대 3(_drop_key_ref 주석)
+    try:
+        _dkr = [x for x in (cp.get("dropKeyRef") or []) if isinstance(x, dict) and x.get("combo")]
+        if _dkr:
+            lines.append("⚡ 급락×유력 짝 · 참고: " + " · ".join(
+                "%s (%s배)" % ("+".join(map(str, x["combo"])), x.get("odds")) for x in _dkr))
     except Exception:
         pass
     if not lines:
