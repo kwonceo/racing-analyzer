@@ -41550,6 +41550,9 @@ JUDGE_MATCH_MEMBER = True
 KAKAO_TRIO_OFFICIAL = True
 
 
+KAKAO_SENT_TRIO_OFFICIAL_ONLY = True   # [2026-09-26] 삼복승 발송 기록 = 정식만(아래 _KAKAO_SENT 기록 주석)
+
+
 def _kakao_trio_official(cp, sport=None):
     """판정 명단에 들어간 삼복승 = 정식 발송 대상. 없으면 빈 목록(→ 종전 「참고」 유지)."""
     if not KAKAO_TRIO_OFFICIAL:
@@ -42330,12 +42333,27 @@ def _kakao_notify_race(rk, phase, an, snap):
             if _sr.get("ok"):
                 try:
                     _cpn = an.get("corePicks") or {}
+                    # 🔴 [2026-09-26 대표 승인 「삼복승 제외 통보 수정」] 삼복승 발송 기록 = **정식 삼복승만**.
+                    #   종전 finalTrifectas[:2] 는 ① 본문은 [:KAKAO_TRIO_MAX=1] 만 「참고」로 나가는데 2개를 적고
+                    #   ② 비교 상대 displayedCombos.trifectas 는 정식(판정)만이라 경마는 늘 [] ⇒ 즉시변경이
+                    #   「보낸 적 없는 삼복승 제외」를 통보했다(소노다 10R 5+7+12 · 오비히로 2R 2+3+4 ·
+                    #   9/19~25 변경 카톡 633건 중 393건). 정식 = 판정 명단과 같은 규칙(_kakao_trio_official)이라
+                    #   이제 기록과 비교 대상이 같은 기준이다. 「참고」 삼복승은 사라는 안내가 아니므로 통보 대상이 아니다.
+                    #   🔧 되돌리기: KAKAO_SENT_TRIO_OFFICIAL_ONLY = False · 계수기 kakao_sent_trio_official
+                    if KAKAO_SENT_TRIO_OFFICIAL_ONLY:
+                        _snt_tri = [sorted(int(x) for x in c)
+                                    for c in _kakao_trio_official(_cpn, an.get("sport"))]
+                        _gate_hit("kakao_sent_trio_official", rk,
+                                  "기록 %d개(종전 방식 %d개)" % (len(_snt_tri), len([t for t in (_cpn.get("finalTrifectas") or [])[:2] if t.get("combo")])),
+                                  once_key=rk)
+                    else:
+                        _snt_tri = [sorted(int(x) for x in (t.get("combo") or []))
+                                    for t in (_cpn.get("finalTrifectas") or [])[:2] if t.get("combo")]
                     _KAKAO_SENT[rk] = {
                         "day": time.strftime("%Y-%m-%d"), "phase": phase, "nsent": 0,
                         "quinellas": [sorted(int(x) for x in (q.get("combo") or []))
                                       for q in (_cpn.get("finalQuinellas") or [])[:3] if q.get("combo")],
-                        "trifectas": [sorted(int(x) for x in (t.get("combo") or []))
-                                      for t in (_cpn.get("finalTrifectas") or [])[:2] if t.get("combo")]}
+                        "trifectas": _snt_tri}
                     _kakao_sent_save()   # [리로드 생존] 발송 즉시 영속화
                 except Exception:
                     pass
