@@ -1,54 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 5경주",
-      "horse_no": 2,
-      "recent_avg": 11.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-16"
-    },
-    {
-      "race": "소노다 5경주",
-      "horse_no": 3,
-      "recent_avg": 6.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-16"
-    },
-    {
-      "race": "소노다 5경주",
-      "horse_no": 5,
-      "recent_avg": 8.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-16"
-    },
-    {
-      "race": "나고야 1경주",
-      "horse_no": 4,
-      "recent_avg": 9.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-16"
-    },
-    {
-      "race": "나고야 1경주",
-      "horse_no": 5,
-      "recent_avg": 8.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-09-16"
-    },
-    {
       "race": "나고야 2경주",
       "horse_no": 2,
       "recent_avg": 7.2,
@@ -4664,16 +4616,66 @@
         "복승이상감지"
       ],
       "date": "2026-09-27"
+    },
+    {
+      "race": "코치 12경주",
+      "horse_no": 2,
+      "recent_avg": 7.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-27"
+    },
+    {
+      "race": "코치 12경주",
+      "horse_no": 8,
+      "recent_avg": 7.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-27"
+    },
+    {
+      "race": "코치 12경주",
+      "horse_no": 5,
+      "recent_avg": 5.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-27"
+    },
+    {
+      "race": "사가 9경주",
+      "horse_no": 13,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-27"
+    },
+    {
+      "race": "사가 9경주",
+      "horse_no": 5,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-27"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9524,
+      "count": 9531,
       "hit": 1485
     },
     "전체부진마": {
-      "count": 15673,
-      "hit": 4116
+      "count": 15695,
+      "hit": 4121
     },
     "대규모급락": {
       "count": 5,
@@ -4683,8 +4685,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6149,
-      "hit": 2631
+      "count": 6164,
+      "hit": 2636
     },
     "급락동반": {
       "count": 777,
