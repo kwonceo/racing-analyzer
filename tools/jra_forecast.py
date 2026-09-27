@@ -11,7 +11,7 @@
   python tools/jra_forecast.py 한신 11            # 오늘
   python tools/jra_forecast.py 한신 11 20260926
 """
-import io, os, re, sys, json, time, datetime
+import io, os, re, sys, glob, json, time, datetime
 from urllib.request import Request, urlopen
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -147,7 +147,100 @@ def forecast_one(venue, rno, ymd=None, model=None, force=False):
     return rec, None
 
 
+def _netkeiba_order(race_id_):
+    """netkeiba result.html → 착순 상위 3두 마번. 행 class 가 「FirstDisplay HorseList」처럼 앞에 다른 이름이 붙는다 —
+    ⚠ 서버 결과 파서가 2·3착을 놓치는 것(9/26 한신 6R 2nd·3rd None)도 이 구조 때문으로 보인다(별건)."""
+    h = _get("https://race.netkeiba.com/race/result.html?race_id=%s" % race_id_)
+    out = {}
+    for rk, no in re.findall(r'<div class="Rank">\s*(\d+)\s*</div>.*?<td class="Num Txt_C">\s*<div>\s*(\d+)\s*</div>', h, re.S):
+        rk, no = int(rk), int(no)
+        if rk <= 3 and rk not in out:
+            out[rk] = no
+    return [out.get(1), out.get(2), out.get(3)] if out.get(1) and out.get(2) else None
+
+
+def _result_of(rec, fetch=True):
+    """운영 data/analysis_log · race_results 결과 → 2착이 비어 있으면 netkeiba 결과표(예측한 경주만 · 요청 1건).
+    배당은 서버 저장값(analysis_log payouts)을 쓴다 — 그쪽은 채워져 있다(9/26 한신 6R 복승 33.0)."""
+    y = rec["date"]
+    fn = "%s_%s_%s_%s_%d경주.json" % (y[:4], y[4:6], y[6:8], rec["venue"], int(rec["rno"]))
+    pay = {}
+    first = None
+    for sub in ("analysis_log", "race_results"):
+        doc = FF._load(os.path.join(BASE, "data", sub, fn)) or {}
+        res = doc.get("result") if sub == "analysis_log" else doc
+        if not isinstance(res, dict):
+            continue
+        pay = pay or (res.get("payouts") or {})
+        first = first or res.get("1st")
+        if res.get("1st") and res.get("2nd"):
+            try:
+                return {"order": [int(res["1st"]), int(res["2nd"]), int(res.get("3rd") or 0)],
+                        "quinella": pay.get("quinella"), "trio": pay.get("trio"), "trifecta": pay.get("trifecta"),
+                        "approx": bool(res.get("payouts_approx")), "src": sub}
+            except Exception:
+                pass
+    if not fetch or not first or not rec.get("raceId"):
+        return None                                  # 1착도 없으면 아직 결과 전 — netkeiba 를 두드리지 않는다
+    try:
+        od = _netkeiba_order(rec["raceId"])
+    except Exception as e:
+        print("[중앙 채점] netkeiba 결과 조회 실패:", str(e)[:80])
+        return None
+    if not od:
+        return None
+    return {"order": [od[0], od[1], od[2] or 0], "quinella": pay.get("quinella"),
+            "trio": pay.get("trio"), "trifecta": pay.get("trifecta"), "src": "netkeiba result"}
+
+
+def grade(ymd=None):
+    """[2026-09-26 대표 「중앙 채점도 연결해」] form_forecast.grade 와 같은 채점 항목. 시장 대조는 없다(馬柱에서 배당을 지웠으므로)."""
+    files = sorted(glob.glob(os.path.join(OUT, ymd or "*", "*.json")))
+    n_new = 0
+    for f in files:
+        rec = FF._load(f) or {}
+        if rec.get("result") or not isinstance(rec.get("prediction"), dict):
+            continue
+        res = _result_of(rec)
+        if not res:
+            continue
+        p = rec["prediction"]
+        top2, top3 = set(res["order"][:2]), set(res["order"][:3])
+        qs = [set(map(int, q)) for q in (p.get("quinellas") or []) if isinstance(q, (list, tuple)) and len(q) == 2]
+        ts = [set(map(int, t)) for t in (p.get("trios") or []) if isinstance(t, (list, tuple)) and len(t) == 3]
+        rec["result"] = res
+        rec["grade"] = {"q_hit": any(q == top2 for q in qs), "q_n": len(qs),
+                        "trio_hit": any(t == top3 for t in ts), "trio_n": len(ts),
+                        "axis_top2": p.get("axis") in top2, "axis_win": p.get("axis") == res["order"][0]}
+        io.open(f, "w", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False, indent=1))
+        n_new += 1
+    return n_new
+
+
+def summary():
+    n = q = t = ax = 0
+    stake = 0
+    pay = 0.0
+    for f in glob.glob(os.path.join(OUT, "*", "*.json")):
+        rec = FF._load(f) or {}
+        g = rec.get("grade")
+        if not g:
+            continue
+        n += 1; q += g["q_hit"]; t += g["trio_hit"]; ax += g["axis_top2"]
+        stake += g["q_n"]
+        if g["q_hit"] and (rec.get("result") or {}).get("quinella"):
+            try:
+                pay += float(rec["result"]["quinella"])
+            except (TypeError, ValueError):
+                pass
+    return {"n": n, "q_hit": q, "trio_hit": t, "axis_top2": ax, "q_stake": stake,
+            "q_return_pct": round(100 * pay / stake, 1) if stake else None}
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--grade":
+        print("새로 채점", grade(sys.argv[2] if len(sys.argv) > 2 else None), "·", summary())
+        sys.exit(0)
     if len(sys.argv) < 3:
         print(__doc__)
         sys.exit(0)
