@@ -219,13 +219,53 @@ for _b, _n in FF.BABA.items():
 HORSE_BABA.update({"오이": "20", "가와사키": "21", "가나자와": "22", "고치": "31", "몬베쓰": "36"})
 
 
+# [2026-09-27 대표 「명칭이 틀려서 전적표 분석을 못 한다」] 배당판 「키시와다」 ↔ 저장 「기시와다」 — 한 글자 차이로 못 찾았다.
+#   확장과 **같은 표**(chrome-extension/track_alias.js · app.py _TRACK_GROUPS 에서 생성)로 같은 경기장의 모든 표기를 후보로 쓰고,
+#   표에 없으면 확장처럼 발음 정규화(격음·경음 → 평음)로 한 번 더 맞춘다. 한자 경기장명(岸和田)도 받는다.
+_ALIAS_TBL = None
+_CHO_PLAIN = {15: 0, 16: 3, 17: 7, 14: 12, 1: 0, 4: 3, 8: 7, 10: 9, 13: 12}   # ㅋㅌㅍㅊ ㄲㄸㅃㅆㅉ → ㄱㄷㅂㅈ ㄱㄷㅂㅅㅈ
+
+
+def _phon(s):
+    out = []
+    for ch in str(s):
+        c = ord(ch) - 0xAC00
+        if 0 <= c < 11172:
+            cho, rest = divmod(c, 588)
+            ch = chr(0xAC00 + _CHO_PLAIN.get(cho, cho) * 588 + rest)
+        out.append(ch)
+    return "".join(out).replace("츠", "쓰").replace("즈", "쓰")
+
+
+def _track_cands(track):
+    global _ALIAS_TBL
+    if _ALIAS_TBL is None:
+        try:
+            src = io.open(os.path.join(BASE, "chrome-extension", "track_alias.js"), encoding="utf-8").read()
+            _ALIAS_TBL = json.loads(re.search(r"KB_TRACK_ALIAS\s*=\s*(\{.*?\});", src, re.S).group(1))
+        except Exception:
+            _ALIAS_TBL = {}
+    canon = _ALIAS_TBL.get(track)
+    if not canon:
+        p = _phon(track)
+        canon = next((v for k, v in _ALIAS_TBL.items() if _phon(k) == p), None)
+    cands = [track, TRACK_ALIAS.get(track, track)]
+    if canon:
+        cands += [canon] + [k for k, v in _ALIAS_TBL.items() if v == canon]
+    seen = []
+    for c in cands:
+        if c and c not in seen:
+            seen.append(c)
+    return seen
+
+
 def resolve_key(rk, sport):
     """배당판 raceKey('타케오 6경주') + 종목 → (kind, key). 경륜은 오늘 analysis_log 토큰으로, 경마는 babaCode 로."""
-    m = re.match(r"^\s*([가-힣]{2,7})(?:\s*\[[^\]\s]{1,3}\])?\s*(\d{1,2})\s*(?:경주|R)?\s*$", str(rk or ""))
+    m = re.match(r"^\s*([가-힣一-龥々ぁ-んァ-ヶ]{2,7})(?:\s*\[[^\]\s]{1,3}\])?\s*(\d{1,2})\s*(?:경주|R)?\s*$", str(rk or ""))
     if not m:
         return None, None, "경주명을 못 읽음: %r" % rk
     track, rno = m.group(1), int(m.group(2))
-    cands = [track, TRACK_ALIAS.get(track, track)]
+    cands = _track_cands(track)
     tok = KF._ymd_token(_today_k())
     if sport in ("", None, "cycle", "keirin"):
         for t in cands:
