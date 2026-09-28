@@ -1356,10 +1356,18 @@
         d.addEventListener('click', (ev) => {
           try {
             if (!ev.isTrusted) return;                       // 우리(수집)의 프로그램 클릭은 제외
-            const t = ev.target && ev.target.closest && ev.target.closest('.bet_type_btn, [bet_mode], [class*="bet_type"]');
+            // 🔴 [2026-09-28 대표 「삼복승 배당을 보려고 누르면 다시 복승으로 돌아간다」] 새 스킨(이미지 버튼 .buy_type_btn ·
+            //   글자 없음 · div_Btn_BS/SS/SBS)을 이 감시가 못 알아봐 사용자 클릭 유예·무클릭 관전·탭 복원이 **전부 꺼져 있었다**
+            //   → 수집이 매번 복승을 눌러 놓고 그대로 두었다. 이미지 버튼도 감지하고 코드로 탭 이름을 읽는다.
+            const t = ev.target && ev.target.closest && ev.target.closest('.bet_type_btn, [bet_mode], [class*="bet_type"], .buy_type_btn');
             if (t) {
               _lastUserTabClick = Date.now();
-              _userChosenTab = (t.textContent || '').replace(/\s+/g, '').trim() || _userChosenTab;   // [v2.1.134] 사용자가 고른 탭 기억
+              let _txt = (t.textContent || '').replace(/\s+/g, '').trim();
+              if (!_txt) {
+                const _m = /(?:^|\s)div_Btn_([A-Z]+)(?:\s|$)/.exec(String(t.className || ''));
+                _txt = (_m && _SPRITE_BET_CODE[_m[1]]) || '';
+              }
+              _userChosenTab = _txt || _userChosenTab;   // [v2.1.134] 사용자가 고른 탭 기억
               console.log('[사용자 조작] 마권 탭 직접 클릭 감지("' + _userChosenTab + '") → 자동 수집 12초 유예');
             }
           } catch (_) { /* */ }
