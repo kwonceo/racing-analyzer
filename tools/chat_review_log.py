@@ -83,7 +83,70 @@ BACKFILL = [
 ]
 
 
+def _server_result(date, rk):
+    """서버가 저장한 결과(analysis_log.result → race_results). 2착이 비어 있으면 None(중앙 결과 파서 결손 · 별건)."""
+    fn = "%s_%s.json" % (date, rk.replace(" ", "_"))
+    for sub in ("analysis_log", "race_results"):
+        p = os.path.join(BASE, "data", sub, fn)
+        try:
+            d = json.load(io.open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        r = d.get("result") if sub == "analysis_log" else d
+        if isinstance(r, dict) and r.get("1st") and r.get("2nd"):
+            try:
+                return [int(r["1st"]), int(r["2nd"])] + ([int(r["3rd"])] if r.get("3rd") else [])
+            except (TypeError, ValueError):
+                return None
+    # 🔴 서버가 결과를 안 가진 경주(반에이 오비히로 전부 · 2026-09-27 실측 12/12 None)는 keiba.go.jp 성적표를 직접 읽는다
+    try:
+        sys.path.insert(0, os.path.join(BASE, "tools"))
+        import form_forecast as _FF
+        venue, rno = rk.rsplit(" ", 1)
+        rno = int(rno.replace("경주", ""))
+        rev = {v: k for k, v in _FF.BABA.items()}
+        rev.update({"오이": "20", "고치": "31", "가와사키": "21", "가나자와": "22"})
+        if venue in rev:
+            res = _FF._result_from_keiba(date.replace("_", "/"), rev[venue], rno)
+            if res and res.get("order"):
+                return [x for x in res["order"] if x]
+    except Exception as _e:
+        print("[결과 채움] keiba 조회 실패:", str(_e)[:80])
+    return None
+
+
+def fill_results(days=3):
+    """[2026-09-28 대표 「결과를 내가 안 올리면 네가 확인해서 등록하고 복기 자료에 남겨」]
+    최근 days 일 jsonl 에서 결과 없는 경주의 **최신 줄**을 골라 서버 결과로 채운 새 줄을 붙인다(append · 지우지 않는다)."""
+    import glob as _g
+    out = []
+    for p in sorted(_g.glob(os.path.join(DIR, "*.jsonl")))[-days:]:
+        latest = {}
+        for ln in io.open(p, encoding="utf-8"):
+            try:
+                e = json.loads(ln)
+            except Exception:
+                continue
+            latest[(e.get("date"), e.get("rk"))] = e
+        for (date, rk), e in latest.items():
+            if e.get("result") or not date or not rk:
+                continue
+            r = _server_result(date, rk)
+            if not r:
+                continue
+            e2 = {k: v for k, v in e.items() if k not in ("t", "at", "score")}
+            e2["result"] = r
+            e2["result_src"] = "서버 자동(대표 미입력)"
+            write(e2)
+            out.append((rk, r))
+    return out
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--fill-results":
+        for rk, r in fill_results():
+            print("결과 채움", rk, r)
+        sys.exit(0)
     if len(sys.argv) > 1 and sys.argv[1] == "--backfill":
         for e in BACKFILL:
             p, s = write(e)

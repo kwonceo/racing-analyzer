@@ -584,6 +584,13 @@ def main():
                             print("[중앙 채점] 새로 %d건 · %s" % (_n, _JF.summary()))
                     except Exception as _je:
                         print("[중앙 채점] 실패(무시):", str(_je)[:80])
+                    # [2026-09-28 대표 「결과를 내가 안 올리면 네가 확인해서 등록하고 복기 자료에 남겨」] 3층 기록 결과 자동 채움
+                    try:
+                        import chat_review_log as _CR
+                        for _rk, _r in _CR.fill_results(days=3):
+                            print("[복기 결과 채움] %s %s" % (_rk, _r))
+                    except Exception as _ce:
+                        print("[복기 결과 채움] 실패(무시):", str(_ce)[:80])
             except Exception as e:
                 print("[daemon 오류]", e)
             time.sleep(60)
