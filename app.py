@@ -6853,7 +6853,7 @@ def _win_exacta_reversal(fav_rank, curD, max_rank=4, src="단승"):
                 "favoredExacta": ab, "reverseExacta": ba,
                 "favRank": ai + 1, "chalRank": bi + 1, "multiRank": multi}
         if multi:
-            base["text"] = (f"🔄 역전감지[{ai + 1}·{bi + 1}위 간]: 단승 {a}번({ai + 1}위) vs {b}번({bi + 1}위) — "
+            base["text"] = (f"🔄 역전감지[{ai + 1}·{bi + 1}위 간]: {src} {a}번({ai + 1}위) vs {b}번({bi + 1}위) — "
                             f"쌍승 {b}→{a}({ba})가 {a}→{b}({ab})보다 낮음 → 상위권 실질순위 역전: {b}번 우세 ({tag} {ratio})")
         else:
             # [문구 수정 (2026-09-26 대표 승인 · 아오모리 3R)] 단승 미수집이면 「단승 7번 유력」이 거짓이었다 —
