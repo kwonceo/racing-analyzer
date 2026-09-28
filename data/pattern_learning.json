@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "다치카와 9경주",
-      "horse_no": 7,
-      "recent_avg": 5.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-17"
-    },
-    {
-      "race": "다치카와 9경주",
-      "horse_no": 4,
-      "recent_avg": 6.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-09-17"
-    },
-    {
       "race": "몬베츠 3경주",
       "horse_no": 5,
       "recent_avg": 5.4,
@@ -4696,16 +4678,32 @@
         "복승이상감지"
       ],
       "date": "2026-09-28"
+    },
+    {
+      "race": "후나바시 8경주",
+      "horse_no": 1,
+      "recent_avg": 6.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-09-28"
+    },
+    {
+      "race": "후나바시 8경주",
+      "horse_no": 8,
+      "recent_avg": 8.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-09-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9672,
-      "hit": 1494
+      "count": 9676,
+      "hit": 1496
     },
     "전체부진마": {
-      "count": 15933,
-      "hit": 4187
+      "count": 15938,
+      "hit": 4189
     },
     "대규모급락": {
       "count": 5,
@@ -4715,7 +4713,7 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6261,
+      "count": 6262,
       "hit": 2693
     },
     "급락동반": {
@@ -5093,24 +5091,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2831,
-    "hit": 2144,
+    "count": 2832,
+    "hit": 2145,
     "cases": [
-      {
-        "race": "벳푸 5경주",
-        "date": "2026-09-25",
-        "smart_horses": [
-          4,
-          5
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.9,
-        "high_odds": false
-      },
       {
         "race": "벳푸 7경주",
         "date": "2026-09-25",
@@ -6618,6 +6601,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 2.0,
+        "high_odds": false
+      },
+      {
+        "race": "후나바시 8경주",
+        "date": "2026-09-28",
+        "smart_horses": [
+          7,
+          1,
+          8
+        ],
+        "placed": [
+          1,
+          8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
