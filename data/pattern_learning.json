@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "나고야 3경주",
-      "horse_no": 7,
-      "recent_avg": 5.5,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-09-17"
-    },
-    {
-      "race": "몬베츠 7경주",
-      "horse_no": 2,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-17"
-    },
-    {
       "race": "나고야 7경주",
       "horse_no": 7,
       "recent_avg": 4.2,
@@ -4692,16 +4674,36 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-09-28"
+    },
+    {
+      "race": "후나바시 10경주",
+      "horse_no": 1,
+      "recent_avg": 4.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-28"
+    },
+    {
+      "race": "후나바시 10경주",
+      "horse_no": 8,
+      "recent_avg": 9.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9688,
+      "count": 9694,
       "hit": 1498
     },
     "전체부진마": {
-      "count": 15951,
-      "hit": 4191
+      "count": 15960,
+      "hit": 4193
     },
     "대규모급락": {
       "count": 5,
@@ -4711,8 +4713,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6263,
-      "hit": 2693
+      "count": 6266,
+      "hit": 2695
     },
     "급락동반": {
       "count": 777,
@@ -5089,27 +5091,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2833,
-    "hit": 2146,
+    "count": 2834,
+    "hit": 2147,
     "cases": [
-      {
-        "race": "소노다 9경주",
-        "date": "2026-09-25",
-        "smart_horses": [
-          9,
-          1,
-          6,
-          4
-        ],
-        "placed": [
-          1,
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "벳푸 8경주",
         "date": "2026-09-25",
@@ -6620,6 +6604,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 1.3,
+        "high_odds": false
+      },
+      {
+        "race": "기후 10경주",
+        "date": "2026-09-28",
+        "smart_horses": [
+          4,
+          8
+        ],
+        "placed": [
+          4
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.5,
         "high_odds": false
       }
     ],
