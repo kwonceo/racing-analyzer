@@ -5085,26 +5085,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2837,
-    "hit": 2149,
+    "count": 2838,
+    "hit": 2150,
     "cases": [
-      {
-        "race": "야히코 1경주",
-        "date": "2026-09-25",
-        "smart_horses": [
-          2,
-          5,
-          7
-        ],
-        "placed": [
-          2,
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": 14.0,
-        "quinella_odds": 3.5,
-        "high_odds": false
-      },
       {
         "race": "카와사키 1경주",
         "date": "2026-09-25",
@@ -6616,9 +6599,26 @@
         "trifecta_odds": null,
         "quinella_odds": 13.2,
         "high_odds": false
+      },
+      {
+        "race": "다마노 1경주",
+        "date": "2026-09-28",
+        "smart_horses": [
+          6,
+          1,
+          2
+        ],
+        "placed": [
+          1,
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 9.4,
+        "high_odds": false
       }
     ],
-    "rate": 75.7,
+    "rate": 75.8,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
