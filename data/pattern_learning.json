@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 3경주",
-      "horse_no": 5,
-      "recent_avg": 11.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-09-20"
-    },
-    {
       "race": "서울 5경주",
       "horse_no": 10,
       "recent_avg": 4.0,
@@ -4696,16 +4688,26 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-09-29"
+    },
+    {
+      "race": "카나자와 5경주",
+      "horse_no": 1,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9807,
+      "count": 9810,
       "hit": 1511
     },
     "전체부진마": {
-      "count": 16161,
-      "hit": 4246
+      "count": 16166,
+      "hit": 4247
     },
     "대규모급락": {
       "count": 5,
@@ -4715,8 +4717,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6354,
-      "hit": 2735
+      "count": 6356,
+      "hit": 2736
     },
     "급락동반": {
       "count": 784,
