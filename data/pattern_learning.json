@@ -4706,7 +4706,7 @@
       "hit": 1512
     },
     "전체부진마": {
-      "count": 16218,
+      "count": 16223,
       "hit": 4257
     },
     "대규모급락": {
@@ -4717,7 +4717,7 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6385,
+      "count": 6390,
       "hit": 2745
     },
     "급락동반": {
@@ -5095,25 +5095,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2857,
-    "hit": 2163,
+    "count": 2858,
+    "hit": 2164,
     "cases": [
-      {
-        "race": "사가 9경주",
-        "date": "2026-09-26",
-        "smart_horses": [
-          8,
-          6,
-          4
-        ],
-        "placed": [
-          6
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "사가 10경주",
         "date": "2026-09-26",
@@ -6629,6 +6613,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 3.7,
+        "high_odds": false
+      },
+      {
+        "race": "카나자와 7경주",
+        "date": "2026-09-29",
+        "smart_horses": [
+          7,
+          3
+        ],
+        "placed": [
+          7,
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.0,
         "high_odds": false
       }
     ],
