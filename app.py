@@ -6899,6 +6899,8 @@ def _win_exacta_reversal(fav_rank, curD, max_rank=4, src="단승"):
     return primary + multi
 
 
+MISMATCH_TEXT_V2 = True   # [2026-09-29] 복승불일치 문구 반전(표시 전용) · 되돌리기 False
+
 def _quinella_mismatch(fav_rank, curQ):
     """[2번] 복승 불일치 감지 공식. 단승 1+2위 예상 조합 vs 실제 최저복승.
       불일치점수 = 예상최저복승 / 실제최저복승.  >1 = 예상 밖 조합에 자금집중.
@@ -6918,12 +6920,25 @@ def _quinella_mismatch(fav_rank, curQ):
     lvl = "🔴🔴" if ratio >= 2.0 else ("🔴" if ratio >= 1.5 else "🟡")
     exp_set = set(exp_pair)
     focus = [h for h in act_pair if h not in exp_set]   # 집중 자금 유입 말
+    dropout = [h for h in exp_pair if h not in set(act_pair)]   # 단승 쪽 말(예상 조합에만 있는 말)
+    if MISMATCH_TEXT_V2:
+        # [2026-09-29 대표 승인 · 문구 반전] 7~9월 소급(경마 321 · 경륜 2,116 경주): 지목마 1·2착이 같은 시장순위 대비
+        #   경마 −14.4%p · 경륜 −16.2%p(3분할 전 구간) ↔ 단승 쪽 말은 +4.7 / +10.4%p. 복승·단승이 갈리면 단승이 맞는다.
+        #   ⚠ 표시 문구만 바꾼다 — focusHorses·축교정·종합신뢰도 가중은 그대로(리플레이 전 · 승인 사항).
+        #   ⚠ 「단승 쪽 말 × 시장1위」 구매 규칙은 리플레이 기각(경마 3제외 40.6 · 경륜 62.3 · 무작위 이하) — 참고 문구뿐.
+        _txt = (f"⚠️ 복승 불일치: 단승 기준 예상 {exp_pair[0]}+{exp_pair[1]}({exp_odds}) / "
+                f"실제 최저 {act_pair[0]}+{act_pair[1]}({act_odds}) → "
+                f"{('·'.join(map(str, focus)) or '동일')}번 복승 자금 집중·단승 미동반 ({lvl} {ratio}) · "
+                f"⚠ 이 유형의 지목마는 같은 시장순위보다 덜 들어온다(소급 −15%p)"
+                + (f" · 단승 쪽 {'·'.join(map(str, dropout))}번은 순위보다 잘 들어온다(+5~10%p) 참고" if dropout else ""))
+    else:
+        _txt = (f"⚠️ 복승 불일치: 단승 기준 예상 {exp_pair[0]}+{exp_pair[1]}({exp_odds}) / "
+                f"실제 최저 {act_pair[0]}+{act_pair[1]}({act_odds}) → "
+                f"{('·'.join(map(str, focus)) or '동일')}번 집중 자금 유입 ({lvl} {ratio})")
     return {"expected": list(exp_pair), "actual": list(act_pair),
             "expectedOdds": exp_odds, "actualOdds": act_odds, "ratio": ratio,
-            "level": lvl, "focusHorses": focus,
-            "text": f"⚠️ 복승 불일치: 단승 기준 예상 {exp_pair[0]}+{exp_pair[1]}({exp_odds}) / "
-                    f"실제 최저 {act_pair[0]}+{act_pair[1]}({act_odds}) → "
-                    f"{('·'.join(map(str, focus)) or '동일')}번 집중 자금 유입 ({lvl} {ratio})"}
+            "level": lvl, "focusHorses": focus, "dropoutHorses": dropout,
+            "text": _txt}
 
 
 def _reversal_strength_score(ratio):
@@ -7081,8 +7096,12 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
     if quin_mismatch:
         foc = quin_mismatch.get("focusHorses") or []
         ep, ap = quin_mismatch["expected"], quin_mismatch["actual"]
+        _dro = quin_mismatch.get("dropoutHorses") or []
+        _mtxt = (f"⚠️ 복승불일치: 단승 기준 {ep[0]}+{ep[1]} 예상, 실제 최저는 {ap[0]}+{ap[1]} → {('·'.join(map(str, foc)) or '동일')}번 복승 자금 집중·단승 미동반(소급 −15%p · 과열 주의)"
+                 + (f" · 단승 쪽 {'·'.join(map(str, _dro))}번 참고" if _dro else "")) if MISMATCH_TEXT_V2 else \
+                f"⚠️ 복승불일치: 단승 기준 {ep[0]}+{ep[1]} 예상, 실제 최저는 {ap[0]}+{ap[1]} → {('·'.join(map(str, foc)) or '동일')}번 주목"
         types.append({"kind": "복승불일치", "level": quin_mismatch["level"],
-                      "text": f"⚠️ 복승불일치: 단승 기준 {ep[0]}+{ep[1]} 예상, 실제 최저는 {ap[0]}+{ap[1]} → {('·'.join(map(str, foc)) or '동일')}번 주목",
+                      "text": _mtxt,
                       "detail": f"불일치점수 {quin_mismatch['ratio']} (예상 {quin_mismatch['expectedOdds']} / 실제 {quin_mismatch['actualOdds']})",
                       "horses": foc})
         for h in foc:
