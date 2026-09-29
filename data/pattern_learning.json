@@ -1,56 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 12경주",
-      "horse_no": 12,
-      "recent_avg": 5.4,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-20"
-    },
-    {
-      "race": "코치 12경주",
-      "horse_no": 10,
-      "recent_avg": 10.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-20"
-    },
-    {
-      "race": "미즈사와 1경주",
-      "horse_no": 4,
-      "recent_avg": 7.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-21"
-    },
-    {
-      "race": "미즈사와 1경주",
-      "horse_no": 6,
-      "recent_avg": 7.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-21"
-    },
-    {
-      "race": "미즈사와 1경주",
-      "horse_no": 2,
-      "recent_avg": 7.4,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-21"
-    },
-    {
       "race": "미즈사와 2경주",
       "horse_no": 3,
       "recent_avg": 7.8,
@@ -4700,16 +4650,62 @@
         "복승이상감지"
       ],
       "date": "2026-09-29"
+    },
+    {
+      "race": "미즈사와 10경주",
+      "horse_no": 4,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
+    },
+    {
+      "race": "미즈사와 10경주",
+      "horse_no": 11,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-09-29"
+    },
+    {
+      "race": "카나자와 8경주",
+      "horse_no": 6,
+      "recent_avg": 8.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
+    },
+    {
+      "race": "카나자와 8경주",
+      "horse_no": 5,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-09-29"
+    },
+    {
+      "race": "카나자와 8경주",
+      "horse_no": 9,
+      "recent_avg": 7.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9865,
-      "hit": 1514
+      "count": 9875,
+      "hit": 1516
     },
     "전체부진마": {
-      "count": 16268,
-      "hit": 4267
+      "count": 16285,
+      "hit": 4272
     },
     "대규모급락": {
       "count": 5,
@@ -4719,8 +4715,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6403,
-      "hit": 2753
+      "count": 6410,
+      "hit": 2756
     },
     "급락동반": {
       "count": 784,
@@ -5097,26 +5093,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2862,
+    "count": 2863,
     "hit": 2167,
     "cases": [
-      {
-        "race": "카와사키 4경주",
-        "date": "2026-09-26",
-        "smart_horses": [
-          2,
-          6,
-          3
-        ],
-        "placed": [
-          2,
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.9,
-        "high_odds": false
-      },
       {
         "race": "나라 4경주",
         "date": "2026-09-26",
@@ -6634,6 +6613,19 @@
           7
         ],
         "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "히라츠카 4경주",
+        "date": "2026-09-29",
+        "smart_horses": [
+          2,
+          5
+        ],
+        "placed": [],
+        "hit": false,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
