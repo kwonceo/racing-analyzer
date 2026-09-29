@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 9경주",
-      "horse_no": 5,
-      "recent_avg": 6.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-09-17"
-    },
-    {
-      "race": "몬베츠 9경주",
-      "horse_no": 5,
-      "recent_avg": 6.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-09-17"
-    },
-    {
-      "race": "나고야 9경주",
-      "horse_no": 1,
-      "recent_avg": 5.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-17"
-    },
-    {
       "race": "나고야 9경주",
       "horse_no": 1,
       "recent_avg": 5.0,
@@ -4688,16 +4662,46 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-09-28"
+    },
+    {
+      "race": "미즈사와 1경주",
+      "horse_no": 2,
+      "recent_avg": 11.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
+    },
+    {
+      "race": "미즈사와 1경주",
+      "horse_no": 10,
+      "recent_avg": 12.7,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
+    },
+    {
+      "race": "미즈사와 1경주",
+      "horse_no": 6,
+      "recent_avg": 9.3,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9709,
+      "count": 9715,
       "hit": 1501
     },
     "전체부진마": {
-      "count": 15977,
-      "hit": 4197
+      "count": 15987,
+      "hit": 4200
     },
     "대규모급락": {
       "count": 5,
@@ -4707,8 +4711,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6268,
-      "hit": 2696
+      "count": 6272,
+      "hit": 2699
     },
     "급락동반": {
       "count": 777,
