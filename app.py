@@ -32085,7 +32085,10 @@ _JP_BABA_CODE = {
     "金沢": "22", "카나자와": "22", "가나자와": "22", "笠松": "23", "카사마츠": "23",
     "名古屋": "24", "나고야": "24", "園田": "27", "소노다": "27",
     "姫路": "28", "히메지": "28", "高知": "31", "고치": "31", "코치": "31",
-    "佐賀": "32", "사가": "32", "帯広": "65", "오비히로": "65", "반에이": "65",
+    "佐賀": "32", "사가": "32", "帯広": "3", "오비히로": "3", "반에이": "3",
+    # 🔴 [2026-09-28] 오비히로(반에이)는 k_babaCode=**3** 이다. 종전 "65"(2026-07-18 부터)는 keiba.go.jp 가
+    #   빈 페이지(7.7KB · 着順 없음)를 돌려줘 결과 백필·확정배당·DebaTable 보강이 **전부 조용히 실패**했다.
+    #   실측 8~9월 오비히로 313경주 결과 0 (다른 NAR 99%+) · 2026/09/27 1R code 3 → 5-2-9 · 馬連複 540円.
 }
 
 
@@ -33695,10 +33698,16 @@ def _jp_result_backfill_once(date=None, verbose=True):
             if not rno:
                 continue
             tried += 1
+            # [2026-09-28] 계수기 keiba_backfill: reach = 시도 · fire = 착순 확보(원칙 23 · _gate_hit 은 fire 때 reach 도 올린다)
             top3 = _keiba_result_top3(baba, ymd, str(rno))
             if not top3 or len(top3) < 3:
                 fail_list.append({"raceKey": rk, "error": "결과 미게시/파싱 실패"})
+                # 🔴 [2026-09-28] 실패를 경기장 코드와 함께 센다 — 오비히로 코드 오류가 2달 조용했던 것은
+                #   이 실패가 목록에만 남고 어디서도 세어지지 않았기 때문이다(원칙 21·24).
+                _gate_hit("keiba_backfill", rk, reason="baba=%s" % baba, reach_only=True)
+                _gate_hit("keiba_backfill_fail", rk, reason="baba=%s" % baba, reach_only=True)
                 continue
+            _gate_hit("keiba_backfill", rk, reason="baba=%s" % baba)   # 발동 = 착순 확보
             result = {"1st": top3[0], "2nd": top3[1], "3rd": top3[2]}
             # 🔴 [경마 확정배당 배선 (2026-07-31)] 종전에는 착순만 저장하고 `payouts` 를 만들지 않아
             #   경마 확정배당 보유가 **0.9%(6/654)** 였다 — 경륜은 같은 시점 100% 였다.
