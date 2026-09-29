@@ -2,26 +2,6 @@
   "patterns": [
     {
       "race": "코치 2경주",
-      "horse_no": 4,
-      "recent_avg": 5.5,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-20"
-    },
-    {
-      "race": "코치 2경주",
-      "horse_no": 1,
-      "recent_avg": 8.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-09-20"
-    },
-    {
-      "race": "코치 2경주",
       "horse_no": 2,
       "recent_avg": 6.0,
       "win_place": 1,
@@ -4698,16 +4678,34 @@
         "복승이상감지"
       ],
       "date": "2026-09-29"
+    },
+    {
+      "race": "후나바시 3경주",
+      "horse_no": 10,
+      "recent_avg": 4.7,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-09-29"
+    },
+    {
+      "race": "후나바시 3경주",
+      "horse_no": 8,
+      "recent_avg": 7.0,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-09-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9814,
-      "hit": 1511
+      "count": 9817,
+      "hit": 1512
     },
     "전체부진마": {
-      "count": 16173,
-      "hit": 4249
+      "count": 16177,
+      "hit": 4251
     },
     "대규모급락": {
       "count": 5,
@@ -4717,8 +4715,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 6359,
-      "hit": 2738
+      "count": 6360,
+      "hit": 2739
     },
     "급락동반": {
       "count": 784,
@@ -5095,25 +5093,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 2847,
-    "hit": 2156,
+    "count": 2848,
+    "hit": 2157,
     "cases": [
-      {
-        "race": "기시와다 12경주",
-        "date": "2026-09-26",
-        "smart_horses": [
-          7,
-          1
-        ],
-        "placed": [
-          7,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 5.4,
-        "high_odds": false
-      },
       {
         "race": "벳푸 2경주",
         "date": "2026-09-26",
@@ -6622,6 +6604,23 @@
         ],
         "placed": [],
         "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "후나바시 3경주",
+        "date": "2026-09-29",
+        "smart_horses": [
+          10,
+          4,
+          5,
+          9
+        ],
+        "placed": [
+          10
+        ],
+        "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
