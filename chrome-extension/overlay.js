@@ -983,6 +983,7 @@
       });
       var keys = {}; (d.keyHorses || []).forEach(function (h) { keys[+h] = 1; });
       (d.darkHorses || []).forEach(function (h) {
+        if (h && h.hidden) return;   // [2026-10-06] 신호 없는 복병은 화면에서 뺀다(서버 hidden 표식)
         var n = +h.no; if (!keys[n] && role[n] !== 'cut' && role[n] !== 'weakcut') role[n] = 'dark';
       });
       return role;
@@ -2217,6 +2218,7 @@
         // 🔴 [2026-08-30] 근거 없는 ★ 억제 스위치 — 위 주석 참조
         var DARK_STARS_NEED_SIGNAL = true;
         (d.darkHorses || []).forEach(function (h) {
+          if (h && h.hidden) return;   // [2026-10-06 대표 승인] 신호 0(급락0·스마트X·forced X) 복병은 표시하지 않는다
           if (h.no == null || !inV(h.no) || baseKeys.indexOf(Number(h.no)) >= 0 || darkSeen[h.no]) return;
           darkSeen[h.no] = 1;
           var anom = Number(h.anomCount || 0), smart = !!h.smartMoney, forced = !!h.forced;
