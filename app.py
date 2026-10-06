@@ -35429,7 +35429,16 @@ def _jra_parse_result(html):
                 v = _jra_yen(c[2].split(" ")[0])
                 if v:
                     out["payouts"][_JRA_PAY_MAP[c[0]]] = v
-    out["finished"] = bool(out["order"]) and bool(out["payouts"])
+    # 🔴 [2026-09-27] **착순 1~3위가 다 있어야 확정이다.**
+    #   사고: 9월 서버 수집 중앙 47경주 **47/47** 이 `1st` 만 있고 `2nd·3rd=None`(order_full 1두).
+    #     발주+8분 시점 결과표가 1착 한 줄 + 배당만 보이는 상태였는데 종전 판정
+    #     `bool(order) and bool(payouts)` 가 그걸 확정으로 봤다. 같은 race_id 를 지금 받으면 13-4-3 전부 나온다.
+    #   ⇒ 1~3위 미달이면 미확정 → 호출부가 쓰지 않고 다음 주기(최대 발주+90분)에 다시 본다.
+    #   ⚠ 동착(同着)은 rank 가 겹칠 수 있어 「rank≤3 인 행 3개 이상 + 1위 있음」으로 본다.
+    _top = [x for x in out["order"] if x["rank"] <= 3]
+    out["finished"] = (len(_top) >= 3 and out["order"][0]["rank"] == 1) and bool(out["payouts"])
+    if out["order"] and out["payouts"] and not out["finished"]:
+        _gate_hit("jra_result_partial", None, "착순 %d행뿐(1~3위 미달)" % len(out["order"]))
     return out
 
 
@@ -35442,8 +35451,11 @@ def _jra_result_save(rk, parsed, race_id):
         return False
     d = json.load(open(p, encoding="utf-8"))
     res = d.get("result") or {}
-    if res.get("1st"):
+    if res.get("1st") and res.get("2nd"):
         return False                                    # ⚠ 이미 있으면 덮지 않는다
+    if res.get("1st"):
+        # 🔴 [2026-09-27] 1착만 남은 반쪽 결과는 채운다(종전엔 `1st` 만 보고 영구 동결 — 47/47).
+        _gate_hit("jra_result_refill", rk, "1착만 저장된 결과 보충")
     o = parsed["order"]
     res["1st"] = o[0]["no"] if len(o) > 0 else None
     res["2nd"] = o[1]["no"] if len(o) > 1 else None
