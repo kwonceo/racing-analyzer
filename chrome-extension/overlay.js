@@ -1893,6 +1893,25 @@
             panel.appendChild(_chg);
           }
         } catch (_) { /* */ }
+        // [📌 결론 상자 (2026-10-06 대표 「중구난방 · 뭘 사야 할지 모르겠다」)] 서버 corePicks.summaryBox 한 상자 —
+        //   축 · 상대 · 복승 · 삼복승 · 뺀 말. 표시 전용(명단 무변경) · 서버 SUMMARY_BOX_ENABLED=False 면 안 뜬다.
+        try {
+          var _sb = cp && cp.summaryBox;
+          if (_sb && _sb.axis != null && !d.recommendClosed && st.ovShowPicks !== false) {
+            var sbx = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #facc15;border-radius:9px;background:rgba(250,204,21,.14)');
+            sbx.appendChild(mk('div', 'font-weight:900;color:#facc15;font-size:16px',
+              '📌 결론 — 축 ' + _sb.axis + '번' + ((_sb.partners || []).length ? ' · 상대 ' + _sb.partners.join('·') + '번' : '')));
+            var _pl = (_sb.pairs || []).map(function (p) { return (p.combo || []).join('+') + (p.odds != null ? '(' + p.odds + ')' : ''); }).join(' · ');
+            if (_pl) sbx.appendChild(mk('div', 'font-size:14px;font-weight:800;color:#fde68a;margin-top:3px', '복승 ' + _pl));
+            var _tl = (_sb.trios || []).map(function (t) { return (t.combo || []).join('+') + (t.ins ? '(보험)' : ''); }).join(' · ');
+            if (_tl) sbx.appendChild(mk('div', 'font-size:13px;font-weight:700;color:#fde68a;margin-top:2px',
+              '삼복승 ' + _tl + (_sb.trioHasAxis === false ? ' ⚠ 축이 안 들어 있음' : '')));
+            if ((_sb.excluded || []).length) sbx.appendChild(mk('div', 'font-size:12px;color:#fca5a5;margin-top:2px',
+              '뺀 말 ' + _sb.excluded.map(function (e) { return e.no + '번' + (e.why ? '(' + e.why + ')' : ''); }).join(' · ')));
+            sbx.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-top:3px', '아래 신호 상자는 근거 · 살 것은 이 상자 하나'));
+            panel.appendChild(sbx);
+          }
+        } catch (_) { /* */ }
         if ((_fq.length || _dansung || _spAll.length) && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
           var cpBox = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
           cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요! (근거 기반)'));
@@ -2244,6 +2263,14 @@
         // 정렬: 우선순위 desc → 집중급락 횟수 desc → 마번 asc. 상위 3두만 표시.
         darkCands.sort(function (a, b) { return (b.pr - a.pr) || (b.anom - a.anom) || (a.no - b.no); });
         var darkTop = darkCands.slice(0, 3);
+        // [보조 상자 접기 (2026-10-06 대표 「정보가 많아 뭘 사야 될지 모르겠다」)] 복병·크로스·스마트머니 복승·시장 유력·실시간 추가는
+        //   <details> 안으로 — 기본 접힘 · 펼치면 종전 그대로(삭제 없음).
+        var auxBox = document.createElement('details');
+        auxBox.style.cssText = 'margin:4px 0';
+        var auxSum = document.createElement('summary');
+        auxSum.style.cssText = 'cursor:pointer;color:#94a3b8;font-size:12px;font-weight:700';
+        auxSum.textContent = '🔽 보조 신호 (복병 · 크로스 · 스마트머니 · 시장 유력 · 실시간) — 펼치기';
+        auxBox.appendChild(auxSum);
         darkTop.forEach(function (h) {
           // [2번] 복병 글씨 키움(마번·급락 18px)
           var db = mk('div', 'margin:3px 0;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap');
@@ -2252,7 +2279,7 @@
           db.appendChild(mk('span', 'font-weight:900;font-size:18px;color:' + h.col, h.no + '번'));
           var note = h.tag + (h.conf === '높음' ? ' · 신뢰↑' : '');
           db.appendChild(mk('span', 'font-size:14px;font-weight:800;color:' + h.col, note));
-          panel.appendChild(db);
+          auxBox.appendChild(db);
         });
 
         // [복승·쌍승 크로스 역배열] 강한(복승/쌍승 0.5+) 크로스 역배열 말 강조: "🔴 크로스 역배열 13번 복0.72·쌍0.61 🔁양쪽".
@@ -2265,7 +2292,7 @@
             ? ' (복' + (c.qScore != null ? c.qScore : '-') + '·쌍' + (c.xScore != null ? c.xScore : '-') + ')' : (' ' + c.score);
           cx.appendChild(mk('span', 'font-weight:800;color:' + col, c.level + ' 크로스 역배열 ' + c.no + '번' + qx + (c.both ? ' 🔁양쪽' : '')));
           if ((c.refs || []).length) cx.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:#fde68a', '→ ' + c.refs.join('·') + '번 1착 시 2착 강력'));
-          panel.appendChild(cx);
+          auxBox.appendChild(cx);
         });
         // [2번·스마트머니 복승 보조] 서버가 편성한 스마트머니 복승 보조를 강조 표시("복승 추가: 2+10 (스마트머니)").
         (d.smartQuinella || []).forEach(function (sq) {
@@ -2273,7 +2300,7 @@
           var sr = mk('div', 'margin:3px 0;padding:4px 8px;border-left:3px solid #fbbf24;background:rgba(251,191,36,.15);border-radius:6px');
           sr.appendChild(mk('span', 'font-weight:800;color:#fcd34d', '💰 복승 추가: ' + sq.combo.join('+')));
           sr.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:#fde68a', '(스마트머니' + (sq.odds != null ? ' · ' + sq.odds + '배' : '') + ')'));
-          panel.appendChild(sr);
+          auxBox.appendChild(sr);
         });
 
         // [3번·중복 제거] 📊 시장 유력(전적 미수집) — 저배당(5배↓)이라 유력마 편입된 말.
@@ -2284,7 +2311,7 @@
           var mf = mk('div', 'margin:2px 0;padding:3px 8px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.12);border-radius:6px;font-size:11px');
           mf.appendChild(mk('span', 'font-weight:800;color:#38bdf8', '📊 ' + m.no + '번 시장 유력'));
           mf.appendChild(mk('span', 'margin-left:5px;color:#7dd3fc', '배당 ' + m.odds + '배 (전적 미수집)'));
-          panel.appendChild(mf);
+          auxBox.appendChild(mf);
         });
 
         // [3번-실시간] ⚡ 실시간 추가 — 초반 유력마 고정 후 급락/역배열 감지로 편입된 말
@@ -2293,8 +2320,9 @@
           var ra = mk('div', 'margin:3px 0;padding:4px 8px;border-left:3px solid #22c55e;background:rgba(34,197,94,.15);border-radius:6px');
           ra.appendChild(mk('span', 'font-weight:800;color:#4ade80', '⚡ ' + r.no + '번 실시간 추가!'));
           ra.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:#bbf7d0', (r.reason || '') + ' 감지'));
-          panel.appendChild(ra);
+          auxBox.appendChild(ra);
         });
+        if (auxBox.childNodes.length > 1) panel.appendChild(auxBox);   // 내용 있을 때만 접힌 상자 노출
 
         // [3번] 핵심 신호 3~4줄 — 🔄 역배열 · 🔴 급락 · 💡 저배당 압축
         var sig = [];

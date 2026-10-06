@@ -6900,6 +6900,7 @@ def _win_exacta_reversal(fav_rank, curD, max_rank=4, src="단승"):
 
 
 MISMATCH_TEXT_V2 = True   # [2026-09-29] 복승불일치 문구 반전(표시 전용) · 되돌리기 False
+REVERSAL_TEXT_OFF_SPORTS = ("cycle",)   # [2026-10-06] 경륜 쌍승역전 문구·크로스 역배열 화면 제거(표시 전용) · 되돌리기 ()
 
 def _quinella_mismatch(fav_rank, curQ):
     """[2번] 복승 불일치 감지 공식. 단승 1+2위 예상 조합 vs 실제 최저복승.
@@ -13146,7 +13147,10 @@ def _triple_analyze(rk, rec):
                             "detail": f"시장이 {r['favored'][0]}번을 실질 1착으로 판단"})
     # [1번] 쌍승 역전 감지 공식 — 단승(복승인기) 유력마 vs 쌍승 방향 역전(비율 기반)
     # [2026-09-26] 표시 순서만 — 대표 줄(textGrouped 아님)을 맨 위로(안정 정렬 · 목록 자체는 무변경)
-    for r in sorted(wx_reversals, key=lambda _r: bool(_r.get("textGrouped")))[:5]:
+    # [2026-10-06 대표 승인 · 경륜 역배열 문구 끄기] 소급(9/29): 경륜 역배열은 82% 경주에 뜨고 도전마는 시장순위보다 덜 들어온다(−2.8%p)
+    #   → 경륜은 쌍승역전 문구·크로스 역배열을 화면에서 뺀다. 판정 입력(wx_reversals·신뢰도·_push_sig)은 무변경 · 되돌리기 REVERSAL_TEXT_OFF_SPORTS = ()
+    _rev_text_off = str((rec.get("sport") if isinstance(rec, dict) else "") or "") in REVERSAL_TEXT_OFF_SPORTS
+    for r in ([] if _rev_text_off else sorted(wx_reversals, key=lambda _r: bool(_r.get("textGrouped")))[:5]):
         signals.append({"level": r["level"], "type": "쌍승역전공식", "horse": r["challenger"],
                         "text": r["text"],
                         "detail": f"역전비율 = 쌍승({r['challenger']}→{r['favorite']}) {r['reverseExacta']} / "
@@ -14692,7 +14696,7 @@ def _triple_analyze(rk, rec):
         "highOddsCandidates": high_odds_candidates,   # [고배당 후보 발굴] 흐름 좋은 고배당(10배+ 하락) 말 → 삼복승 보험
         "midHighFavorites": mid_high_favorites,   # [💎 중고배당 유력마] 복승10배+ & 강한신호1개+ → 삼복승 보험·알림·학습
         "corePicks": core_picks,   # [핵심 추천·추천 과다 해결] 엄격 우선순위 축2두 → 복승 X+Y·삼복승 X+Y+Z(딱 이것만)
-        "crossReversal": cross_reversal,   # [복승 크로스 역배열] 각 말 실질 강세 점수(인기상위쌍 편차)·삼복승 편성
+        "crossReversal": ([] if _rev_text_off else cross_reversal),   # [복승 크로스 역배열] 경륜은 화면에서 뺀다(2026-10-06 · REVERSAL_TEXT_OFF_SPORTS)
         "smartQuinella": smart_quinella,   # [스마트머니 복승 보조] 스마트머니 복병 → 축과 복승 보조 자동 추가
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
@@ -14796,6 +14800,11 @@ def _triple_analyze(rk, rec):
         _sync_trio_to_q1(rk, _an_out)
     except Exception as _tqe:
         print("[삼복승 정합] 실패(무시·원본 표시):", str(_tqe)[:90])
+    # [삼복승 메인 우선 정렬 (2026-10-06 대표 승인)] 복승① 쌍을 담은 삼복승을 앞으로 · 보험은 뒤로 — 정렬만(함수 주석 참조)
+    try:
+        _trio_main_first(rk, _an_out)
+    except Exception as _tme:
+        print("[삼복승 정렬] 실패(무시·원본 표시):", str(_tme)[:90])
     # [T-2 화면 잠금 (2026-09-06 대표 승인)] 최종 명단이 확정된 **마지막** 자리 — 이 뒤로는 표시 필드를 건드리는 단계가 없다.
     #   실패 시 원본 그대로(잠금 없음). 🔧 되돌리기: T2_DISPLAY_LOCK_ENABLED = False
     # [⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 표시 전용 — T-2 잠금 **앞**에 계산해 함께 잠긴다(_T2_LOCK_KEYS).
@@ -14817,6 +14826,12 @@ def _triple_analyze(rk, rec):
             _an_out["corePicks"]["dropKeyRef"] = _dkr
     except Exception as _dke:
         print("[급락×유력 짝 참고] 실패(무시):", _dke)
+    # [📌 결론 상자 (2026-10-06 대표 승인)] 표시 전용 — 잠금 직전 명단으로 만들고 함께 잠근다(_T2_LOCK_KEYS)
+    try:
+        if isinstance(_an_out.get("corePicks"), dict):
+            _an_out["corePicks"]["summaryBox"] = _summary_box(rk, _an_out)
+    except Exception as _sbe:
+        print("[결론 상자] 실패(무시):", _sbe)
     try:
         _apply_t2_display_lock(rk, _an_out, cur_mb, after_close, curQ)
     except Exception as _t2le:
@@ -15060,7 +15075,7 @@ def _t5_items(fq):
 T2_DISPLAY_LOCK_ENABLED = True   # [2026-09-06 대표 승인] 🔧 되돌리기: False (한 줄)
 T2_DISPLAY_LOCK_MB = 2.0         # 마감 2분 전부터 회원 화면 명단을 잠근다(카톡 T-2 번복 차단과 같은 기준)
 _T2_LOCK = {}                    # rk → {"day", "at", "mb", "keys": {필드: 사본}}  (메모리 · 날짜 바뀌면 소멸)
-_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra", "keyPairsRef", "confTop1Ref", "dropKeyRef")   # 회원이 받는 것 전부(8/29 정의)
+_T2_LOCK_KEYS = ("finalQuinellas", "finalTrifectas", "bmedSpecial", "kakaoExtra", "keyPairsRef", "confTop1Ref", "dropKeyRef", "summaryBox")   # 회원이 받는 것 전부(8/29 정의)
 
 
 def _t2_combos(v):
@@ -15380,6 +15395,112 @@ def _sync_trio_to_q1(rk, an):
     ft.insert(0, item)
     cp["finalTrifectas"] = ft
     _gate_hit("trio_q1_sync", rk, "%s ← 복승① %s" % (item["combo"], sorted(pair)), once_key=rk)
+
+
+# [삼복승 메인 우선 정렬 (2026-10-06 대표 「복승 축과 삼복승이 안 맞는 건 더 웃기다 · 지금 바로 pull」)]
+#   finalTrifectas 를 「복승① 쌍을 담은 조합 먼저 · 그 안에서 '보험' 아닌 것 먼저」로 **정렬만** 한다(생성·삭제 없음).
+#   왜: 나라 3R(10/06) 화면 — 복승 메인 1+5 인데 삼복승은 5번 없는 1+4+7(보험)이 대표로 나갔다.
+#   소급(7~10월 · 확정 3連複 · 앞 2개 · 정제 없음 · 구좌=조합1):
+#     경마 2,945경주 적중 383→522 · 회수 62.9→70.1 · 3제외 57.2→65.4 (3분할 전부 상승)
+#     경륜 4,915경주 적중 1,127→1,329 · 회수 79.7→81.7 · 3제외 77.3→79.8 (3분할 2/3 상승 · 구간1 회수 −2.9)
+#   되돌리기 TRIO_MAIN_FIRST_SPORTS = () · 계수기 trio_main_first(도달=검사 · 발동=순서 변경)
+TRIO_MAIN_FIRST_SPORTS = ("horse", "cycle")
+
+
+def _trio_main_first(rk, an):
+    cp = (an or {}).get("corePicks")
+    if not isinstance(cp, dict):
+        return
+    sport = "cycle" if str((an or {}).get("sport") or "") == "cycle" else "horse"
+    if sport not in TRIO_MAIN_FIRST_SPORTS:
+        return
+    fq = [q for q in (cp.get("finalQuinellas") or []) if isinstance(q, dict) and len(q.get("combo") or []) == 2]
+    ft = list(cp.get("finalTrifectas") or [])
+    if not fq or len(ft) < 2:
+        return
+    try:
+        pair = set(int(x) for x in fq[0]["combo"])
+    except (TypeError, ValueError):
+        return
+    _gate_hit("trio_main_first", rk, None, reach_only=True)
+
+    def _cs(t):
+        try:
+            return set(int(x) for x in ((t or {}).get("combo") or []))
+        except (TypeError, ValueError):
+            return set()
+
+    def _ins(t):
+        return 1 if "보험" in str((t or {}).get("reason") or "") else 0
+    main = [t for t in ft if pair <= _cs(t)]
+    rest = [t for t in ft if not (pair <= _cs(t))]
+    main.sort(key=_ins)
+    rest.sort(key=_ins)
+    new = main + rest
+    if [id(t) for t in new[:2]] == [id(t) for t in ft[:2]]:
+        return
+    for t in new[:2]:
+        if isinstance(t, dict):
+            t["mainFirst"] = True
+    cp["finalTrifectas"] = new
+    _gate_hit("trio_main_first", rk, "%s ← 복승① %s" % ([list(_cs(t)) for t in new[:2]], sorted(pair)), once_key=rk)
+
+
+# [📌 결론 상자 (2026-10-06 대표 「정보가 많아 뭘 사야 될지 모르겠다」)] 표시 전용 — 최종 명단에서 축·상대·복승·삼복승·뺀 말을 한 상자로.
+#   입력은 잠금 직전의 finalQuinellas·finalTrifectas·elimination 뿐 · 판정·학습 무영향 · 되돌리기 SUMMARY_BOX_ENABLED = False
+SUMMARY_BOX_ENABLED = True
+
+
+def _summary_box(rk, an):
+    if not SUMMARY_BOX_ENABLED:
+        return None
+    cp = (an or {}).get("corePicks") or {}
+    fq = [q for q in (cp.get("finalQuinellas") or []) if isinstance(q, dict) and len(q.get("combo") or []) == 2]
+    ft = [t for t in (cp.get("finalTrifectas") or []) if isinstance(t, dict) and len(t.get("combo") or []) == 3]
+    if not fq:
+        return None
+    cnt, order = {}, []
+    for q in fq:
+        for h in q["combo"]:
+            try:
+                h = int(h)
+            except (TypeError, ValueError):
+                continue
+            cnt[h] = cnt.get(h, 0) + 1
+            if h not in order:
+                order.append(h)
+    if not order:
+        return None
+    axis = max(order, key=lambda h: (cnt[h], -order.index(h)))
+    partners = []
+    for q in fq:
+        for h in q["combo"]:
+            try:
+                h = int(h)
+            except (TypeError, ValueError):
+                continue
+            if h != axis and h not in partners:
+                partners.append(h)
+    pairs = [{"combo": [int(x) for x in q["combo"]], "odds": q.get("odds")} for q in fq[:4]]
+    trios = [{"combo": [int(x) for x in t["combo"]], "odds": t.get("odds"),
+              "ins": ("보험" in str(t.get("reason") or ""))} for t in ft[:2]]
+    excluded = []
+    for h in ((an or {}).get("elimination") or {}).get("horses") or []:
+        if not isinstance(h, dict) or h.get("no") is None or h.get("keep") or h.get("override"):
+            continue
+        if h.get("verdict") != "🔴":
+            continue
+        why = h.get("reason") or h.get("reasons") or h.get("why") or ""
+        if isinstance(why, (list, tuple)):
+            why = " · ".join(str(x) for x in why[:2])
+        try:
+            excluded.append({"no": int(h["no"]), "why": str(why)[:40]})
+        except (TypeError, ValueError):
+            continue
+        if len(excluded) >= 3:
+            break
+    return {"axis": axis, "partners": partners[:4], "pairs": pairs, "trios": trios, "excluded": excluded,
+            "trioHasAxis": (any(axis in t["combo"] for t in trios) if trios else None)}
 
 
 def _apply_t5_freeze(rk, an):
