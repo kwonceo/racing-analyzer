@@ -1895,6 +1895,7 @@
         } catch (_) { /* */ }
         // [📌 결론 상자 (2026-10-06 대표 「중구난방 · 뭘 사야 할지 모르겠다」)] 서버 corePicks.summaryBox 한 상자 —
         //   축 · 상대 · 복승 · 삼복승 · 뺀 말. 표시 전용(명단 무변경) · 서버 SUMMARY_BOX_ENABLED=False 면 안 뜬다.
+        var _topBox = null;   // [2026-10-06 대표 「유력마와 복병 정보도 위쪽에 올려놔」] 결론 상자 — 아래 유력마·복병 줄이 이 안으로 들어간다
         try {
           var _sb = cp && cp.summaryBox;
           if (_sb && _sb.axis != null && !d.recommendClosed && st.ovShowPicks !== false) {
@@ -1910,6 +1911,7 @@
               '뺀 말 ' + _sb.excluded.map(function (e) { return e.no + '번' + (e.why ? '(' + e.why + ')' : ''); }).join(' · ')));
             sbx.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-top:3px', '아래 신호 상자는 근거 · 살 것은 이 상자 하나'));
             panel.appendChild(sbx);
+            _topBox = sbx;
           }
         } catch (_) { /* */ }
         if ((_fq.length || _dansung || _spAll.length) && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
@@ -2207,7 +2209,7 @@
           var kr = mk('div', 'margin:4px 0;display:flex;align-items:baseline;gap:4px');
           kr.appendChild(mk('span', 'color:#94a3b8;font-size:14px', '⭐ 유력마 '));
           kr.appendChild(mk('span', 'font-weight:800;font-size:18px;color:#4ea1ff', baseKeys.slice(0, 3).join(' · ')));
-          panel.appendChild(kr);
+          (_topBox || panel).appendChild(kr);   // 결론 상자가 있으면 그 안으로(2026-10-06)
         }
         // [1번·복병 정리] 복병 최대 3두 + 우선순위: ①스마트머니+집중급락 동시 ②집중급락 횟수 많은 순 ③역배열 감지 말.
         //   기존 6두 나열 → 상위 3두만(가장 강한 신호). 후보를 점수화해 정렬 후 상위 3두 렌더.
@@ -2269,7 +2271,7 @@
         auxBox.style.cssText = 'margin:4px 0';
         var auxSum = document.createElement('summary');
         auxSum.style.cssText = 'cursor:pointer;color:#94a3b8;font-size:12px;font-weight:700';
-        auxSum.textContent = '🔽 보조 신호 (복병 · 크로스 · 스마트머니 · 시장 유력 · 실시간) — 펼치기';
+        auxSum.textContent = '🔽 보조 신호 (크로스 · 스마트머니 · 시장 유력 · 실시간) — 펼치기';
         auxBox.appendChild(auxSum);
         darkTop.forEach(function (h) {
           // [2번] 복병 글씨 키움(마번·급락 18px)
@@ -2279,7 +2281,7 @@
           db.appendChild(mk('span', 'font-weight:900;font-size:18px;color:' + h.col, h.no + '번'));
           var note = h.tag + (h.conf === '높음' ? ' · 신뢰↑' : '');
           db.appendChild(mk('span', 'font-size:14px;font-weight:800;color:' + h.col, note));
-          auxBox.appendChild(db);
+          (_topBox || auxBox).appendChild(db);   // 결론 상자가 있으면 그 안으로 · 없으면 접힌 보조 상자(2026-10-06)
         });
 
         // [복승·쌍승 크로스 역배열] 강한(복승/쌍승 0.5+) 크로스 역배열 말 강조: "🔴 크로스 역배열 13번 복0.72·쌍0.61 🔁양쪽".
