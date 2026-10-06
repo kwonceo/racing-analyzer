@@ -14805,6 +14805,11 @@ def _triple_analyze(rk, rec):
         _trio_main_first(rk, _an_out)
     except Exception as _tme:
         print("[삼복승 정렬] 실패(무시·원본 표시):", str(_tme)[:90])
+    # [복병 표시 조건 좁히기 (2026-10-06 대표 승인)] 신호 없는 복병에 hidden 표식 — 화면만 거른다(함수 주석 참조)
+    try:
+        _dark_hide_flags(rk, _an_out)
+    except Exception as _dhe:
+        print("[복병 표시 조건] 실패(무시·원본 표시):", str(_dhe)[:90])
     # [T-2 화면 잠금 (2026-09-06 대표 승인)] 최종 명단이 확정된 **마지막** 자리 — 이 뒤로는 표시 필드를 건드리는 단계가 없다.
     #   실패 시 원본 그대로(잠금 없음). 🔧 되돌리기: T2_DISPLAY_LOCK_ENABLED = False
     # [⭐ 유력마 3두 전조합 참고 (2026-09-06 대표 승인)] 표시 전용 — T-2 잠금 **앞**에 계산해 함께 잠긴다(_T2_LOCK_KEYS).
@@ -15444,6 +15449,38 @@ def _trio_main_first(rk, an):
             t["mainFirst"] = True
     cp["finalTrifectas"] = new
     _gate_hit("trio_main_first", rk, "%s ← 복승① %s" % ([list(_cs(t)) for t in new[:2]], sorted(pair)), once_key=rk)
+
+
+# [🐎 복병 표시 조건 좁히기 (2026-10-06 대표 「복병 조건 좁히기 승인 진행해」)] 표시 전용 — an["darkHorses"] 항목에 hidden 표식만 붙인다.
+#   소급(7~10월 · 유력마 제외 · 대조=같은 시장순위 1·2착률): 복병이 뜨는 경주 경마 89% · 경륜 92%(원칙 18 범위 밖)
+#     신호 0(집중급락 0회·스마트머니 X·forced X) = 경마 6,039두/85% 경주 −0.8%p · 경륜 9,872두/89% −0.1%p ⇒ 숨긴다
+#     스마트머니 경마 +0.4(20% 경주) · 경륜 +3.8(15%) · 집중급락 1회+ 경마 +0.6(25%) · 경륜 +3.9(16%) · forced 경마 +1.2(7%) ⇒ 남긴다
+#   🔴 판정 무변경: 복병 삼복승(darkHorsePicks)·신호말 순서·학습 태깅은 an["darkHorses"] 전체를 그대로 읽는다 — 화면(오버레이·웹)만 hidden 을 거른다
+#   되돌리기 DARK_SHOW_NEED_SIGNAL = False · 계수기 dark_hide(도달=복병 있음 · 발동=숨긴 말 있음)
+DARK_SHOW_NEED_SIGNAL = True
+
+
+def _dark_hide_flags(rk, an):
+    if not DARK_SHOW_NEED_SIGNAL:
+        return
+    darks = (an or {}).get("darkHorses")
+    if not isinstance(darks, list) or not darks:
+        return
+    _gate_hit("dark_hide", rk, None, reach_only=True)
+    hid = []
+    for h in darks:
+        if not isinstance(h, dict):
+            continue
+        try:
+            cnt = int(h.get("anomCount") or 0)
+        except (TypeError, ValueError):
+            cnt = 0
+        weak = (cnt <= 0) and not h.get("smartMoney") and not h.get("forced")
+        h["hidden"] = bool(weak)
+        if weak:
+            hid.append(h.get("no"))
+    if hid:
+        _gate_hit("dark_hide", rk, "숨김 %s / 전체 %d" % (hid, len(darks)), once_key=rk)
 
 
 # [📌 결론 상자 (2026-10-06 대표 「정보가 많아 뭘 사야 될지 모르겠다」)] 표시 전용 — 최종 명단에서 축·상대·복승·삼복승·뺀 말을 한 상자로.

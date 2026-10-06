@@ -2453,7 +2453,7 @@
 
     // ── 섹션 5: 복병 주목 ──
     const darkRows = [];
-    (a.darkHorses || []).slice(0, 3).forEach((d) => {
+    (a.darkHorses || []).filter((d) => !(d && d.hidden)).slice(0, 3).forEach((d) => {   // [2026-10-06] 신호 없는 복병 숨김
       const tags = [];
       if (d.smartMoney) tags.push('큰손 자금 감지');
       if (d.drop != null) tags.push(`급락 ${Math.round(Math.abs(d.drop))}%`);
@@ -4483,7 +4483,7 @@
   // [복병_집중급락 패턴] 집중급락 10회+/스마트머니 말 → 배당순위 무관 복병 자동 편입(마에바시 8R 학습).
   function renderDarkHorses(a) {
     const keys = new Set((a.keyHorses || []).map(Number));       // 유력마는 복병 아님(중복 제거)
-    const dh = ((a && a.darkHorses) || []).filter((h) => !keys.has(Number(h.no))).slice(0, 4);
+    const dh = ((a && a.darkHorses) || []).filter((h) => !(h && h.hidden) && !keys.has(Number(h.no))).slice(0, 4);   // [2026-10-06] hidden 제외
     if (!dh.length) return '';
     return dh.map((h) => {
       const stars = h.stars || (h.smartMoney ? 3 : h.forced ? 1 : 2);
@@ -5302,6 +5302,7 @@
     const map = _horseRoleMap(a);                 // fav / cut / weakcut
     const keys = new Set((a.keyHorses || []).map(Number));
     ((a && a.darkHorses) || []).forEach((h) => {
+      if (h && h.hidden) return;   // [2026-10-06] 신호 없는 복병 숨김
       const n = Number(h.no);
       if (!keys.has(n) && map[n] !== 'cut' && map[n] !== 'weakcut') map[n] = 'dark';
     });
@@ -7353,7 +7354,7 @@
     const kh = (a.keyHorses || []).map(Number);
     if (kh[0] != null && st[kh[0]] !== undefined) st[kh[0]] = 'AXIS';               // 복승 메인 첫째 → 축
     kh.slice(1).forEach((n) => { if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'MAIN'; });   // 나머지 유력마 → 주력
-    (a.darkHorses || []).forEach((h) => { const n = Number(h.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DARK'; });   // 복병/스마트머니 → 복병
+    (a.darkHorses || []).forEach((h) => { if (h && h.hidden) return; const n = Number(h.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DARK'; });   // 복병/스마트머니 → 복병 · [2026-10-06] hidden 제외
     (a.midHighFavorites || []).forEach((h) => { const n = Number(h.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DARK'; });
     (a.eliminationStrong || []).forEach((e) => { const n = Number(e.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DROP'; });   // 제거마 → 제거
     return st;
