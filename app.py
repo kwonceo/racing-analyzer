@@ -15410,6 +15410,12 @@ def _sync_trio_to_q1(rk, an):
 #     경륜 4,915경주 적중 1,127→1,329 · 회수 79.7→81.7 · 3제외 77.3→79.8 (3분할 2/3 상승 · 구간1 회수 −2.9)
 #   되돌리기 TRIO_MAIN_FIRST_SPORTS = () · 계수기 trio_main_first(도달=검사 · 발동=순서 변경)
 TRIO_MAIN_FIRST_SPORTS = ("horse", "cycle")
+# [2026-10-09 대표 승인 · 시즈오카 9R 「신호는 5번인데 삼복승 1추천이 2+4+6 · 2+4+5 가 배당도 더 낮았다」]
+#   메인 후보(복승① 쌍 포함)가 둘 이상이면 실배당 낮은 쪽을 첫자리로 — **경마만**(삼복승 trioShadow · 판정 명단 무변경 · 카톡·화면 첫 삼복승만)
+#   소급(7~10월 · 확정 3連複 · 메인 후보 2개+ · 첫자리 1구좌): 경마 2,797경주 적중 219→312 · 회수 57.8→71.2 · 3제외 53.5→67.5 (3분할 62/58/53 → 77/71/65 전부↑)
+#     경륜 4,783경주는 적중 617→693 · 회수 82.6→78.1 · 3제외 79.7→74.3 ⇒ 경륜 제외(현행 「확신도1위」 셋째 유지)
+#   되돌리기 TRIO_MAIN_ODDS_FIRST_SPORTS = () · 계수기 trio_main_first(종전 그대로)
+TRIO_MAIN_ODDS_FIRST_SPORTS = ("horse",)
 
 
 def _trio_main_first(rk, an):
@@ -15437,9 +15443,19 @@ def _trio_main_first(rk, an):
 
     def _ins(t):
         return 1 if "보험" in str((t or {}).get("reason") or "") else 0
+
+    def _real_odds(t):
+        o = (t or {}).get("odds")
+        if (t or {}).get("estimated") or not isinstance(o, (int, float)) or o <= 0:
+            return None
+        return float(o)
     main = [t for t in ft if pair <= _cs(t)]
     rest = [t for t in ft if not (pair <= _cs(t))]
-    main.sort(key=_ins)
+    if sport in TRIO_MAIN_ODDS_FIRST_SPORTS:
+        # [2026-10-09] 메인 후보끼리는 실배당 낮은 순(실배당 있는 것 먼저) · 추정배당은 뒤에서 보험 순 — 리플레이와 같은 정의
+        main.sort(key=lambda t: (0, _real_odds(t), 0) if _real_odds(t) is not None else (1, 0.0, _ins(t)))
+    else:
+        main.sort(key=_ins)
     rest.sort(key=_ins)
     new = main + rest
     if [id(t) for t in new[:2]] == [id(t) for t in ft[:2]]:
