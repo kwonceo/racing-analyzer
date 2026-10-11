@@ -1,4 +1,42 @@
 <!--REPORT-->
+# [2026-10-11] 다음 경주 자동 전환 복구(확장 2.1.182) · 🔴 GitHub 백업 11일 공백 복구 — 원인 둘(서버 SYSTEM 계정 push 영구 대기 · data/prerace 빈 폴더 pathspec) · 759파일 즉시 업로드
+
+- 시각: 2026-10-11 14:37:15
+- 커밋(작성 시점 HEAD): 0f3001e82
+  ⚠ 이 보고가 담긴 커밋은 보통 **그 다음 커밋**이다(작성 후 커밋하므로).
+
+## 1부. 쉬운 설명
+
+대표 「권한 무시로 변경 · 모든 작업 승인」 · 「경주가 자동으로 다음 경주로 못 넘어간다」.
+① 다음 경주 전환  서버 로그에 배당판 3종(J·JC·H) 동시 수신 = 탭 3개 · 8/30 MULTI_TAB_NO_RELOAD 가 탭 2개+ 면 새로고침을 통째로 건너뜀 ⇒ 어느 탭도 안 넘어감
+   수정(확장 2.1.182 · 운영 확장 파일 체크아웃 · 대표 재로드): RACE_FINISHED 보낸 탭 id 기록 → +15초 그 탭만 reload → 60초 뒤 content BOARD_RK 로 아직 같은 경주면 재시도(최대 3회·15분) · 다른 탭 무변경 · 탭 1개면 종전 · FINISHED_TAB_RELOAD
+   자기검증 7/7(크롬 API 모의: 마감 탭만 · 재시도 · 넘어가면 정리 · 중복 통지 1회 · 탭 1개 종전 · 최대 3회)
+② 🔴 백업 11일 공백  서버 8011 은 9/30 10:41 워치독(SYSTEM) 재기동 이후 SYSTEM 계정 → GitHub 자격 없음 → push 가 git-credential-manager 대기로 영구 정지
+   9/30 11:15·12:13 push 프로세스 10개(git·git-remote-https·credential-manager) 지금도 잔존 · 접근 거부로 종료 불가(관리자 필요)
+   10/02 부터는 data/prerace 빈 폴더가 commit pathspec 에 들어가 「did not match any file」 rc=1 → 로컬 커밋조차 실패
+   수정(원본 app.py · 운영은 21:30 이후 자동 pull): commit 경로 = ls-files 비지 않은 것만(backup_pathspec_skip) · push env GCM_INTERACTIVE=never·GIT_TERMINAL_PROMPT=0(즉시 실패 · backup_push_fail)
+   즉시 조치: 운영에서 대표 계정으로 수동 커밋 759파일 → origin data-backup 브랜치 푸시(fa7267b98 · 서버 재기동 없음)
+   상시: scripts/push_data_backup_loop.bat 30분마다 HEAD→data-backup 강제 푸시 · 시작프로그램 keiba_data_push.vbs(숨김) · 예약작업은 「Access denied」(관리자 필요)라 대체
+③ 운영 반영  scripts/pull_after_races.ps1 1회용 기동 — 21:30 이후 배당 틱 20분 없으면 pull(10/09 경마 삼복승 · 백업 수정) → 문법 · health · master push · logs/pull_after_races.log
+
+## 2부. 예상
+
+데이터 수집은 정상이었고 사라진 것은 없다. 원격 백업만 11일 비었고 지금 채웠다. 다음 경주 전환은 확장 재로드 후 복구된다.
+
+## 3부. 결과
+
+대표: 확장 2.1.182 재로드 · (선택) 관리자 PowerShell 에서 멈춘 git 프로세스 10개 종료 · 근본: 서버를 SYSTEM 이 아닌 대표 계정으로 돌리거나 SYSTEM 용 GitHub 토큰 설정(토큰 입력은 대표가 직접) · 내일 확인: logs/pull_after_races.log · push_data_backup.log · 계수기 backup_pathspec_skip/backup_push_fail
+
+## 메타
+
+```
+{
+ "kind": "fix",
+ "files": "background.js,content.js,app.py,scripts"
+}
+```
+
+<!--REPORT-->
 # [2026-10-11] 데이터 점검 — 수집·결과는 정상 · 🔴 GitHub 자동 백업이 9/30 12:13 이후 11일째 실패(pathspec 'data/prerace') · 10/09 경마 삼복승 변경 운영 미반영
 
 - 시각: 2026-10-11 14:05:51

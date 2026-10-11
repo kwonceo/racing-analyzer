@@ -1574,6 +1574,18 @@ c8105d75a · e825326a3   「결과 자동백업: 이토 5경주 2-5-3」
 
 # ═══ 최근 일지 (2026-09-07) ═══
 
+# 🔴 [2026-10-11] **GitHub 백업 11일 공백 — 서버가 SYSTEM 계정이라 push 영구 대기 + data/prerace 빈 폴더 pathspec · 다음 경주 자동 전환 복구(확장 2.1.182)** (대표 「모든 작업 승인」)
+```
+백업   9/30 10:41 워치독(SYSTEM) 재기동 → 서버 SYSTEM 계정 → GitHub 자격 없음 → push 가 credential-manager 대기로 영구 정지(9/30 프로세스 10개 잔존 · 관리자만 종료 가능)
+       10/02~ data/prerace 빈 폴더가 commit pathspec 에 들어가 rc=1 ⇒ 9/30~10/11 「결과 자동백업」 0건 · 수집 자체는 정상(하루 91~153경주 · 결과 91~100%)
+수정   app.py commit 경로 = ls-files 비지 않은 것만(backup_pathspec_skip) · push env GCM_INTERACTIVE=never(backup_push_fail · 즉시 실패)
+       🔴 서버(SYSTEM)는 push 를 못 한다 ⇒ 업로드는 scripts/push_data_backup_loop.bat(대표 계정 · 30분 · HEAD→data-backup 강제) · 시작프로그램 keiba_data_push.vbs · 예약작업 등록은 Access denied
+즉시   759파일 수동 커밋 → origin data-backup(fa7267b98) · master 반영은 21:30 이후 scripts/pull_after_races.ps1(1회용) 이 pull·push
+전환   배당판 J·JC·H 3탭 → 8/30 MULTI_TAB_NO_RELOAD 가 새로고침 전부 생략 ⇒ RACE_FINISHED 보낸 탭만 reload(+15초 · BOARD_RK 확인 재시도 최대 3회) · FINISHED_TAB_RELOAD
+⚠ 근본  서버를 대표 계정으로 띄우거나 SYSTEM 용 GitHub 토큰(대표가 직접 입력) — 지금은 push 를 사용자 세션 루프가 대신한다
+```
+⏳ 내일: logs/pull_after_races.log(운영 반영) · logs/push_data_backup.log · 계수기 backup_pathspec_skip/backup_push_fail · 대표 확장 2.1.182 재로드 뒤 탭별 전환 콘솔 「[다음경주·탭별]」
+
 # ✅ [2026-10-09] **경마 삼복승 첫자리 = 메인 후보 중 실배당 최저 · 부산 4R·오이 10R·시즈오카 9R 화면 조사** (대표 승인 · 원본 커밋 · 🔴 운영 pull 은 경주 종료 후)
 ```
 계기   시즈오카 9R(5-4-2): 복승① 2+4 · 삼복승 2+4+6(「확신도1위」 셋째 · 추정) 이 2+4+5(초기급락 · 실배당 6.3) 앞 · 6번 45.6 > 5번 43.0 차이는 전부 급락속도 보정(+16/+8)
