@@ -495,6 +495,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   //   발주시각(timerDeadline)이 안 잡힌 사설 모의배당판에서도 전환 체인을 가동하는 핵심 경로.
   if (msg?.type === 'RACE_FINISHED') {
     (async () => {
+      try { await _markFinishedTab(_sender && _sender.tab && _sender.tab.id, msg.raceKey || ''); } catch (_) { /* */ }
       try { await _armNextRaceChain(msg.raceKey || '', 'finished'); } catch (_) { /* */ }
       sendResponse({ ok: true });
     })();
@@ -594,6 +595,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'nextRefresh') { _nextRaceRefresh(); return; }
   if (alarm.name === 'nextCollect') { _nextRaceCollect(); return; }
   if (alarm.name === 'nextAnalyze') { _nextRaceAnalyze(); return; }
+  // [2026-10-11] 탭 2개+ — 끝난 경주를 띄운 그 탭만 새로고침(finTab:<tabId>)
+  if (alarm.name.startsWith('finTab:')) { _reloadFinishedTab(alarm.name.slice(7)); return; }
   if (alarm.name !== 'resultCheck') return;
   const { resultTimer } = await chrome.storage.local.get({ resultTimer: null });
   if (!resultTimer) return;
@@ -1031,6 +1034,51 @@ async function _armNextRaceChain(raceKey, why) {
   chrome.alarms.create('nextAnalyze', { when: now + 72000 });   // +72초: 분석 + 전환 알림
   _setAutoStatus({ running: false, nextRace: 'waiting', why: why || '', raceKey: rk, t: now });
   console.log(`[다음경주] 발주시각 독립 전환 체인 가동(${why}) rk="${rk}"`);
+}
+
+/* 🔴 [2026-10-11 대표 「경주가 자동으로 다음 경주로 못 넘어가고 있다」] **탭이 2개 이상이면 끝난 경주를 띄운 그 탭만 새로고침한다.**
+ *   왜: 8/30 MULTI_TAB_NO_RELOAD 로 탭 2개+ 면 새로고침을 통째로 건너뛰었다(다른 탭의 경주를 지키려고)
+ *     ⇒ 경마(J)·경륜(JC)·한국(H) 배당판을 같이 열어 두면 **어느 탭도 다음 경주로 안 넘어갔다**(10/11 실측 3종 동시 수신).
+ *   방법: content.js _finishWatchdog 가 카운트다운 소멸 시 보내는 RACE_FINISHED 의 **보낸 탭 id** 를 기록 →
+ *     +15초에 그 탭만 reload → 60초 뒤 그 탭 배당판 경주(BOARD_RK)가 아직 끝난 경주면 다시 reload(최대 3회 · 15분 안).
+ *   ⚠ 다른 탭은 건드리지 않는다(8/30 취지 유지) · 탭 1개면 종전 경로(_nextRaceRefresh) 그대로 · autoNextRace=false 면 안 함.
+ *   🔧 되돌리기: FINISHED_TAB_RELOAD = false 한 줄. */
+const FINISHED_TAB_RELOAD = true;
+async function _markFinishedTab(tabId, rk) {
+  if (!FINISHED_TAB_RELOAD || tabId == null) return;
+  const cfg = await _autoCfg();
+  if (cfg.autoNextRace === false) return;
+  const tabs = await _findOddsTabs();
+  if (tabs.length < 2) return;                       // 탭 1개면 종전 체인이 새로고침한다
+  const { finishedTabs } = await chrome.storage.local.get({ finishedTabs: {} });
+  const cur = finishedTabs[tabId];
+  if (cur && cur.rk === (rk || '')) return;          // 같은 경주 중복 통지
+  finishedTabs[tabId] = { rk: rk || '', t: Date.now(), tries: 0 };
+  await chrome.storage.local.set({ finishedTabs });
+  chrome.alarms.create('finTab:' + tabId, { when: Date.now() + 15000 });
+  console.log('[다음경주·탭별] 마감 탭 ' + tabId + ' (' + (rk || '?') + ') → 15초 뒤 이 탭만 새로고침');
+}
+async function _reloadFinishedTab(tabIdStr) {
+  const tabId = Number(tabIdStr);
+  const { finishedTabs } = await chrome.storage.local.get({ finishedTabs: {} });
+  const st = finishedTabs[tabIdStr];
+  const _drop = async () => { delete finishedTabs[tabIdStr]; await chrome.storage.local.set({ finishedTabs }); };
+  if (!st) return;
+  if (st.tries >= 3 || Date.now() - st.t > 15 * 60000) { await _drop(); return; }
+  if (st.tries > 0) {                                  // 이미 한 번 새로고침했으면 넘어갔는지 확인
+    let rkNow = '';
+    try { const r = await chrome.tabs.sendMessage(tabId, { type: 'BOARD_RK' }); rkNow = (r && r.raceKey) || ''; } catch (_) { /* */ }
+    if (!rkNow || (st.rk && rkNow !== st.rk)) {        // 다음 경주로 넘어갔거나 판독 불가 → 그만
+      console.log('[다음경주·탭별] 탭 ' + tabId + ' 전환 확인(' + (st.rk || '?') + ' → ' + (rkNow || '판독 불가') + ')');
+      await _drop(); return;
+    }
+  }
+  try { await chrome.tabs.reload(tabId); } catch (_) { await _drop(); return; }   // 탭이 닫혔다
+  st.tries += 1; finishedTabs[tabIdStr] = st;
+  await chrome.storage.local.set({ finishedTabs });
+  chrome.alarms.create('finTab:' + tabIdStr, { when: Date.now() + 60000 });
+  _setAutoStatus({ running: false, nextRace: 'tab-refresh', tab: tabId, tries: st.tries, raceKey: st.rk, t: Date.now() });
+  console.log('[다음경주·탭별] 탭 ' + tabId + ' 새로고침 ' + st.tries + '회(' + (st.rk || '?') + ')');
 }
 
 async function _nextRaceRefresh() {
