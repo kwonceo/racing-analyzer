@@ -2916,6 +2916,13 @@
       return true; // async
     }
     // [4번] 미리보기: 전송 전 추출 결과 + 검증 + 상위 10조합 반환
+    // [2026-10-11] background 탭별 다음경주 전환이 「이 탭 배당판이 지금 몇 경주인가」를 묻는다(설정 override 무시 · 화면 그대로)
+    if (msg?.type === 'BOARD_RK') {
+      let rk = '';
+      try { rk = extractRaceKey() || ''; } catch (_) { rk = ''; }
+      sendResponse({ raceKey: rk });
+      return;
+    }
     if (msg?.type === 'PREVIEW') {
       getSettings().then(({ raceKey }) => {
         const payload = buildPayload(raceKey);
