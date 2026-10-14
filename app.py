@@ -15410,6 +15410,12 @@ def _sync_trio_to_q1(rk, an):
 #     경륜 4,915경주 적중 1,127→1,329 · 회수 79.7→81.7 · 3제외 77.3→79.8 (3분할 2/3 상승 · 구간1 회수 −2.9)
 #   되돌리기 TRIO_MAIN_FIRST_SPORTS = () · 계수기 trio_main_first(도달=검사 · 발동=순서 변경)
 TRIO_MAIN_FIRST_SPORTS = ("horse", "cycle")
+# [2026-10-09 대표 승인 · 시즈오카 9R 「신호는 5번인데 삼복승 1추천이 2+4+6 · 2+4+5 가 배당도 더 낮았다」]
+#   메인 후보(복승① 쌍 포함)가 둘 이상이면 실배당 낮은 쪽을 첫자리로 — **경마만**(삼복승 trioShadow · 판정 명단 무변경 · 카톡·화면 첫 삼복승만)
+#   소급(7~10월 · 확정 3連複 · 메인 후보 2개+ · 첫자리 1구좌): 경마 2,797경주 적중 219→312 · 회수 57.8→71.2 · 3제외 53.5→67.5 (3분할 62/58/53 → 77/71/65 전부↑)
+#     경륜 4,783경주는 적중 617→693 · 회수 82.6→78.1 · 3제외 79.7→74.3 ⇒ 경륜 제외(현행 「확신도1위」 셋째 유지)
+#   되돌리기 TRIO_MAIN_ODDS_FIRST_SPORTS = () · 계수기 trio_main_first(종전 그대로)
+TRIO_MAIN_ODDS_FIRST_SPORTS = ("horse",)
 
 
 def _trio_main_first(rk, an):
@@ -15437,9 +15443,19 @@ def _trio_main_first(rk, an):
 
     def _ins(t):
         return 1 if "보험" in str((t or {}).get("reason") or "") else 0
+
+    def _real_odds(t):
+        o = (t or {}).get("odds")
+        if (t or {}).get("estimated") or not isinstance(o, (int, float)) or o <= 0:
+            return None
+        return float(o)
     main = [t for t in ft if pair <= _cs(t)]
     rest = [t for t in ft if not (pair <= _cs(t))]
-    main.sort(key=_ins)
+    if sport in TRIO_MAIN_ODDS_FIRST_SPORTS:
+        # [2026-10-09] 메인 후보끼리는 실배당 낮은 순(실배당 있는 것 먼저) · 추정배당은 뒤에서 보험 순 — 리플레이와 같은 정의
+        main.sort(key=lambda t: (0, _real_odds(t), 0) if _real_odds(t) is not None else (1, 0.0, _ins(t)))
+    else:
+        main.sort(key=_ins)
     rest.sort(key=_ins)
     new = main + rest
     if [id(t) for t in new[:2]] == [id(t) for t in ft[:2]]:
@@ -21528,7 +21544,25 @@ def _run_data_git_backup(label):
         # 🔴 `errors="replace"` 가 없으면 **cp949 디코딩 실패로 stdout/stderr 가 통째로 비고**,
         #   그러면 "nothing to commit" 판정에 못 걸려 정상인데도 「commit 건너뜀」으로 찍힌 뒤
         #   **push 를 안 하고 return** 한다. 실측 268회 전부 빈 문자열이었다.
-        r = subprocess.run(_GIT + ["commit", "-m", msg, "--"] + paths,
+        # 🔴 [2026-10-11] **git 이 모르는 경로를 pathspec 에 넣으면 커밋 전체가 거부된다.**
+        #   실사고: data/prerace 가 빈 폴더(10/02 한국 세션 0경주 백업에서 파일 삭제) → os.path.exists 는 참 →
+        #     `error: pathspec 'data/prerace' did not match any file(s) known to git` rc=1 → **9/30~10/11 결과 자동백업 0건**
+        #   ⇒ 커밋 경로는 「git 이 아는 파일이 하나라도 있는 경로」만 넣는다(ls-files 비지 않음). 빠진 경로는 계수기로 센다.
+        _commit_paths, _unknown = [], []
+        for _cp in paths:
+            try:
+                _ls = subprocess.run(_GIT + ["ls-files", "--", _cp], cwd=root, timeout=30,
+                                     capture_output=True, text=True, errors="replace")
+                (_commit_paths if (_ls.returncode == 0 and (_ls.stdout or "").strip()) else _unknown).append(_cp)
+            except Exception:
+                _commit_paths.append(_cp)
+        if _unknown:
+            print("[데이터백업] git 이 모르는 경로 %d곳은 커밋에서 뺀다: %s" % (len(_unknown), ", ".join(_unknown)))
+            _gate_hit("backup_pathspec_skip", None, ",".join(_unknown)[:120])
+        if not _commit_paths:
+            print("[데이터백업] 🔴 커밋할 경로가 없다 — 건너뛴다")
+            return
+        r = subprocess.run(_GIT + ["commit", "-m", msg, "--"] + _commit_paths,
                            cwd=root, timeout=60, capture_output=True, text=True,
                            errors="replace")
         out = ((r.stdout or "") + (r.stderr or "")).strip()
@@ -21539,9 +21573,16 @@ def _run_data_git_backup(label):
             #   서버 계정에서만 훅이 실패하는데(내 셸에선 rc=0) 재현이 안 되므로 **원문을 길게 남긴다.**
             print("[데이터백업] commit 건너뜀(rc=%s):" % r.returncode, out[:1200])
             return
-        pr = subprocess.run(_GIT + ["push"], cwd=root, timeout=120, capture_output=True, text=True)
+        # 🔴 [2026-10-11] 서버가 SYSTEM 계정(워치독 재기동 · 9/30 10:41~)으로 돌면 GitHub 자격 증명이 없어
+        #   git-credential-manager 가 **보이지 않는 로그인 창을 영원히 기다린다** — 9/30 11:15·12:13 push 프로세스 10개가 11일째 잔존.
+        #   timeout=120 은 git.exe 만 죽이고 손자(git-remote-https·credential-manager)는 남긴다.
+        #   ⇒ 대화형 로그인을 끄고 즉시 실패하게 한다 · 실패는 계수기 backup_push_fail · 업로드는 대표 계정 예약작업(scripts/push_data_backup.bat)이 맡는다.
+        _penv = dict(os.environ, GCM_INTERACTIVE="never", GIT_TERMINAL_PROMPT="0", GIT_ASKPASS="echo")
+        pr = subprocess.run(_GIT + ["push"], cwd=root, timeout=120, capture_output=True, text=True,
+                            errors="replace", env=_penv)
         if pr.returncode != 0:
             print("[데이터백업] ⚠ push 실패(원격/인증/분기 diverge?):", (pr.stderr or "").strip()[:200])
+            _gate_hit("backup_push_fail", None, (pr.stderr or "").strip()[:120])
         else:
             print(f"[데이터백업] ✅ GitHub 반영: {msg}")
     except Exception as e:
