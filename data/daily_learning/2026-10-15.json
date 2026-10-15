@@ -1,0 +1,170 @@
+{
+ "date": "2026-10-15",
+ "results_summary": {
+  "total_races": 108,
+  "hits": 83,
+  "hit_rate": 76.9,
+  "profit": {
+   "net": 240200,
+   "settled": 108
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 9809,
+  "quality_score": 74,
+  "ai_ready_races": 77,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "나고야": {
+    "n": 12,
+    "hits": 9,
+    "hit_rate": 75.0
+   },
+   "나라": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "다마노": {
+    "n": 12,
+    "hits": 8,
+    "hit_rate": 66.7
+   },
+   "몬베츠": {
+    "n": 12,
+    "hits": 10,
+    "hit_rate": 83.3
+   },
+   "벳푸": {
+    "n": 12,
+    "hits": 8,
+    "hit_rate": 66.7
+   },
+   "소노다": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "카와사키": {
+    "n": 12,
+    "hits": 4,
+    "hit_rate": 33.3
+   },
+   "마에바시": {
+    "n": 11,
+    "hits": 10,
+    "hit_rate": 90.9
+   },
+   "아오모리": {
+    "n": 7,
+    "hits": 6,
+    "hit_rate": 85.7
+   },
+   "도요하시": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   },
+   "시즈오카": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   }
+  },
+  "by_field_size": {
+   "소두수(≤8)": {
+    "n": 64,
+    "hits": 52,
+    "hit_rate": 81.2
+   },
+   "중두수(9~12)": {
+    "n": 41,
+    "hits": 31,
+    "hit_rate": 75.6
+   },
+   "다두수(13+)": {
+    "n": 2,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "미상": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_time_zone": {
+   "오후": {
+    "n": 51,
+    "hits": 41,
+    "hit_rate": 80.4
+   },
+   "저녁": {
+    "n": 43,
+    "hits": 30,
+    "hit_rate": 69.8
+   },
+   "오전": {
+    "n": 14,
+    "hits": 12,
+    "hit_rate": 85.7
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 108,
+    "hits": 83,
+    "hit_rate": 76.9
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 108,
+    "hits": 83,
+    "hit_rate": 76.9
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 108,
+    "hits": 83,
+    "hit_rate": 76.9
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 53,
+   "n": 67,
+   "rate": 79.1
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 3,
+   "n": 16,
+   "rate": 18.8
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 352,
+   "n": 591,
+   "rate": 59.6
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 812,
+   "n": 1795,
+   "rate": 45.2
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-10-15 22:03:38"
+}
