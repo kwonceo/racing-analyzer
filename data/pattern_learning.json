@@ -5088,25 +5088,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3299,
-    "hit": 2479,
+    "count": 3300,
+    "hit": 2480,
     "cases": [
-      {
-        "race": "나고야 7경주",
-        "date": "2026-10-13",
-        "smart_horses": [
-          2,
-          10,
-          9
-        ],
-        "placed": [
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "몬베츠 3경주",
         "date": "2026-10-13",
@@ -6596,9 +6580,23 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "마에바시 6경주",
+        "date": "2026-10-15",
+        "smart_horses": [
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 4.8,
+        "high_odds": false
       }
     ],
-    "rate": 75.1,
+    "rate": 75.2,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
