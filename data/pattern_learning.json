@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카사마츠 8경주",
-      "horse_no": 7,
-      "recent_avg": 4.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-07"
-    },
-    {
       "race": "오이 2경주",
       "horse_no": 3,
       "recent_avg": 5.6,
@@ -4688,6 +4680,17 @@
         "복승이상감지"
       ],
       "date": "2026-10-15"
+    },
+    {
+      "race": "카와사키 6경주",
+      "horse_no": 1,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "급락31%",
+        "복승이상감지"
+      ],
+      "date": "2026-10-15"
     }
   ],
   "condition_stats": {
@@ -4696,8 +4699,8 @@
       "hit": 1729
     },
     "전체부진마": {
-      "count": 18922,
-      "hit": 4950
+      "count": 18930,
+      "hit": 4951
     },
     "대규모급락": {
       "count": 5,
@@ -4707,12 +4710,12 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7385,
-      "hit": 3221
+      "count": 7393,
+      "hit": 3222
     },
     "급락동반": {
-      "count": 814,
-      "hit": 223
+      "count": 818,
+      "hit": 224
     }
   },
   "bokbyeong_patterns": [
