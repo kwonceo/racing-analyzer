@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "오이 2경주",
-      "horse_no": 3,
-      "recent_avg": 5.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-07"
-    },
-    {
-      "race": "오이 2경주",
       "horse_no": 7,
       "recent_avg": 9.4,
       "win_place": 3,
@@ -4691,16 +4681,26 @@
         "복승이상감지"
       ],
       "date": "2026-10-15"
+    },
+    {
+      "race": "카와사키 7경주",
+      "horse_no": 3,
+      "recent_avg": 4.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-15"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 11537,
+      "count": 11543,
       "hit": 1729
     },
     "전체부진마": {
-      "count": 18930,
-      "hit": 4951
+      "count": 18938,
+      "hit": 4952
     },
     "대규모급락": {
       "count": 5,
@@ -4710,8 +4710,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7393,
-      "hit": 3222
+      "count": 7395,
+      "hit": 3223
     },
     "급락동반": {
       "count": 818,
@@ -5088,27 +5088,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3298,
+    "count": 3299,
     "hit": 2479,
     "cases": [
-      {
-        "race": "나고야 6경주",
-        "date": "2026-10-13",
-        "smart_horses": [
-          4,
-          1,
-          5,
-          2
-        ],
-        "placed": [
-          4,
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "나고야 7경주",
         "date": "2026-10-13",
@@ -6600,9 +6582,23 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "벳푸 6경주",
+        "date": "2026-10-15",
+        "smart_horses": [
+          3,
+          4,
+          6
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 75.2,
+    "rate": 75.1,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
