@@ -5781,6 +5781,37 @@ def _parse_combo_map(qd):
 KR_DROP_BANDS = [(10, 0.20, "🟡"), (5, 0.15, "🟠"), (2, 0.10, "🔴")]
 _TIER_RANK = {"🟡": 1, "🟠": 2, "🔴": 3}
 
+# 🔴 [2026-10-15 대표 「둘다 승인」] 급락 표시·등록의 두 가지 결함을 막는 상수.
+#   ⓐ **발주 임박·후 틱은 살 수 없다.** `minutes_before` 는 분 단위 반올림이라
+#     발주 27초 **뒤** 틱도 mb=0 · after_close=False 로 들어온다(카와사키 7R 17:55:27 실측 · 발주 17:55:00).
+#     그 틱을 최신값으로 쓰면 확정배당이 「🔴 마감급락 −30%」로 둔갑해 화면에 뜬다.
+#     ⇒ 2026-09-18 에 알림(late_drop MIN_SEC_BEFORE=30)에 이미 건 규칙을 **신호·급락말 등록에도** 건다.
+#   ⓑ **급락말이 잔돈 조합 하나로 올라간다.** `_excess_drop_analysis` 는 급락한 조합만 평균 내므로
+#     1,000배대 조합 하나가 −13% 면 그 말의 평균도 −13% → absStrong → 🔴 집중신호가 된다
+#     (나고야 9R 2번 = 2+10 1,052→913.9 하나 · 같은 시각 주력 2+7 은 오히려 +11% 상승).
+#     ⇒ 소급 18,799건: 급락 조합이 **전부 50배+** 인 등록 8,512건(45.3%)은 1·2착 **12.6%** 로
+#       무작위 기준선 24.3% 의 절반이고 3분할 13/13/12 로 일관. 남는 쪽은 36.5%(37/37/36).
+#     ⚠ 「조합 2개 이상」 가드는 **기각했다** — 조합 1개 등록이 26.9% 로 오히려 더 좋았다(2개 25.4 · 5개+ 20.5).
+#       나쁜 것은 조합 수가 아니라 **배당대**였다(원칙 20 이 켜기 전에 잡았다).
+#   ⚠ 문턱 50 은 이미 코드에 있는 값이다(`_time_based_drop_signals` 의 `highOdds` 기준) — 새로 훑어 고른 값이 아니다.
+#     100·200·300 도 같이 재 봤고 전부 같은 방향이다(제외군 9.6 / 7.0 / 6.0%).
+SIGNAL_LATE_SEC = 30.0            # 발주 N초 전부터는 「살 수 없는 틱」 — 🔧 되돌리기: 0
+DROP_HORSE_MIN_LOW_ODDS = 50.0    # 급락말 등록 요건: 급락 조합 중 직전배당 이 값 미만이 하나는 있어야 한다 · 🔧 되돌리기: 0
+
+
+def _tick_too_late(snap, deadline_epoch):
+    """이 스냅샷이 「살 수 없는 시점」(발주 SIGNAL_LATE_SEC 초 전~그 이후)인가.
+    ⚠ 판단 불가(시각·발주시각 결측)면 **False** — 막지 않는다(원칙 20: 애매하면 통과)."""
+    if not SIGNAL_LATE_SEC or not deadline_epoch:
+        return False
+    try:
+        t = float((snap or {}).get("t") or 0)
+    except (TypeError, ValueError):
+        return False
+    if t <= 0:
+        return False
+    return t >= float(deadline_epoch) - SIGNAL_LATE_SEC
+
 
 def _time_based_drop_signals(rk):
     """경주 히스토리(발주전분 기록)로 시간대별 마감 임박 급락 신호 생성.
@@ -5791,6 +5822,17 @@ def _time_based_drop_signals(rk):
     except Exception:
         return []
     snaps = [s for s in (doc.get("snapshots") or []) if s.get("minutes_before") is not None]
+    # 🔴 [2026-10-15 ⓐ] 발주 임박·후 틱을 최신값으로 쓰지 않는다 — 확정배당이 「마감급락」으로 둔갑한다.
+    #   ⚠ `minutes_before is not None` 만으로는 못 거른다. 발주 27초 뒤 틱도 분 반올림으로 mb=0 이다.
+    #   남는 것이 2틱 미만이면 **거르지 않는다**(판단 불가 시 종전 동작 · 원칙 20).
+    _dl0 = doc.get("deadline_epoch")
+    if _dl0:
+        _buyable = [s for s in snaps if not _tick_too_late(s, _dl0)]
+        if len(_buyable) >= 2:
+            if len(_buyable) != len(snaps):
+                _gate_hit("sig_late_tick_skip", rk, "발주 임박·후 틱 %d개 제외" % (len(snaps) - len(_buyable)),
+                          once_key=rk)
+            snaps = _buyable
     if len(snaps) < 2:
         return []
     latest = snaps[-1]
@@ -17781,14 +17823,38 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
                 signal_reason = f"{signal_horse}번 집중급락(평균 {_hi.get('avg')}%)"
         except Exception:
             signal_horse, signal_reason = None, None
+        # 🔴 [2026-10-15 ⓑ] 급락말 등록 재료 — 상단 SIGNAL_LATE_SEC·DROP_HORSE_MIN_LOW_ODDS 주석 참조.
+        #   _lo_backed = 급락 조합 중 **직전배당이 싼 것(50배 미만)을 하나라도 가진 말**.
+        #   이게 비어 있는 말은 잔돈 조합만 움직인 것이고 소급 1·2착 12.6%(무작위 24.3%)로 해롭다.
+        #   _late_tick = 발주 임박·후 틱(분 반올림으로 mb=0 인 발주 뒤 틱을 여기서 잡는다).
+        _lo_backed, _late_tick = set(), False
+        try:
+            if DROP_HORSE_MIN_LOW_ODDS:
+                for _d0 in (q_drops or []):
+                    _cb0 = _d0.get("combo") or []
+                    _po0 = prevQ.get(tuple(sorted(int(_x) for _x in _cb0)))
+                    if _po0 and float(_po0) < DROP_HORSE_MIN_LOW_ODDS:
+                        for _h0 in _cb0:
+                            _lo_backed.add(int(_h0))
+            _late_tick = _tick_too_late({"t": now}, doc.get("deadline_epoch"))
+        except Exception:
+            _lo_backed, _late_tick = set(), False
+
         # [초기 급락마 보존] 마감 5분+ 전에 절대 10%+ 급락(자금집중)된 말을 등록 → 마감까지 삼복승 보험 유지
         #   (후반 다른 말 대급락 재편에도 폐기 금지). 대규모 급락(노이즈)·마감후 제외, 최대 4두.
         try:
             _massish = len(q_drops) >= 30   # 대규모 동시급락(노이즈) 프록시 → 초기급락 보존 제외
-            if (minutes_before is not None and minutes_before >= 5 and not after_close and not _massish):
+            if (minutes_before is not None and minutes_before >= 5 and not after_close and not _massish
+                    and not _late_tick):   # [2026-10-15 ⓐ] 살 수 없는 틱에서는 등록하지 않는다
                 _edh = doc.setdefault("early_drop_horses", {})
                 for _no in (_exc.get("concentrated") or [])[:4]:
                     _hh = (_exc.get("horses") or {}).get(_no) or (_exc.get("horses") or {}).get(str(_no)) or {}
+                    # [2026-10-15 ⓑ] 잔돈(고배당) 조합만 움직인 말은 등록하지 않는다
+                    if (DROP_HORSE_MIN_LOW_ODDS and _lo_backed and int(_no) not in _lo_backed
+                            and str(_no) not in _edh):
+                        _gate_hit("drop_horse_highodds_skip", rk, "초반 %s번 · 급락 조합 전부 %d배+"
+                                  % (_no, int(DROP_HORSE_MIN_LOW_ODDS)), once_key="%s|e%s" % (rk, _no))
+                        continue
                     if _hh.get("absStrong") and len(_edh) < 4 and str(_no) not in _edh:
                         _edh[str(_no)] = {"firstTime": time.strftime("%H:%M:%S", time.localtime(now)),
                                           "firstMb": minutes_before, "firstPct": _hh.get("avg")}
@@ -17800,10 +17866,17 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
         #   대규모 급락(노이즈)·마감후 제외, 최대 4두.
         try:
             _massish2 = len(q_drops) >= 30
-            if (minutes_before is not None and minutes_before <= 2 and not after_close and not _massish2):
+            if (minutes_before is not None and minutes_before <= 2 and not after_close and not _massish2
+                    and not _late_tick):   # [2026-10-15 ⓐ] 발주 27초 뒤 틱이 mb=0 으로 들어오던 자리
                 _cdh = doc.setdefault("closing_drop_horses", {})
                 for _no in (_exc.get("concentrated") or [])[:4]:
                     _hh = (_exc.get("horses") or {}).get(_no) or (_exc.get("horses") or {}).get(str(_no)) or {}
+                    # [2026-10-15 ⓑ] 잔돈(고배당) 조합만 움직인 말은 등록하지 않는다
+                    if (DROP_HORSE_MIN_LOW_ODDS and _lo_backed and int(_no) not in _lo_backed
+                            and str(_no) not in _cdh):
+                        _gate_hit("drop_horse_highodds_skip", rk, "마감 %s번 · 급락 조합 전부 %d배+"
+                                  % (_no, int(DROP_HORSE_MIN_LOW_ODDS)), once_key="%s|c%s" % (rk, _no))
+                        continue
                     if _hh.get("absStrong") and len(_cdh) < 4 and str(_no) not in _cdh:
                         _cdh[str(_no)] = {"firstTime": time.strftime("%H:%M:%S", time.localtime(now)),
                                           "firstMb": minutes_before, "firstPct": _hh.get("avg")}
