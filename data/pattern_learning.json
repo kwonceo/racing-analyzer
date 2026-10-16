@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 10경주",
-      "horse_no": 10,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-07"
-    },
-    {
       "race": "몬베츠 11경주",
       "horse_no": 5,
       "recent_avg": 6.4,
@@ -4688,16 +4678,26 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-10-16"
+    },
+    {
+      "race": "나고야 7경주",
+      "horse_no": 4,
+      "recent_avg": 7.3,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-16"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 11652,
+      "count": 11654,
       "hit": 1748
     },
     "전체부진마": {
-      "count": 19097,
-      "hit": 4995
+      "count": 19100,
+      "hit": 4996
     },
     "대규모급락": {
       "count": 5,
@@ -4707,8 +4707,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7445,
-      "hit": 3247
+      "count": 7446,
+      "hit": 3248
     },
     "급락동반": {
       "count": 818,
