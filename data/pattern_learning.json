@@ -1,54 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 12경주",
-      "horse_no": 11,
-      "recent_avg": 5.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-08"
-    },
-    {
-      "race": "몬베츠 9경주",
-      "horse_no": 11,
-      "recent_avg": 5.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-08"
-    },
-    {
-      "race": "몬베츠 9경주",
-      "horse_no": 12,
-      "recent_avg": 7.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-08"
-    },
-    {
-      "race": "오이 9경주",
-      "horse_no": 8,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-08"
-    },
-    {
-      "race": "오이 9경주",
-      "horse_no": 4,
-      "recent_avg": 6.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-08"
-    },
-    {
       "race": "몬베츠 10경주",
       "horse_no": 5,
       "recent_avg": 9.4,
@@ -4672,16 +4624,62 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-10-17"
+    },
+    {
+      "race": "사가 11경주",
+      "horse_no": 8,
+      "recent_avg": 5.4,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-10-17"
+    },
+    {
+      "race": "사가 11경주",
+      "horse_no": 5,
+      "recent_avg": 5.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-17"
+    },
+    {
+      "race": "오비히로 12경주",
+      "horse_no": 5,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-17"
+    },
+    {
+      "race": "오비히로 12경주",
+      "horse_no": 8,
+      "recent_avg": 6.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-17"
+    },
+    {
+      "race": "오비히로 12경주",
+      "horse_no": 4,
+      "recent_avg": 5.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 11845,
-      "hit": 1773
+      "count": 11859,
+      "hit": 1775
     },
     "전체부진마": {
-      "count": 19372,
-      "hit": 5059
+      "count": 19392,
+      "hit": 5064
     },
     "대규모급락": {
       "count": 5,
@@ -4691,8 +4689,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7527,
-      "hit": 3286
+      "count": 7533,
+      "hit": 3289
     },
     "급락동반": {
       "count": 818,
