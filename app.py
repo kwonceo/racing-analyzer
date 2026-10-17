@@ -29888,6 +29888,54 @@ def _oddspark_parse_trio(html, max_no=18):
         return []
 
 
+def _keirin_parse_trio_popular(html, max_no=9):
+    """[경륜 삼복승 · 인기순 (2026-10-17)] oddspark 경륜 3連複 `viewType=1`(人気順) → [{combo:[a,b,c], odds}].
+    왜: 경륜 3連複 기본 화면은 「축 1개 × 행렬」 표라 'a-b-c' 문자열이 없다 → `_oddspark_parse_trio` 가
+      경륜 전 경주 0건이었다(10/17 실측 25/25경주 · 같은 서버의 NAR 삼복승은 정상).
+    인기순 화면은 낮은 배당 20개를 담고, 차번은 글자가 아니라 `<li class="nN">` 이름표다.
+    ⚠ '高オッズ順'(높은 배당 20개) 표는 읽지 않는다 — 앞쪽 인기순 표만. 실패·미발매 시 []."""
+    out = {}
+    try:
+        h = html or ""
+        cut = h.find("高オッズ順")
+        if cut > 0:
+            h = h[:cut]
+        for chunk in h.split('<ul class="trio">')[1:]:
+            ul, _, rest = chunk.partition("</ul>")
+            nos = [int(x) for x in re.findall(r'class="n(\d{1,2})"', ul)]
+            if len(nos) != 3:
+                continue
+            row = rest.split("</tr>", 1)[0]
+            m = re.search(r">\s*([\d,]{1,7}\.\d)\s*<", row)
+            if not m:
+                continue
+            o = float(m.group(1).replace(",", ""))
+            if len(set(nos)) != 3 or not all(1 <= n <= max_no for n in nos) or o <= 1.0:
+                continue
+            k = tuple(sorted(nos))
+            if out.get(k) is None or o < out[k]:
+                out[k] = o
+        return [{"combo": list(k), "odds": round(v, 1)} for k, v in sorted(out.items(), key=lambda kv: kv[1])]
+    except Exception:
+        return []
+
+
+KEIRIN_TRIO_FEED = False   # True 면 경륜 삼복승 실배당을 분석(trio)에 넣는다 · False = 기록만(logs/keirin_trio)
+_KEIRIN_TRIO_OBS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "keirin_trio")
+
+
+def _keirin_trio_obs_log(rk, ymd, trio):
+    """[관측] 경륜 삼복승 인기순 20개를 시각과 함께 한 줄씩 쌓는다(append 전용 · 실패해도 무시)."""
+    try:
+        os.makedirs(_KEIRIN_TRIO_OBS_DIR, exist_ok=True)
+        _p = os.path.join(_KEIRIN_TRIO_OBS_DIR, "%s.jsonl" % ymd)
+        with io.open(_p, "a", encoding="utf-8") as _f:
+            _f.write(json.dumps({"t": round(time.time(), 1), "rk": rk, "trio": trio},
+                                ensure_ascii=False) + "\n")
+    except Exception as _e:
+        print("[경륜 삼복승 관측] 기록 실패(무시):", str(_e)[:80])
+
+
 def _keirin_odds_url(jo, ymd, race, bet_type):
     """oddspark 경륜 배당 페이지 URL. betType 5=복승(2車複)·6=쌍승(2車単)."""
     return ("https://www.oddspark.com/keirin/Odds.do"
@@ -40108,7 +40156,19 @@ def _multi_collect_one(track, race, ymd):
             q = _keirin_parse_quinella(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 5)))
             x = _keirin_parse_exacta(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 6)))
             try:
-                tr3 = _oddspark_parse_trio(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 8)), max_no=9)
+                # [2026-10-17] 기본 화면(축×행렬)은 파서가 0건 → 인기순(viewType=1) 한 번으로 바꾼다(요청 수 동일).
+                #   낮은 배당 20개만 온다(전 조합 아님). 0건이면 종전 텍스트 파서로 한 번 더(무삭제 폴백).
+                _gate_hit("keirin_trio_pop", "%s %s경주" % (track.get("venue"), rno), "도달", reach_only=True)
+                _html_k3 = _keirin_fetch(_keirin_odds_url(jo, ymd, rno, 8) + "&viewType=1")
+                _k3 = _keirin_parse_trio_popular(_html_k3, max_no=9) or _oddspark_parse_trio(_html_k3, max_no=9)
+                if _k3:
+                    _gate_hit("keirin_trio_pop", "%s %s경주" % (track.get("venue"), rno),
+                              "%d개" % len(_k3), once_key="%s %s" % (track.get("venue"), rno))
+                    # 🔴 관측 먼저: 실배당이 분석에 들어가면 삼복승 18% 상한(trio_map 없을 때만)이 풀리고
+                    #   권장 비중·제거 공식 입력이 바뀐다 = 추천 경로 변경 → 리플레이 뒤 KEIRIN_TRIO_FEED 로 연다.
+                    _keirin_trio_obs_log("%s %s경주" % (track.get("venue"), rno), ymd, _k3)
+                    if KEIRIN_TRIO_FEED:
+                        tr3 = _k3
             except Exception as _te:
                 print("[다중경주] 경륜 삼복승 수집 실패(무시):", _te)
             sport, category = "cycle", "cycle"
