@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "오이 3경주",
-      "horse_no": 4,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-08"
-    },
-    {
-      "race": "오이 3경주",
       "horse_no": 6,
       "recent_avg": 4.0,
       "win_place": 1,
@@ -4676,16 +4666,24 @@
         "복승이상감지"
       ],
       "date": "2026-10-17"
+    },
+    {
+      "race": "오비히로 9경주",
+      "horse_no": 9,
+      "recent_avg": 7.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-10-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 11786,
-      "hit": 1767
+      "count": 11791,
+      "hit": 1768
     },
     "전체부진마": {
-      "count": 19295,
-      "hit": 5047
+      "count": 19300,
+      "hit": 5048
     },
     "대규모급락": {
       "count": 5,
