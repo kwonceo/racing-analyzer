@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카사마츠 7경주",
-      "horse_no": 6,
-      "recent_avg": 5.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-09"
-    },
-    {
-      "race": "부산 4경주",
-      "horse_no": 10,
-      "recent_avg": 6.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-09"
-    },
-    {
       "race": "부산 4경주",
       "horse_no": 2,
       "recent_avg": 7.4,
@@ -4674,16 +4656,32 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-10-18"
+    },
+    {
+      "race": "카나자와 4경주",
+      "horse_no": 3,
+      "recent_avg": 7.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-18"
+    },
+    {
+      "race": "카나자와 4경주",
+      "horse_no": 7,
+      "recent_avg": 7.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-10-18"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 11958,
-      "hit": 1782
+      "count": 11961,
+      "hit": 1784
     },
     "전체부진마": {
-      "count": 19527,
-      "hit": 5085
+      "count": 19533,
+      "hit": 5087
     },
     "대규모급락": {
       "count": 5,
@@ -4693,7 +4691,7 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7569,
+      "count": 7572,
       "hit": 3303
     },
     "급락동반": {
