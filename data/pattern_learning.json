@@ -4663,11 +4663,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 12038,
+      "count": 12041,
       "hit": 1799
     },
     "전체부진마": {
-      "count": 19659,
+      "count": 19662,
       "hit": 5119
     },
     "대규모급락": {
@@ -5056,25 +5056,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3425,
-    "hit": 2562,
+    "count": 3426,
+    "hit": 2563,
     "cases": [
-      {
-        "race": "욧카이치 6경주",
-        "date": "2026-10-16",
-        "smart_horses": [
-          2,
-          4,
-          5
-        ],
-        "placed": [
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": 4.6,
-        "quinella_odds": 2.5,
-        "high_odds": false
-      },
       {
         "race": "욧카이치 7경주",
         "date": "2026-10-16",
@@ -6565,6 +6549,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 6.2,
+        "high_odds": false
+      },
+      {
+        "race": "오비히로 7경주",
+        "date": "2026-10-18",
+        "smart_horses": [
+          2,
+          10
+        ],
+        "placed": [
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
