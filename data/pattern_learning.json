@@ -2,14 +2,6 @@
   "patterns": [
     {
       "race": "오비히로 2경주",
-      "horse_no": 6,
-      "recent_avg": 5.8,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-10-10"
-    },
-    {
-      "race": "오비히로 2경주",
       "horse_no": 7,
       "recent_avg": 5.4,
       "win_place": 3,
@@ -4659,16 +4651,26 @@
         "복승이상감지"
       ],
       "date": "2026-10-18"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 1,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-18"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 12041,
+      "count": 12047,
       "hit": 1799
     },
     "전체부진마": {
-      "count": 19662,
-      "hit": 5119
+      "count": 19669,
+      "hit": 5120
     },
     "대규모급락": {
       "count": 5,
@@ -4678,8 +4680,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7621,
-      "hit": 3320
+      "count": 7622,
+      "hit": 3321
     },
     "급락동반": {
       "count": 818,
