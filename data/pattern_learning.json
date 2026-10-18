@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "카사마츠 2경주",
-      "horse_no": 4,
-      "recent_avg": 4.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-09"
-    },
-    {
-      "race": "카사마츠 2경주",
       "horse_no": 3,
       "recent_avg": 4.8,
       "win_place": 2,
@@ -4674,16 +4664,26 @@
         "복승이상감지"
       ],
       "date": "2026-10-18"
+    },
+    {
+      "race": "카나자와 1경주",
+      "horse_no": 8,
+      "recent_avg": 4.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-18"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 11923,
+      "count": 11927,
       "hit": 1776
     },
     "전체부진마": {
-      "count": 19474,
-      "hit": 5070
+      "count": 19480,
+      "hit": 5071
     },
     "대규모급락": {
       "count": 5,
@@ -4693,8 +4693,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7551,
-      "hit": 3294
+      "count": 7553,
+      "hit": 3295
     },
     "급락동반": {
       "count": 818,
@@ -5071,26 +5071,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3395,
+    "count": 3396,
     "hit": 2540,
     "cases": [
-      {
-        "race": "마에바시 4경주",
-        "date": "2026-10-15",
-        "smart_horses": [
-          4,
-          1,
-          2
-        ],
-        "placed": [
-          4,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 6.5,
-        "high_odds": false
-      },
       {
         "race": "나고야 10경주",
         "date": "2026-10-15",
@@ -6568,6 +6551,20 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 4.4,
+        "high_odds": false
+      },
+      {
+        "race": "카나자와 1경주",
+        "date": "2026-10-18",
+        "smart_horses": [
+          6,
+          4,
+          7
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
