@@ -4666,7 +4666,7 @@
       "hit": 1816
     },
     "전체부진마": {
-      "count": 19840,
+      "count": 19847,
       "hit": 5164
     },
     "대규모급락": {
@@ -4677,11 +4677,11 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7691,
+      "count": 7698,
       "hit": 3348
     },
     "급락동반": {
-      "count": 821,
+      "count": 824,
       "hit": 225
     }
   },
@@ -5055,22 +5055,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3466,
-    "hit": 2591,
+    "count": 3467,
+    "hit": 2592,
     "cases": [
-      {
-        "race": "코치 6경주",
-        "date": "2026-10-17",
-        "smart_horses": [
-          3,
-          5
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 5.7,
-        "high_odds": false
-      },
       {
         "race": "코치 6경주",
         "date": "2026-10-17",
@@ -6595,6 +6582,23 @@
         ],
         "placed": [
           5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 11경주",
+        "date": "2026-10-19",
+        "smart_horses": [
+          5,
+          3,
+          2,
+          1
+        ],
+        "placed": [
+          3
         ],
         "hit": true,
         "trifecta_odds": null,
