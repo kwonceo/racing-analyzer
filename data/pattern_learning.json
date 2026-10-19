@@ -5047,43 +5047,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3482,
-    "hit": 2601,
+    "count": 3484,
+    "hit": 2602,
     "cases": [
-      {
-        "race": "코치 6경주",
-        "date": "2026-10-17",
-        "smart_horses": [
-          1,
-          4,
-          6
-        ],
-        "placed": [
-          1,
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 5.7,
-        "high_odds": false
-      },
-      {
-        "race": "코치 6경주",
-        "date": "2026-10-17",
-        "smart_horses": [
-          1,
-          4,
-          6
-        ],
-        "placed": [
-          1,
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 5.7,
-        "high_odds": false
-      },
       {
         "race": "시즈오카 5경주",
         "date": "2026-10-17",
@@ -6585,6 +6551,36 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 3.1,
+        "high_odds": false
+      },
+      {
+        "race": "나고야 10경주",
+        "date": "2026-10-19",
+        "smart_horses": [
+          8,
+          5
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": 4.0,
+        "high_odds": false
+      },
+      {
+        "race": "오비히로 10경주",
+        "date": "2026-10-19",
+        "smart_horses": [
+          10,
+          6,
+          1
+        ],
+        "placed": [
+          10,
+          6
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 4.8,
         "high_odds": false
       }
     ],
