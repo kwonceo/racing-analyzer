@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "모리오카 3경주",
-      "horse_no": 5,
-      "recent_avg": 8.4,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-11"
-    },
-    {
-      "race": "모리오카 3경주",
       "horse_no": 10,
       "recent_avg": 10.2,
       "win_place": 1,
@@ -4652,16 +4642,24 @@
         "복승이상감지"
       ],
       "date": "2026-10-20"
+    },
+    {
+      "race": "몬베츠 4경주",
+      "horse_no": 12,
+      "recent_avg": 7.7,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 12221,
-      "hit": 1830
+      "count": 12229,
+      "hit": 1831
     },
     "전체부진마": {
-      "count": 19965,
-      "hit": 5193
+      "count": 19973,
+      "hit": 5194
     },
     "대규모급락": {
       "count": 5,
@@ -5049,24 +5047,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3520,
-    "hit": 2631,
+    "count": 3521,
+    "hit": 2632,
     "cases": [
-      {
-        "race": "케이오카쿠 4경주",
-        "date": "2026-10-18",
-        "smart_horses": [
-          1,
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.8,
-        "high_odds": false
-      },
       {
         "race": "모리오카 10경주",
         "date": "2026-10-18",
@@ -6592,9 +6575,24 @@
         "trifecta_odds": null,
         "quinella_odds": 6.2,
         "high_odds": false
+      },
+      {
+        "race": "몬베츠 4경주",
+        "date": "2026-10-20",
+        "smart_horses": [
+          3,
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 10.3,
+        "high_odds": false
       }
     ],
-    "rate": 74.7,
+    "rate": 74.8,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
