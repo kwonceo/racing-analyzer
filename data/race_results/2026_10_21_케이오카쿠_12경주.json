@@ -1,0 +1,73 @@
+{
+ "race_id": "2026_10_21_케이오카쿠_12경주",
+ "raceKey": "케이오카쿠 12경주",
+ "date": "2026-10-21",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "케이오카쿠",
+ "round": 12,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 9,
+ "result": {
+  "1st": 5,
+  "2nd": 4,
+  "3rd": 8
+ },
+ "payouts": {
+  "quinella": 2.1,
+  "trifecta": 3.2
+ },
+ "payouts_approx": false,
+ "payout_source": "official",
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   6,
+   7,
+   8
+  ],
+  "eliminated": [
+   5,
+   9
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 2.1,
+  "trifecta_odds": 3.2,
+  "actual_return": null,
+  "profit": 1100
+ },
+ "memo": null,
+ "saved_at": "2026-10-21 00:33:49",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
