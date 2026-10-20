@@ -1,0 +1,71 @@
+{
+ "race_id": "2026_10_21_카와사키_10경주",
+ "raceKey": "카와사키 10경주",
+ "date": "2026-10-21",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "카와사키",
+ "round": 10,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 1,
+  "2nd": 7,
+  "3rd": 4
+ },
+ "payouts": {
+  "quinella": 6.7,
+  "trifecta": 52.7
+ },
+ "payouts_approx": false,
+ "payout_source": "official",
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7
+  ],
+  "eliminated": [
+   6
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 6.7,
+  "trifecta_odds": 52.7,
+  "actual_return": null,
+  "profit": 5700
+ },
+ "memo": null,
+ "saved_at": "2026-10-21 00:48:36",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
