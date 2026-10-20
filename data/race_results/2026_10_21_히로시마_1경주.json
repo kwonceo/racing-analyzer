@@ -1,0 +1,71 @@
+{
+ "race_id": "2026_10_21_히로시마_1경주",
+ "raceKey": "히로시마 1경주",
+ "date": "2026-10-21",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "히로시마",
+ "round": 1,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 1,
+  "2nd": 7,
+  "3rd": 2
+ },
+ "payouts": {
+  "quinella": 21.1,
+  "trifecta": 27.5
+ },
+ "payouts_approx": false,
+ "payout_source": "official",
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "eliminated": [
+   7
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 21.1,
+  "trifecta_odds": 27.5,
+  "actual_return": null,
+  "profit": 20100
+ },
+ "memo": null,
+ "saved_at": "2026-10-21 00:24:16",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
