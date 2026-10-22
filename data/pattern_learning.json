@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "모리오카 4경주",
-      "horse_no": 4,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-12"
-    },
-    {
-      "race": "모리오카 4경주",
       "horse_no": 9,
       "recent_avg": 7.2,
       "win_place": 3,
@@ -4640,16 +4630,26 @@
         "복승이상감지"
       ],
       "date": "2026-10-21"
+    },
+    {
+      "race": "카사마츠 1경주",
+      "horse_no": 5,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-22"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 12432,
+      "count": 12435,
       "hit": 1855
     },
     "전체부진마": {
-      "count": 20295,
-      "hit": 5273
+      "count": 20300,
+      "hit": 5274
     },
     "대규모급락": {
       "count": 5,
@@ -4659,8 +4659,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 7863,
-      "hit": 3418
+      "count": 7865,
+      "hit": 3419
     },
     "급락동반": {
       "count": 835,
