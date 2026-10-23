@@ -30118,6 +30118,15 @@ except Exception as _nge:
     print("[netkeiba] 요청제한 모듈 로드 실패(무시):", str(_nge)[:80])
 
 
+# 🔴 [2026-10-23] oddspark 403 회로 차단기 — 10/22 20:50 부터 Akamai Access Denied(IP 를 바꿔도 403).
+#   종전엔 403 을 받아도 매 사이클 계속 두드렸다(로그 640건+). 계속 두드리면 차단이 길어질 수 있다.
+#   ⇒ 403 이면 ODDSPARK_403_COOLDOWN_SEC 동안 oddspark 요청을 보내지 않고(즉시 예외) 그 뒤 1회만 시험한다.
+#   계수기: oddspark_403(fire=차단 진입 · 대기 창당 1회) · oddspark_403_skip(reach=건너뛴 요청 · 대기 창당 1회 기록)
+#   🔧 되돌리기: ODDSPARK_403_COOLDOWN_SEC = 0
+ODDSPARK_403_COOLDOWN_SEC = 1800
+_ODDSPARK_BLOCK = {"until": 0.0, "n403": 0, "skipped": 0, "since": None}
+
+
 def _keirin_fetch(url, mode="live"):
     """공용 fetch. ⚠ oddspark(경륜)·keiba.go.jp(지방)는 **종전과 완전히 동일**하게 지난다.
 
@@ -30146,13 +30155,33 @@ def _keirin_fetch(url, mode="live"):
                     break
         if not _ok:
             raise RuntimeError("netkeiba 요청 제한: %s" % _why)
+    _op = "oddspark.com" in (url or "") and ODDSPARK_403_COOLDOWN_SEC > 0
+    if _op and time.time() < _ODDSPARK_BLOCK["until"]:
+        _ODDSPARK_BLOCK["skipped"] += 1
+        _gate_hit("oddspark_403_skip", None, "대기", reach_only=True)
+        raise RuntimeError("oddspark 403 대기 중(%d초 남음 · 건너뜀 %d)"
+                           % (_ODDSPARK_BLOCK["until"] - time.time(), _ODDSPARK_BLOCK["skipped"]))
     req = Request(url, headers=dict(_ODDSPARK_HEADERS))
     try:
         _r = urlopen(req, timeout=15).read().decode("utf-8", "ignore")
     except Exception as _e:
         if _nk and netkeiba_guard is not None:
             netkeiba_guard.record(False, getattr(_e, "code", None))
+        if _op and getattr(_e, "code", None) == 403:
+            _ODDSPARK_BLOCK["n403"] += 1
+            _ODDSPARK_BLOCK["until"] = time.time() + ODDSPARK_403_COOLDOWN_SEC
+            if not _ODDSPARK_BLOCK["since"]:
+                _ODDSPARK_BLOCK["since"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            _gate_hit("oddspark_403", None, "403 · %d초 대기" % ODDSPARK_403_COOLDOWN_SEC,
+                      once_key="%d" % int(_ODDSPARK_BLOCK["until"]))
+            print("🔴 [oddspark 403] 차단 감지 %d회째 · %d분 동안 요청 중단(since %s) · %s"
+                  % (_ODDSPARK_BLOCK["n403"], ODDSPARK_403_COOLDOWN_SEC // 60,
+                     _ODDSPARK_BLOCK["since"], (url or "")[:70]))
         raise
+    if _op and _ODDSPARK_BLOCK["since"]:
+        print("🟢 [oddspark 403] 회복 · since %s · 403 %d회 · 건너뜀 %d"
+              % (_ODDSPARK_BLOCK["since"], _ODDSPARK_BLOCK["n403"], _ODDSPARK_BLOCK["skipped"]))
+        _ODDSPARK_BLOCK.update({"until": 0.0, "n403": 0, "skipped": 0, "since": None})
     if _nk and netkeiba_guard is not None:
         netkeiba_guard.record(True)
     return _r
