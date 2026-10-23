@@ -4652,11 +4652,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 12608,
+      "count": 12612,
       "hit": 1876
     },
     "전체부진마": {
-      "count": 20578,
+      "count": 20582,
       "hit": 5350
     },
     "대규모급락": {
@@ -5045,25 +5045,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3631,
-    "hit": 2710,
+    "count": 3632,
+    "hit": 2711,
     "cases": [
-      {
-        "race": "카나자와 11경주",
-        "date": "2026-10-20",
-        "smart_horses": [
-          3,
-          5,
-          7
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "우라와 11경주",
         "date": "2026-10-20",
@@ -6583,6 +6567,23 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": 7.0,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 8경주",
+        "date": "2026-10-23",
+        "smart_horses": [
+          8,
+          9,
+          10
+        ],
+        "placed": [
+          9,
+          10
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.7,
         "high_odds": false
       }
     ],
