@@ -39702,10 +39702,28 @@ def _nar_race_list(baba, ymd):
     return sorted(out, key=lambda r: r["raceNo"])
 
 
-def _nar_schedule(ymd):
-    """南関東 4장 중 오늘 개최분만 트랙 레코드로 반환(미개최=제외). oddspark 커버 경마장과 중복 없음."""
+# 🔴 [2026-10-23] oddspark 차단 폴백 — 10/22 20:50 부터 oddspark 403(IP 를 바꿔도 막힘).
+#   oddspark 가 개최 목록을 못 주면 나머지 NAR 경마장도 keiba.go.jp 로 배당을 받는다(南関東 경로를 그대로 재사용).
+#   발동 조건: oddspark 경마 개최 목록이 **비었을 때만**(정상일 땐 종전과 완전히 같다) · 이미 목록에 있는 경마장은 건너뜀.
+#   ⚠ 요청 수를 줄이려고 폴백 트랙은 삼복승(三連複)을 안 받는다(경마 삼복승은 판정 명단에 trioShadow · 단 복승/쌍승/단승은 받는다).
+#   계수기 nar_keiba_fallback(reach=스케줄 판정 · fire=폴백 트랙 추가 · 경마장 단위)
+#   🔧 되돌리기: NAR_KEIBA_FALLBACK_ENABLED = False
+NAR_KEIBA_FALLBACK_ENABLED = True
+NAR_KEIBA_FALLBACK_BABA = {"3": "오비히로", "10": "모리오카", "11": "미즈사와", "22": "카나자와",
+                           "23": "카사마츠", "24": "나고야", "27": "소노다", "28": "히메지",
+                           "31": "코치", "32": "사가"}
+
+
+def _nar_schedule(ymd, fallback=False, have=()):
+    """南関東 4장 중 오늘 개최분만 트랙 레코드로 반환(미개최=제외). oddspark 커버 경마장과 중복 없음.
+    fallback=True 면 oddspark 차단 폴백으로 NAR_KEIBA_FALLBACK_BABA 도 포함(have = 이미 있는 경마장 표준명)."""
     out = []
-    for baba, venue in NAR_NANKAN_BABA.items():
+    _babas = dict(NAR_NANKAN_BABA)
+    if fallback:
+        for _b, _v in NAR_KEIBA_FALLBACK_BABA.items():
+            if _track_norm(_v) not in have:
+                _babas.setdefault(_b, _v)
+    for baba, venue in _babas.items():
         try:
             races = _nar_race_list(baba, ymd)
         except Exception as e:
@@ -39713,9 +39731,13 @@ def _nar_schedule(ymd):
             continue
         if not races:
             continue
+        _fb = baba not in NAR_NANKAN_BABA
         out.append({"venue": venue, "narBaba": baba, "sport": "horse",
-                    "category": "japan_local", "races": races})
-        print("[南関東 스케줄] %s: %d경주 (keiba.go.jp baba=%s)" % (venue, len(races), baba))
+                    "category": "japan_local", "races": races, "narFallback": _fb})
+        if _fb:
+            _gate_hit("nar_keiba_fallback", venue, "%d경주" % len(races), once_key=venue)
+        print("[南関東 스케줄] %s: %d경주 (keiba.go.jp baba=%s%s)"
+              % (venue, len(races), baba, " · 🔴 oddspark 차단 폴백" if _fb else ""))
     return out
 
 
@@ -39741,7 +39763,11 @@ def _multi_schedule_fetch():
     # [南関東 병합 (2026-07-29)] oddspark 가 커버하지 않는 浦和·船橋·大井·川崎을 keiba.go.jp 로 병합.
     #   ⚠ 위 oddspark 트랙과 중복되지 않는다(南関東 4장은 oddspark 개최 목록에 애초에 없음 — 실측 확인).
     try:
-        for nt in _nar_schedule(ymd):
+        _fb = bool(NAR_KEIBA_FALLBACK_ENABLED and not tracks)
+        if NAR_KEIBA_FALLBACK_ENABLED:
+            _gate_hit("nar_keiba_fallback", None, "판정", reach_only=True)
+        _have = {_track_norm(t.get("venue")) for t in sched["tracks"]}
+        for nt in _nar_schedule(ymd, fallback=_fb, have=_have):
             sched["tracks"].append(nt)
     except Exception as e:
         print("[스케줄] 南関東 병합 실패(무시·기존 경마는 유지):", e)
@@ -40175,7 +40201,9 @@ def _multi_collect_one(track, race, ymd):
                 print("[南関東] 단승 수집 실패(무시):", _we)
             try:
                 # [삼복승] 앵커(1축) 기반 별도 파서 — 실배당 수집 시 `_trio_est` 추정배당보다 우선한다.
-                tr3 = _nar_parse_trio(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "trio")))
+                # [2026-10-23] oddspark 차단 폴백 트랙은 요청 수를 줄이려고 건너뛴다(keiba.go.jp 까지 막히면 결과·전적도 잃는다).
+                if not track.get("narFallback"):
+                    tr3 = _nar_parse_trio(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "trio")))
             except Exception as _te:
                 print("[南関東] 삼복승 수집 실패(무시):", _te)
             sport, category = "horse", "japan_local"
