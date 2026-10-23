@@ -2074,6 +2074,8 @@ _KEIRIN_ONLY_RE = re.compile(
     # [경륜 전용 지명 보강2 (2026-07-21)] 도야마·마쓰사카 미등록 → 동일 오분류 위험. 둘 다 경마장·경정장
     #   없는 경륜 전용 지명(富山경마장·松阪경정장 없음 확인) — 이중소속 아님.
     r"기시와다|키시와다|岸和田|도요하시|豊橋|구마모토|熊本|도야마|富山|마쓰사카|松阪|케이오각|"
+    # [2026-10-23] 大宮(오미야) — 경륜 전용(大宮 경마장 없음) · 저장 토큰 大宮 322 · 오미야 86 · KEIRIN_JO "25" 와 함께(원칙 25)
+    r"오미야|大宮|"
     # 🔴 [2026-08-10] **한글 표기 변형**을 추가한다. `도야마` 는 원래 있었는데 확장이 `토야마` 로
     #   보내 이 정규식을 못 타고 **sport=horse 로 굳었다**(회원 화면에 다른 종목 배당이 나갔다).
     #   ⚠ 별칭(_TRACK_GROUPS)만 고치면 종목 오판은 남는다 — 판정 순서에 따라 정규화 전에 종목이
@@ -29593,6 +29595,8 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
              #     (9경주 전부 · 10분 간격으로 서로 덮어씀). 8/5 고마쓰시마와 같은 계열 — 사고 전에 잡았다.
              "45": "도요하시", "34": "카와사키", "48": "욧카이치", "56": "기시와다",
              "24": "우쓰노미야",
+             # [2026-10-23] 25 = 大宮(keirin.jp naibuKeirinCd · JKA 코드) — 확장 저장 토큰 「오미야」와 맞춘다(원칙 25)
+             "25": "오미야",
              # [joCode 업데이트 2026-07-14·라이브 확인] 기시와다 73→56 교정 + 신규 4곳 추가
              "11": "하코다테", "61": "다마노", "27": "케이오카쿠", "87": "구마모토",
              # [joCode 실측 교정 2026-07-19·백필 라이브 확인]
@@ -39153,6 +39157,104 @@ def _keirin_schedule(ymd, force=False):
     return tracks
 
 
+# 🔴 [2026-10-23] 경륜 keirin.jp(JKA 공식) 폴백 — oddspark 403(10/22 20:50~ · IP 를 바꿔도 막힘).
+#   oddspark 경륜 개최 목록이 비면 keirin.jp 공개 JSON 으로 스케줄·배당을 받는다(로그인 불필요 · 실측 10/23).
+#     JSJ048            → 오늘 개최 경륜장 · naibuKeirinCd(= oddspark joCode 와 같은 JKA 코드: 87 熊本 · 48 四日市) · touhyouLivePara
+#     JSJ001(encp=경륜장) → C0201race[i].encParaR = i+1 경주 키
+#     JSJ001(encp=경주)   → C0201racedtl.bfrStartTime = 発走 시각 (경륜장당 하루 1회 · 메모리 캐시)
+#     JST011 kake=4 → ozz2SyahukuData(2車複) · kake=2 → ozz2SyatanData(2車単) · kake=7 → ozz3RenhukuData(3連複) · 키 "OZZ12"/"OZZ123"
+#   ⚠ 발동 조건: oddspark 경륜 목록이 **비었을 때만**(정상일 땐 종전과 같다).
+#   ⚠ 삼복승은 종전처럼 관측만(KEIRIN_TRIO_FEED) · 출주표·결과는 이 경로에 없다(배당만).
+#   계수기 keirinjp_fallback(reach=스케줄 판정 · fire=경륜장 추가) · keirinjp_odds(fire=경주 단위 수집 성공)
+#   🔧 되돌리기: KEIRINJP_FALLBACK_ENABLED = False
+KEIRINJP_FALLBACK_ENABLED = True
+KEIRINJP_JSON_URL = "https://keirin.jp/pc/json"
+_KEIRINJP_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36",
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "X-Requested-With": "XMLHttpRequest",
+    "Referer": "https://keirin.jp/pc/racelive",
+}
+_KEIRINJP_SCHED_CACHE = {}     # ymd -> {경륜장코드: {"venue", "races"}}
+
+
+def _keirinjp_json(query):
+    req = Request("%s?%s" % (KEIRINJP_JSON_URL, query), headers=dict(_KEIRINJP_HEADERS))
+    return json.loads(urlopen(req, timeout=15).read().decode("utf-8", "ignore") or "{}")
+
+
+def _keirinjp_odds_list(dmap, n, keep_direction=False):
+    """{"OZZ12": 12.1, ...} → [{combo, odds}] (n=2 복승·쌍승 · n=3 삼복승). 메타 키(HATUBAISUM_CNT 등)는 버린다."""
+    out, seen = [], set()
+    for k, v in (dmap or {}).items():
+        m = re.fullmatch(r"OZZ(\d{%d})" % n, str(k))
+        if not m:
+            continue
+        try:
+            o = float(v)
+        except (TypeError, ValueError):
+            continue
+        nums = [int(c) for c in m.group(1)]
+        if o <= 0 or len(set(nums)) != n or min(nums) < 1:
+            continue
+        c = nums if keep_direction else sorted(nums)
+        if tuple(c) in seen:
+            continue
+        seen.add(tuple(c))
+        out.append({"combo": c, "odds": o})
+    return out
+
+
+def _keirinjp_schedule(ymd, have=()):
+    """keirin.jp 로 오늘 경륜 스케줄 → [{venue, kjCode, sport:'cycle', kjMode:True, races:[{raceNo, postTime, postEpoch, kjEnc}]}].
+    have = 이미 목록에 있는 경기장 표준명(중복 방지). 실패해도 예외 전파 안 함."""
+    tracks = []
+    try:
+        lst = (_keirinjp_json("type=JSJ048") or {}).get("RaceList") or []
+    except Exception as e:
+        print("[keirin.jp 스케줄] 개최 목록 실패(경륜 생략):", e)
+        return tracks
+    cache = _KEIRINJP_SCHED_CACHE.setdefault(ymd, {})
+    for v in lst:
+        try:
+            if str(v.get("kaisaiDate") or "") != ymd or not v.get("touhyouLivePara"):
+                continue
+            jo = str(v.get("naibuKeirinCd") or "")
+            venue = KEIRIN_JO.get(jo) or _track_norm(v.get("keirinjoName") or "") or ("경륜%s" % jo)
+            if _track_norm(venue) in have:
+                continue
+            ent = cache.get(jo)
+            if not ent:
+                d = (_keirinjp_json("encp=%s&type=JSJ001" % v["touhyouLivePara"]) or {}).get("C0201data") or {}
+                races = []
+                for i, r in enumerate(d.get("C0201race") or []):
+                    enc = r.get("encParaR")
+                    if not enc:
+                        continue
+                    rno, pt = i + 1, None
+                    try:
+                        dd = (_keirinjp_json("encp=%s&type=JSJ001" % enc) or {}).get("C0201data") or {}
+                        rno = int(dd.get("selRaceNo") or rno)
+                        pt = (dd.get("C0201racedtl") or {}).get("bfrStartTime") or None
+                        time.sleep(0.2)
+                    except Exception as _pe:
+                        print("[keirin.jp 스케줄] %s %d경주 발주시각 실패(무시): %s" % (venue, rno, _pe))
+                    races.append({"raceNo": rno, "postTime": pt,
+                                  "postEpoch": _post_time_epoch(pt, ymd) if pt else None, "kjEnc": enc})
+                if not races:
+                    continue
+                ent = {"venue": venue, "races": sorted(races, key=lambda r: r["raceNo"])}
+                cache[jo] = ent
+            tracks.append({"venue": ent["venue"], "kjCode": jo, "sport": "cycle", "category": "cycle",
+                           "kjMode": True, "races": ent["races"]})
+            _gate_hit("keirinjp_fallback", ent["venue"], "%d경주" % len(ent["races"]), once_key=ent["venue"])
+        except Exception as e:
+            print("[keirin.jp 스케줄]", v.get("keirinjoName"), "실패(건너뜀):", e)
+    print("[keirin.jp 스케줄] %s: 경륜장 %d곳 · 경주 %d개(🔴 oddspark 차단 폴백)"
+          % (ymd, len(tracks), sum(len(t["races"]) for t in tracks)))
+    return tracks
+
+
 # [한국경마 스케줄] KRA 배당 API로 오늘 개최 경주 감지 → 전체 경주 탭 병합용 트랙 리스트.
 #   KRA 는 스케줄 전용 API가 없어 배당 API(_kra_fetch)로 각 경주 존재를 확인한다(발매 시작 후 감지).
 #   ⚠ 발주시각 필드는 KRA API에 없음 → postTime 은 None(카운트다운 대신 목록만). 두수는 단승 개수로 산출.
@@ -39777,6 +39879,16 @@ def _multi_schedule_fetch():
             sched["tracks"].append(kt)
     except Exception as e:
         print("[스케줄] 경륜 병합 실패(무시·경마는 유지):", e)
+    # [2026-10-23] oddspark 경륜 목록이 비면 keirin.jp(JKA 공식) 폴백 — 정상일 땐 종전과 같다.
+    try:
+        if KEIRINJP_FALLBACK_ENABLED:
+            _gate_hit("keirinjp_fallback", None, "판정", reach_only=True)
+            if not any(t.get("sport") == "cycle" for t in sched["tracks"]):
+                _have = {_track_norm(t.get("venue")) for t in sched["tracks"]}
+                for kt in _keirinjp_schedule(ymd, have=_have):
+                    sched["tracks"].append(kt)
+    except Exception as e:
+        print("[스케줄] keirin.jp 폴백 실패(무시):", e)
     # [한국경마 병합] KRA API로 오늘 개최 한국경마(서울·부산·제주)를 감지해 병합(sport=korea) → 전체 경주 탭에 🇰🇷 표시.
     #   ⚠ 비개최일엔 빈 리스트(정상). 발주시각은 KRA 미제공이라 목록만(카운트다운 없음).
     try:
@@ -40207,6 +40319,28 @@ def _multi_collect_one(track, race, ymd):
             except Exception as _te:
                 print("[南関東] 삼복승 수집 실패(무시):", _te)
             sport, category = "horse", "japan_local"
+        elif track.get("kjMode"):
+            # ── [2026-10-23] 경륜 keirin.jp(JKA 공식) 폴백 — oddspark 403 동안 ──
+            _enc = race.get("kjEnc")
+            if not _enc:
+                return None
+            _jq = (_keirinjp_json("kake=4&mode=0&encp=%s&type=JST011" % _enc) or {}).get("data") or {}
+            _jx = (_keirinjp_json("kake=2&mode=0&encp=%s&type=JST011" % _enc) or {}).get("data") or {}
+            q = _keirinjp_odds_list(_jq.get("ozz2SyahukuData"), 2)
+            x = _keirinjp_odds_list(_jx.get("ozz2SyatanData"), 2, keep_direction=True)
+            try:
+                _j3 = (_keirinjp_json("kake=7&mode=0&encp=%s&type=JST011" % _enc) or {}).get("data") or {}
+                _k3 = sorted(_keirinjp_odds_list(_j3.get("ozz3RenhukuData"), 3), key=lambda d: d["odds"])
+                if _k3:
+                    _keirin_trio_obs_log("%s %s경주" % (track.get("venue"), rno), ymd, _k3[:20])
+                    if KEIRIN_TRIO_FEED:
+                        tr3 = _k3
+            except Exception as _te:
+                print("[keirin.jp] 삼복승 수집 실패(무시):", _te)
+            if q:
+                _gate_hit("keirinjp_odds", "%s %s경주" % (track.get("venue"), rno), "복승 %d" % len(q),
+                          once_key="%s %s" % (track.get("venue"), rno))
+            sport, category = "cycle", "cycle"
         elif is_cycle:
             jo = track["joCode"]
             # 경륜: betType 5=복승(2車複)·6=쌍승(2車単)·8=삼복승(3連複·코치 7R 실측) (경마와 번호 다름)
@@ -40451,6 +40585,8 @@ def _multi_collect_one(track, race, ymd):
                 _nar_form_enrich(key, ymd, rno)
             except Exception as _fe:
                 print(f"[전적보강] {key} 실패(무시): {_fe}")
+        elif track.get("kjMode"):
+            pass   # [2026-10-23] keirin.jp 폴백 경륜은 배당만 받는다(출주표는 oddspark 경로 · 차단 중)
         elif not track.get("joCode"):
             # 코드가 **하나도 없다** → 전적·결과·흐름 수집이 전부 스킵된다. 경주당 1회만 경고.
             try:
