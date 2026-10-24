@@ -1,36 +1,6 @@
 {
   "patterns": [
     {
-      "race": "나고야 4경주",
-      "horse_no": 3,
-      "recent_avg": 6.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-15"
-    },
-    {
-      "race": "나고야 4경주",
-      "horse_no": 6,
-      "recent_avg": 8.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-15"
-    },
-    {
-      "race": "나고야 4경주",
-      "horse_no": 9,
-      "recent_avg": 7.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-15"
-    },
-    {
       "race": "소노다 7경주",
       "horse_no": 5,
       "recent_avg": 6.4,
@@ -4662,16 +4632,46 @@
         "복승이상감지"
       ],
       "date": "2026-10-24"
+    },
+    {
+      "race": "사가 6경주",
+      "horse_no": 3,
+      "recent_avg": 8.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-24"
+    },
+    {
+      "race": "사가 6경주",
+      "horse_no": 9,
+      "recent_avg": 8.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-24"
+    },
+    {
+      "race": "사가 6경주",
+      "horse_no": 11,
+      "recent_avg": 12.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 12771,
+      "count": 12779,
       "hit": 1893
     },
     "전체부진마": {
-      "count": 20809,
-      "hit": 5404
+      "count": 20821,
+      "hit": 5407
     },
     "대규모급락": {
       "count": 1,
@@ -4681,8 +4681,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 8038,
-      "hit": 3511
+      "count": 8042,
+      "hit": 3514
     },
     "급락동반": {
       "count": 842,
