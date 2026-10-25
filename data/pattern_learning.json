@@ -1,50 +1,6 @@
 {
   "patterns": [
     {
-      "race": "사가 2경주",
-      "horse_no": 8,
-      "recent_avg": 5.8,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-10-17"
-    },
-    {
-      "race": "사가 2경주",
-      "horse_no": 1,
-      "recent_avg": 5.7,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-17"
-    },
-    {
-      "race": "사가 2경주",
-      "horse_no": 6,
-      "recent_avg": 6.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-17"
-    },
-    {
-      "race": "오비히로 3경주",
-      "horse_no": 7,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-17"
-    },
-    {
-      "race": "오비히로 3경주",
-      "horse_no": 9,
-      "recent_avg": 5.4,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-10-17"
-    },
-    {
       "race": "오비히로 3경주",
       "horse_no": 5,
       "recent_avg": 7.2,
@@ -4638,16 +4594,62 @@
         "복승이상감지"
       ],
       "date": "2026-10-25"
+    },
+    {
+      "race": "카나자와 8경주",
+      "horse_no": 6,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-25"
+    },
+    {
+      "race": "카나자와 8경주",
+      "horse_no": 3,
+      "recent_avg": 5.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-25"
+    },
+    {
+      "race": "오비히로 8경주",
+      "horse_no": 2,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-25"
+    },
+    {
+      "race": "오비히로 8경주",
+      "horse_no": 10,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-25"
+    },
+    {
+      "race": "오비히로 8경주",
+      "horse_no": 7,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-10-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 13055,
-      "hit": 1941
+      "count": 13065,
+      "hit": 1943
     },
     "전체부진마": {
-      "count": 21228,
-      "hit": 5520
+      "count": 21241,
+      "hit": 5525
     },
     "대규모급락": {
       "count": 1,
@@ -4657,8 +4659,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 8173,
-      "hit": 3579
+      "count": 8176,
+      "hit": 3582
     },
     "급락동반": {
       "count": 842,
@@ -5035,21 +5037,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3678,
-    "hit": 2737,
+    "count": 3679,
+    "hit": 2738,
     "cases": [
-      {
-        "race": "욧카이치 4경주",
-        "date": "2026-10-21",
-        "smart_horses": [
-          3
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": 1.4,
-        "quinella_odds": 2.7,
-        "high_odds": false
-      },
       {
         "race": "카와사키 3경주",
         "date": "2026-10-21",
@@ -6550,6 +6540,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카나자와 8경주",
+        "date": "2026-10-25",
+        "smart_horses": [
+          1,
+          6,
+          3
+        ],
+        "placed": [
+          6,
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 6.2,
         "high_odds": false
       }
     ],
