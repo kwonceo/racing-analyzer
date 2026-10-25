@@ -1589,8 +1589,12 @@ c8105d75a · e825326a3   「결과 자동백업: 이토 5경주 2-5-3」
 ✅ 13:11 지방경마 폴백 반영(518ad1fca · 대표 「지방경마 배당받아오게 진행해」) — oddspark 경마 개최 목록이 비면 NAR 10장도 keiba.go.jp(南関東 경로 재사용)
        카사마츠 7R 13:25:29~ 복승 45·쌍승 81·단승 10 실수집 · 폴백 트랙 삼복승 생략 · ⚠ 저장 source 표기는 「oddspark」(南関東 경로 종전 표기 · 실제 keiba.go.jp)
        ⚠ keiba.go.jp 배당 요청은 nar_guard 밖 — 요청 증가분만큼 keiba.go.jp 403 감시(막히면 결과·전적까지 잃는다)
-🔴 경륜 대체 없음 — 접속 가능: keirin.jp(SPA · 배당 경로 미확인) · winticket(API 477 인증) · 넷경륜(netkeiba 계열 · 8월 IP 차단 이력) · kdreams / keirin-station·sp.oddspark 는 403
-⏳ 다음: oddspark 회복 여부(로그 「🟢 [oddspark 403] 회복」) · 경륜 대체 소스 조사(대표 「경륜도」) · 경륜은 지금 확장 사설 배당판만
+✅ 14:34 경륜 keirin.jp(JKA 공식) 폴백 반영(3dd66d356 · 대표 「바로 이어서 진행해」) — 공개 JSON · 로그인 불필요
+       JSJ048(개최 목록 · naibuKeirinCd = oddspark joCode 와 같은 JKA 코드) → JSJ001(경륜장 키 → C0201race[i].encParaR · 경주 키 → racedtl.bfrStartTime 発走)
+       → JST011 kake 4=2車複 · 2=2車単 · 7=3連複(관측만) · 키 "OZZ12" · 스케줄 41 → 126경주(경륜 9곳 82) · 구마모토 9R 복승 36 실수집
+       KEIRIN_JO "25"=오미야 · _KEIRIN_ONLY_RE 오미야|大宮(저장 토큰 大宮 322 · 오미야 86 · 원칙 25) · 출주표·결과는 이 경로에 없다
+       조사 중 탈락: winticket(API 477 인증) · 넷경륜(netkeiba 계열) · keirin-station·sp.oddspark 403
+⏳ 다음: oddspark 회복 여부(로그 「🟢 [oddspark 403] 회복」) · keiba.go.jp·keirin.jp 403 감시(요청 증가) · 경륜 출주표 대체(keirin.jp JSJ006 출주 정보 후보)
 
 # ✅ [2026-10-14 18:07] **운영 반영 — 경마 삼복승 실배당 최저 우선(10/09) · 백업 커밋 경로·push 무대기(10/11) · 역배열 리플레이 결론 전달**
 ```

@@ -45750,16 +45750,33 @@ def _snapshot_shortage_check(sched, now):
         print("[수집 공백 경보] 저장 실패(무시):", _ge)
 
 
+_MULTI_BG_THREAD = {"th": None}
+
+
 def _multi_bg_watchdog():
     """[안정화 (2026-07-19)] bg 수집 루프 워치독 — 하트비트가 180초+ 멈추면(스레드 사망·교착) 루프 재기동.
-    오늘 실측: 수집이 1.4시간+ 조용히 멈춘 채 아무 흔적이 없던 문제 → 자기 치유 + 재기동 로그."""
+    오늘 실측: 수집이 1.4시간+ 조용히 멈춘 채 아무 흔적이 없던 문제 → 자기 치유 + 재기동 로그.
+
+    🔴 [2026-10-25 실사고] 「느린 사이클」(180초+)을 「죽은 루프」로 보고 새 루프를 띄웠다. 옛 루프는 살아 있어 계속 돌므로
+      10/23 14:34 재기동 뒤 6번 복제 → **수집 루프 7개 동시** → 서버 포화 → 더 느려짐 → 또 복제(눈덩이).
+      화면 API 무응답 · OS 워치독 hung 반복(10/24~25). 같은 사이클 번호 로그가 6줄씩 찍힌 것이 증거.
+    ⇒ 루프 스레드가 **살아 있으면 띄우지 않는다**(느림만 기록 · 계수기 multi_bg_slow). 죽었을 때만 재기동(multi_bg_revive)."""
     while True:
         try:
             time.sleep(60)
             _bt = _MULTI_BG_BEAT.get("t") or 0
             if _bt and (time.time() - _bt) > 180:
-                print(f"[다중경주] 🚨 워치독: 수집 루프 하트비트 {int(time.time() - _bt)}초 정지 → 루프 재기동")
-                threading.Thread(target=_multi_bg_loop, daemon=True, name="multi-bg-revived").start()
+                _th = _MULTI_BG_THREAD.get("th")
+                if _th is not None and _th.is_alive():
+                    print(f"[다중경주] ⚠ 워치독: 수집 루프 하트비트 {int(time.time() - _bt)}초 정지 — 스레드는 살아 있음(느림) · 재기동 안 함")
+                    _gate_hit("multi_bg_slow", None, "%d초" % int(time.time() - _bt), reach_only=True)
+                    time.sleep(120)
+                    continue
+                print(f"[다중경주] 🚨 워치독: 수집 루프 하트비트 {int(time.time() - _bt)}초 정지 · 스레드 사망 → 루프 재기동")
+                _gate_hit("multi_bg_revive", None, "%d초" % int(time.time() - _bt))
+                _nt = threading.Thread(target=_multi_bg_loop, daemon=True, name="multi-bg-revived")
+                _MULTI_BG_THREAD["th"] = _nt
+                _nt.start()
                 time.sleep(120)   # 재기동 직후 중복 재기동 방지
         except Exception as _we:
             print("[다중경주] 워치독 오류(무시):", _we)
@@ -45768,7 +45785,9 @@ def _multi_bg_watchdog():
 def _start_multi_race_bg():
     """[6번] 다중 경주 백그라운드 시작(실패해도 서버·단일 모드 무영향)."""
     try:
-        threading.Thread(target=_multi_bg_loop, daemon=True).start()
+        _mt = threading.Thread(target=_multi_bg_loop, daemon=True, name="multi-bg")
+        _MULTI_BG_THREAD["th"] = _mt              # [2026-10-25] 워치독이 생존 여부를 본다(느림 ≠ 사망)
+        _mt.start()
         threading.Thread(target=_multi_bg_watchdog, daemon=True, name="multi-bg-watchdog").start()   # [안정화] 자기 치유
         print("[다중경주] 백그라운드 시작(스케줄 30분·수집 30초·실패격리·워치독 60초)")
     except Exception as e:
