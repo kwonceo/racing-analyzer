@@ -9358,6 +9358,9 @@ SELFCHK_PAIR_MAX = 2         # 경주당 최대 편입 수(소급 실측 평균 
 SELFCHK_PAIR_EXEMPT = True
 
 
+BASIS_DARK_SKIP_KEY = True   # [2026-10-26] 조합 근거 문장에서 유력마는 「복병」 → 「유력마·복병 신호」(표시 전용 · 순서 판정 글자 유지)
+
+
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
     """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
@@ -9532,6 +9535,11 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     def _mh(no):
         return meta.get(int(no)) or meta.get(str(no)) or {}
 
+    try:
+        _basis_keys = set(int(x) for x in (cp.get("keyHorses") or []))
+    except (TypeError, ValueError):
+        _basis_keys = set()
+
     def _combo_basis(combo):
         """조합 근거 문장 리스트 — 급락%·스마트머니·역배열·복병·집중급락(말별)."""
         out = []
@@ -9546,8 +9554,18 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 out.append("%d번: 역배열 감지" % int(no))
             if m.get("anomaly") and _dp is None:
                 out.append("%d번: 집중급락" % int(no))
+            # 🔴 [2026-10-26 표시 전용 · 대표 승인] 유력마(keyHorses)에는 「복병」을 붙이지 않는다.
+            #   darkHorsePicks 가 유력마를 빼지 않고 만들어져(9월~ 유력마·복병 겹침 87~88%) 「유력마끼리 짝」 옆에
+            #   「2번: 복병 · 6번: 복병」이 같이 뜨던 모순(서울 11R 10/25). 근거 문장만 바뀐다 — 조합·순서·darkHorsePicks 무변경.
+            #   ⚠ 문장을 **빼지 않고** 문구만 바꾼다: _combo_signal_rank(동점 순서)가 basis 의 「복병」 글자와
+            #     basis 유무를 읽는다 → 빼면 동점 조합 순서·판정 명단이 바뀐다. 「복병」 글자를 남겨 순서 판정을 그대로 둔다.
+            #   계수기 basis_dark_key_relabel · 🔧 되돌리기 BASIS_DARK_SKIP_KEY = False
             if m.get("dark"):
-                out.append("%d번: 복병" % int(no))
+                if BASIS_DARK_SKIP_KEY and int(no) in _basis_keys:
+                    _gate_hit("basis_dark_key_relabel", None, "%d번" % int(no), reach_only=True)
+                    out.append("%d번: 유력마·복병 신호" % int(no))
+                else:
+                    out.append("%d번: 복병" % int(no))
         return out
 
     def _combo_score(combo):

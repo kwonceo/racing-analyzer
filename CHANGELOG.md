@@ -21,6 +21,7 @@
 - **🧭 전적표 예측 관측 계층(2026-09-09 · 대표 승인)**(`tools/form_forecast.py` 신규 · 별도 프로세스): 출마표 원문을 발주 5~14분 전에 Claude 가 읽어 축·상대·근거를 기록 · 자동 채점 · 시장 상위3두 대조. 추천 경로 무개입.
 
 ### 수정된 버그
+- 조합 근거에 유력마가 「N번: 복병」으로 표시되던 모순(「유력마끼리 짝」 옆에 같은 말이 복병 · 9월~ 겹침 87~88%) — 유력마는 「N번: 유력마·복병 신호」로 표기(「복병」 글자 유지 → 동점 순서 판정 무변경 · 표시 전용 · `BASIS_DARK_SKIP_KEY` · 계수기 `basis_dark_key_relabel`)
 - 수집 루프 워치독이 「느린 사이클(180초+)」을 「죽은 루프」로 보고 새 루프를 띄워 10/23~25 루프 7개 동시 실행 → 서버 포화·화면 API 무응답 — 루프 스레드가 살아 있으면 재기동 안 함(계수기 `multi_bg_slow` / `multi_bg_revive`)
 - oddspark 차단 시 경륜 배당 0 — oddspark 경륜 목록이 비면 keirin.jp(JKA 공식) 공개 JSON(JSJ048 → JSJ001 → JST011 kake 4/2/7)으로 스케줄·복승·쌍승 수집(삼복승은 관측만 · `KEIRINJP_FALLBACK_ENABLED` · 계수기 `keirinjp_fallback`/`keirinjp_odds`) · KEIRIN_JO "25"=오미야 · `_KEIRIN_ONLY_RE` 에 오미야|大宮
 - oddspark 차단 시 지방경마 배당 0 — 경마 개최 목록이 비면 나머지 NAR 10장도 keiba.go.jp 로 수집(南関東 경로 재사용 · 폴백 트랙은 삼복승 생략 · `NAR_KEIBA_FALLBACK_ENABLED` · 계수기 `nar_keiba_fallback`)
