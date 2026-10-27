@@ -1,30 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 9경주",
-      "horse_no": 5,
-      "recent_avg": 4.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-19"
-    },
-    {
-      "race": "카나자와 9경주",
-      "horse_no": 4,
-      "recent_avg": 7.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-19"
-    },
-    {
-      "race": "나고야 6경주",
-      "horse_no": 7,
-      "recent_avg": 7.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-19"
-    },
-    {
       "race": "우라와 10경주",
       "horse_no": 8,
       "recent_avg": 5.8,
@@ -4645,16 +4621,44 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-10-26"
+    },
+    {
+      "race": "모리오카 1경주",
+      "horse_no": 6,
+      "recent_avg": 7.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-27"
+    },
+    {
+      "race": "모리오카 1경주",
+      "horse_no": 8,
+      "recent_avg": 8.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-27"
+    },
+    {
+      "race": "모리오카 1경주",
+      "horse_no": 9,
+      "recent_avg": 8.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-10-27"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 13411,
-      "hit": 1995
+      "count": 13417,
+      "hit": 1996
     },
     "전체부진마": {
-      "count": 21754,
-      "hit": 5661
+      "count": 21764,
+      "hit": 5664
     },
     "대규모급락": {
       "count": 1,
@@ -4664,8 +4668,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 8343,
-      "hit": 3666
+      "count": 8347,
+      "hit": 3668
     },
     "급락동반": {
       "count": 842,
