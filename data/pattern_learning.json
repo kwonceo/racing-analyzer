@@ -1,54 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 12경주",
-      "horse_no": 6,
-      "recent_avg": 8.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-21"
-    },
-    {
-      "race": "카사마츠 12경주",
-      "horse_no": 10,
-      "recent_avg": 6.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-21"
-    },
-    {
-      "race": "소노다 11경주",
-      "horse_no": 6,
-      "recent_avg": 4.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-21"
-    },
-    {
-      "race": "몬베츠 12경주",
-      "horse_no": 1,
-      "recent_avg": 4.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-21"
-    },
-    {
-      "race": "카사마츠 1경주",
-      "horse_no": 5,
-      "recent_avg": 4.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-22"
-    },
-    {
       "race": "소노다 1경주",
       "horse_no": 3,
       "recent_avg": 6.2,
@@ -4661,16 +4613,62 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-10-27"
+    },
+    {
+      "race": "나고야 11경주",
+      "horse_no": 8,
+      "recent_avg": 12.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-27"
+    },
+    {
+      "race": "나고야 11경주",
+      "horse_no": 7,
+      "recent_avg": 10.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-27"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 3,
+      "recent_avg": 5.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-27"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 5,
+      "recent_avg": 7.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-27"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 1,
+      "recent_avg": 16.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-27"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 13653,
-      "hit": 2026
+      "count": 13664,
+      "hit": 2028
     },
     "전체부진마": {
-      "count": 22144,
-      "hit": 5768
+      "count": 22162,
+      "hit": 5773
     },
     "대규모급락": {
       "count": 1,
@@ -4680,8 +4678,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 8491,
-      "hit": 3742
+      "count": 8498,
+      "hit": 3745
     },
     "급락동반": {
       "count": 847,
@@ -5058,24 +5056,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3726,
-    "hit": 2763,
+    "count": 3727,
+    "hit": 2764,
     "cases": [
-      {
-        "race": "카사마츠 9경주",
-        "date": "2026-10-23",
-        "smart_horses": [
-          7,
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.2,
-        "high_odds": false
-      },
       {
         "race": "카사마츠 10경주",
         "date": "2026-10-23",
@@ -6558,6 +6541,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "나고야 11경주",
+        "date": "2026-10-27",
+        "smart_horses": [
+          10,
+          8,
+          6
+        ],
+        "placed": [
+          10,
+          8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.8,
         "high_odds": false
       }
     ],
