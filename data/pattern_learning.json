@@ -1,27 +1,6 @@
 {
   "patterns": [
     {
-      "pattern": "대규모급락",
-      "raceKey": "우라와 5경주",
-      "total_combos_dropped": 55,
-      "drop_ratio": 0.833,
-      "result": "8+12",
-      "result_odds": "미상",
-      "result_quinella_odds": null,
-      "signal_result_combo": "-37.6%",
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1792733815.8220625
-    },
-    {
-      "race": "우라와 6경주",
-      "horse_no": 6,
-      "recent_avg": 5.8,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-10-23"
-    },
-    {
       "race": "우라와 6경주",
       "horse_no": 9,
       "recent_avg": 5.8,
@@ -4648,16 +4627,36 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-10-28"
+    },
+    {
+      "race": "몬베츠 3경주",
+      "horse_no": 4,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-28"
+    },
+    {
+      "race": "소노다 10경주",
+      "horse_no": 9,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 13847,
+      "count": 13854,
       "hit": 2048
     },
     "전체부진마": {
-      "count": 22420,
-      "hit": 5833
+      "count": 22433,
+      "hit": 5835
     },
     "대규모급락": {
       "count": 1,
@@ -4667,8 +4666,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 8573,
-      "hit": 3785
+      "count": 8579,
+      "hit": 3787
     },
     "급락동반": {
       "count": 847,
