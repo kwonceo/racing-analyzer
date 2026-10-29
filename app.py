@@ -39302,6 +39302,34 @@ def _keirinjp_schedule(ymd, have=()):
 #   계수기 keirinjp_result(reach=시도 · fire=착순 확보) · 🔧 되돌리기 KEIRINJP_RESULT_ENABLED = False
 KEIRINJP_RESULT_ENABLED = True
 _KEIRINJP_ENC_CACHE = {}       # (ymd, 경륜장코드) -> {경주번호: encp}
+_KEIRINJP_ENC_MISS = {}        # (ymd, 경륜장코드) -> 못 찾은 시각(20분 재시도 억제)
+
+
+_KEIRINJP_MEET_INDEX = {"day": None, "meets": {}}   # (경륜장코드, 'MM/DD' 개최 첫날) -> kkParameter(개최 키)
+
+
+def _keirinjp_meet_index():
+    """[2026-10-29] 지난 개최 색인 — JSJ048 은 오늘 개최만 주므로, 오늘 출주 선수들의 「지난 개최 성적」(JSJ007
+    tyoInfoSubData · kkParameter = 그 개최의 키)을 모아 이미 끝난 경륜장의 개최 키를 얻는다(하루 1회 · 경주당 1요청)."""
+    today = time.strftime("%Y%m%d")
+    if _KEIRINJP_MEET_INDEX.get("day") == today and _KEIRINJP_MEET_INDEX.get("meets"):
+        return _KEIRINJP_MEET_INDEX["meets"]
+    meets = {}
+    try:
+        for _jo, ent in (_KEIRINJP_SCHED_CACHE.get(today) or {}).items():
+            for _r in (ent.get("races") or []):
+                if not _r.get("kjEnc"):
+                    continue
+                for rr in ((_keirinjp_json("encp=%s&type=JSJ007" % _r["kjEnc"]) or {}).get("sensyuTypeInfo") or []):
+                    for m in [rr.get("konResultInfoSubData")] + list(rr.get("tyoInfoSubData") or []):
+                        if isinstance(m, dict) and m.get("kkParameter") and m.get("bKeirinjyoCd") and m.get("kaisaiFirst"):
+                            meets.setdefault((str(m["bKeirinjyoCd"]), str(m["kaisaiFirst"])), m["kkParameter"])
+                time.sleep(0.15)
+    except Exception as e:
+        print("[keirin.jp 개최 색인] 실패(무시):", str(e)[:80])
+    _KEIRINJP_MEET_INDEX.update({"day": today, "meets": meets})
+    print("[keirin.jp 개최 색인] %d개 개최(지난 결과 백필용)" % len(meets))
+    return meets
 
 
 def _keirinjp_race_enc(jo, ymd, rno):
@@ -39314,6 +39342,8 @@ def _keirinjp_race_enc(jo, ymd, rno):
     except Exception:
         pass
     ck = _KEIRINJP_ENC_CACHE.get((ymd, jo))
+    if ck is None and time.time() - _KEIRINJP_ENC_MISS.get((ymd, jo), 0) < 1200:
+        return None                                # 20분 안에 못 찾은 경륜장·날짜 → 경주마다 다시 찾지 않는다
     if ck is None:
         ck = {}
         _md = "%s/%s" % (ymd[4:6], ymd[6:8])
@@ -39329,8 +39359,36 @@ def _keirinjp_race_enc(jo, ymd, rno):
                     if r.get("encParaR"):
                         ck[i + 1] = r["encParaR"]
             break
+        if not ck:
+            # 오늘 목록에 없는 경륜장(끝난 개최) → 지난 개최 색인에서 그 날짜를 포함하는 개최를 찾는다(개최는 보통 3~4일)
+            try:
+                _t = time.mktime(time.strptime(ymd, "%Y%m%d"))
+                for (_jo, _first), _kk in _keirinjp_meet_index().items():
+                    if _jo != jo:
+                        continue
+                    try:
+                        _f = time.mktime(time.strptime("%s/%s" % (ymd[:4], _first), "%Y/%m/%d"))
+                    except ValueError:
+                        continue
+                    if not (0 <= (_t - _f) / 86400.0 <= 6):
+                        continue
+                    d = (_keirinjp_json("encp=%s&type=JSJ001" % _kk) or {}).get("C0201data") or {}
+                    for k in d.get("C0201kaisai") or []:
+                        if str(k.get("txtEventDate") or "") != _md or not k.get("encParaK"):
+                            continue
+                        dd = (_keirinjp_json("encp=%s&type=JSJ001" % k["encParaK"]) or {}).get("C0201data") or {}
+                        for i, r in enumerate(dd.get("C0201race") or []):
+                            if r.get("encParaR"):
+                                ck[i + 1] = r["encParaR"]
+                    if ck:
+                        _gate_hit("keirinjp_meet_index", "%s %s" % (jo, ymd), "찾음", once_key="%s %s" % (jo, ymd))
+                        break
+            except Exception as _me:
+                print("[keirin.jp 지난 개최] %s %s 실패(무시): %s" % (jo, ymd, str(_me)[:80]))
         if ck:
             _KEIRINJP_ENC_CACHE[(ymd, jo)] = ck      # 못 찾으면 캐시하지 않는다(다음 주기 재시도)
+        else:
+            _KEIRINJP_ENC_MISS[(ymd, jo)] = time.time()
     return ck.get(int(rno))
 
 
