@@ -1,0 +1,123 @@
+{
+ "race_id": "2026_10_23_오가키_6경주",
+ "raceKey": "2026-10-23 오가키 6경주",
+ "date": "2026-10-23",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "오가키",
+ "round": 6,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": null,
+ "result": {
+  "1st": 4,
+  "2nd": 5,
+  "3rd": 1
+ },
+ "payouts": {
+  "quinella": 15.8,
+  "trifecta": 14.4
+ },
+ "payouts_approx": false,
+ "payout_source": "market_est",
+ "payouts_suspect": null,
+ "odds_at_start": {
+  "quinella": {
+   "1+4": 1.7,
+   "2+4": 3.7,
+   "3+4": 9.1,
+   "4+7": 10.8,
+   "4+5": 15.8,
+   "2+3": 24.4,
+   "3+7": 25.3,
+   "2+5": 33.2,
+   "1+2": 53.3,
+   "2+7": 54.3,
+   "1+3": 88.0,
+   "1+5": 89.4,
+   "1+6": 100.0,
+   "1+7": 100.0,
+   "2+6": 100.0,
+   "3+5": 100.0,
+   "3+6": 100.0,
+   "4+6": 100.0,
+   "5+6": 100.0,
+   "5+7": 100.0,
+   "6+7": 100.0
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "11:28:29",
+   "minutes_before": null,
+   "quinella": {
+    "1+4": 1.7,
+    "2+4": 3.7,
+    "3+4": 9.1,
+    "4+7": 10.8,
+    "4+5": 15.8,
+    "2+3": 24.4,
+    "3+7": 25.3,
+    "2+5": 33.2,
+    "1+2": 53.3,
+    "2+7": 54.3,
+    "1+3": 88.0,
+    "1+5": 89.4,
+    "1+6": 100.0,
+    "1+7": 100.0,
+    "2+6": 100.0,
+    "3+5": 100.0,
+    "3+6": 100.0,
+    "4+6": 100.0,
+    "5+6": 100.0,
+    "5+7": 100.0,
+    "6+7": 100.0
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "1+4",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 25.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 15.8,
+  "trifecta_odds": 14.4,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-10-29 16:02:07",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
