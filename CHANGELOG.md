@@ -21,6 +21,7 @@
 - **🧭 전적표 예측 관측 계층(2026-09-09 · 대표 승인)**(`tools/form_forecast.py` 신규 · 별도 프로세스): 출마표 원문을 발주 5~14분 전에 Claude 가 읽어 축·상대·근거를 기록 · 자동 채점 · 시장 상위3두 대조. 추천 경로 무개입.
 
 ### 수정된 버그
+- 경륜 전적 0(10/24~ · oddspark 출마표 403 · 경주당 복승 3.69→2.56개) — `_keirin_autocollect_form` 실패 시 keirin.jp JSJ006(득점·決まり手·연대율·각질·급반)·JSJ007(최근 개최 착순)·JSJ005(並び)로 `_keirin_parse_card` 와 같은 card 를 만들어 기존 분석·저장 경로 사용 · keirin.jp 폴백 트랙도 전적 수집 호출 · `KEIRINJP_FORM_ENABLED` · 계수기 `keirinjp_form` · ⚠ gear·착순 분포 없음
 - 경륜 결과 0건(10/23~ · oddspark RaceKekka 403) — `_keirin_result_top3` 실패 시 keirin.jp JSJ012(착순·2車複·3連複 확정배당·決まり手)로 폴백 · `_keirin_jo_today` 가 keirin.jp 스케줄 kjCode 도 인정 · `KEIRINJP_RESULT_ENABLED` · 계수기 `keirinjp_result` · ⚠ 오늘 개최 중인 경륜장만(끝난 개최의 과거 결과는 못 받음)
 - 조합 근거에 유력마가 「N번: 복병」으로 표시되던 모순(「유력마끼리 짝」 옆에 같은 말이 복병 · 9월~ 겹침 87~88%) — 유력마는 「N번: 유력마·복병 신호」로 표기(「복병」 글자 유지 → 동점 순서 판정 무변경 · 표시 전용 · `BASIS_DARK_SKIP_KEY` · 계수기 `basis_dark_key_relabel`)
 - 수집 루프 워치독이 「느린 사이클(180초+)」을 「죽은 루프」로 보고 새 루프를 띄워 10/23~25 루프 7개 동시 실행 → 서버 포화·화면 API 무응답 — 루프 스레드가 살아 있으면 재기동 안 함(계수기 `multi_bg_slow` / `multi_bg_revive`)

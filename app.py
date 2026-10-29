@@ -30351,8 +30351,18 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
                       % time.strftime("%m-%d %H:%M", time.localtime(float(_ex.get("t") or 0))),
                       once_key=rk)
             print("🔴 [전적 갱신] %s: 저장분이 오늘이 아니다 → 재수집" % rk)
-        html = _keirin_fetch(_keirin_url(jo, ymd, race))
-        card = _keirin_parse_card(html)
+        try:
+            html = _keirin_fetch(_keirin_url(jo, ymd, race))
+            card = _keirin_parse_card(html)
+        except Exception as _oe:
+            # [2026-10-29] oddspark 출마표 403 → keirin.jp 로 같은 형태의 card(_keirinjp_card)
+            if not KEIRINJP_FORM_ENABLED:
+                raise
+            _gate_hit("keirinjp_form", rk, "시도", reach_only=True)
+            card = _keirinjp_card(jo, ymd, race)
+            if not card or not card.get("riders"):
+                raise RuntimeError("oddspark 실패(%s) · keirin.jp 출주표 없음" % str(_oe)[:60])
+            _gate_hit("keirinjp_form", rk, "%d명" % len(card["riders"]), once_key=rk)
         if not card.get("riders"):
             return None
         if not card.get("venue") and KEIRIN_JO.get(str(jo)):
@@ -39369,6 +39379,83 @@ def _keirinjp_result_top3(jo, ymd, rno):
     return out
 
 
+# 🔴 [2026-10-29 대표 승인] 경륜 출주표 keirin.jp 폴백 — oddspark 출마표 403 으로 10/24~ 경륜 전적 0 →
+#   유력마·라인 판단이 줄어 경주당 복승 조합 3.69 → 2.56개 · 적중 62.3 → 48.1%(1순위 적중은 32.7 ↔ 32.5 그대로).
+#   keirin.jp 로 `_keirin_parse_card` 와 **같은 형태의 card** 를 만들어 기존 `_keirin_analyze`·저장 경로를 그대로 탄다.
+#     JSJ006: 차번·이름·지역·급반·각질·期·나이·平均得点(→score)·決まり手 횟수(逃/捲/差/マ)·2連対率(→rentai)
+#     JSJ007: 今開催·직전 개최 착순(→recent/prev1/prev2 문자열 · 기존 `_keirin_placings_from_card` 가 그대로 읽는다)
+#     JSJ005: 並び予想(→line · ichi 순)
+#   ⚠ 없는 것: ギア倍数(gear)·착순 분포(chaku) → None · 경륜장 決まり手 경향(tendency) → {}
+#   ⚠ score 는 oddspark 「競走得点」 대신 keirin.jp 「平均得点」 — 같은 4개월 평균 득점 지표로 본다(수치 체계 동일 · 원문 확인 10/29)
+#   계수기 keirinjp_form · 🔧 되돌리기 KEIRINJP_FORM_ENABLED = False
+KEIRINJP_FORM_ENABLED = True
+
+
+def _keirinjp_card(jo, ymd, rno):
+    """keirin.jp → `_keirin_parse_card` 와 같은 형태 {venue, race_no, riders, line, tendency, comment, src}. 실패 시 None."""
+    enc = _keirinjp_race_enc(jo, ymd, rno)
+    if not enc:
+        return None
+    d6 = _keirinjp_json("encp=%s&type=JSJ006" % enc) or {}
+    rows6 = d6.get("sensyuTypeInfo") or []
+    if not rows6:
+        return None
+    try:
+        rows7 = {str(r.get("syaban")): r for r in ((_keirinjp_json("encp=%s&type=JSJ007" % enc) or {}).get("sensyuTypeInfo") or [])}
+    except Exception:
+        rows7 = {}
+
+    def _meet_txt(m):
+        if not isinstance(m, dict):
+            return ""
+        _ps = [str(x.get("imgTyakuiName") or "") for x in (m.get("resultInfoSubData") or [])]
+        _ps = ["%s着" % p for p in _ps if p.isdigit()]
+        if not _ps:
+            return ""
+        return ("%s%s %s " % (m.get("kerinjyoName") or "", m.get("gaiTeiGrade") or "", m.get("kaisaiFirst") or "")) + " ".join(_ps)
+
+    def _f(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
+    def _i(v):
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
+    riders = []
+    for r in rows6:
+        car = _i(r.get("syaban"))
+        if car is None or not (1 <= car <= 9):
+            continue
+        r7 = rows7.get(str(car)) or {}
+        _tyo = r7.get("tyoInfoSubData") or []
+        _km = [_i(r.get(k)) for k in ("nigeCnt", "makuriCnt", "sasiCnt", "markCnt")]
+        riders.append({
+            "car": car, "name": str(r.get("sensyuName") or "").replace("　", " ").strip(),
+            "age": _i(r.get("age")), "ki": _i(r.get("sotugyouki")),
+            "area": str(r.get("huKen") or "").replace("　", "").strip(),
+            "classGrade": r.get("kyuhan") or "", "gear": None,
+            "style": r.get("kyakusitu") or "", "styleLabel": _keirin_style_label(r.get("kyakusitu") or ""),
+            "score": _f(r.get("heikinTokuten")), "chaku": None,
+            "kimarite": _km if all(x is not None for x in _km) else None,
+            "rentai": _f(r.get("rentairitu2")),
+            "recent": _meet_txt(r7.get("konResultInfoSubData") or r.get("konResultInfoSubData")),
+            "prev1": _meet_txt(_tyo[0]) if len(_tyo) > 0 else "",
+            "prev2": _meet_txt(_tyo[1]) if len(_tyo) > 1 else "",
+        })
+    line = []
+    try:
+        _nb = ((_keirinjp_json("encp=%s&type=JSJ005" % enc) or {}).get("narabiyoso") or {}).get("shaban") or []
+        line = [int(s["shaban"]) for s in sorted(_nb, key=lambda s: int(s.get("ichi") or 99)) if str(s.get("shaban") or "").isdigit()]
+    except Exception:
+        line = []
+    return {"venue": KEIRIN_JO.get(str(jo)) or "", "race_no": int(rno), "race_name": "", "dist": "", "post": "",
+            "tendency": {}, "riders": riders, "line": line, "comment": "", "src": "keirin.jp"}
+
+
 # [한국경마 스케줄] KRA 배당 API로 오늘 개최 경주 감지 → 전체 경주 탭 병합용 트랙 리스트.
 #   KRA 는 스케줄 전용 API가 없어 배당 API(_kra_fetch)로 각 경주 존재를 확인한다(발매 시작 후 감지).
 #   ⚠ 발주시각 필드는 KRA API에 없음 → postTime 은 None(카운트다운 대신 목록만). 두수는 단승 개수로 산출.
@@ -40700,7 +40787,11 @@ def _multi_collect_one(track, race, ymd):
             except Exception as _fe:
                 print(f"[전적보강] {key} 실패(무시): {_fe}")
         elif track.get("kjMode"):
-            pass   # [2026-10-23] keirin.jp 폴백 경륜은 배당만 받는다(출주표는 oddspark 경로 · 차단 중)
+            # [2026-10-29] keirin.jp 폴백 경륜도 출주표를 받는다 — oddspark 가 막혀 있으면 _keirin_autocollect_form 이 keirin.jp 로 넘어간다
+            try:
+                _keirin_autocollect_form(key, track.get("kjCode"), ymd, rno)
+            except Exception as _fe:
+                print(f"[전적수집] {key} 경륜(keirin.jp) 전적 실패: {_fe}")
         elif not track.get("joCode"):
             # 코드가 **하나도 없다** → 전적·결과·흐름 수집이 전부 스킵된다. 경주당 1회만 경고.
             try:
