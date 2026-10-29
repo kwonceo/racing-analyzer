@@ -1,22 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 1경주",
-      "horse_no": 4,
-      "recent_avg": 10.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-25"
-    },
-    {
-      "race": "오비히로 3경주",
-      "horse_no": 3,
-      "recent_avg": 4.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-25"
-    },
-    {
       "race": "오비히로 3경주",
       "horse_no": 6,
       "recent_avg": 6.0,
@@ -4674,16 +4658,34 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-10-29"
+    },
+    {
+      "race": "나고야 11경주",
+      "horse_no": 4,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-29"
+    },
+    {
+      "race": "나고야 11경주",
+      "horse_no": 11,
+      "recent_avg": 9.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14177,
-      "hit": 2083
+      "count": 14184,
+      "hit": 2084
     },
     "전체부진마": {
-      "count": 22940,
-      "hit": 5961
+      "count": 22950,
+      "hit": 5963
     },
     "대규모급락": {
       "count": 2,
@@ -4693,8 +4695,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 8763,
-      "hit": 3878
+      "count": 8766,
+      "hit": 3879
     },
     "급락동반": {
       "count": 848,
