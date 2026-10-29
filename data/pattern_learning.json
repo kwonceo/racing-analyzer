@@ -4651,6 +4651,19 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-10-29"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "2026-10-25 구마모토 11경주",
+      "total_combos_dropped": 16,
+      "drop_ratio": 0.444,
+      "result": "5+9",
+      "result_odds": "저배당",
+      "result_quinella_odds": 1.5,
+      "signal_result_combo": null,
+      "recommended_hit": true,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1793251065.3665643
     }
   ],
   "condition_stats": {
@@ -4665,9 +4678,9 @@
     "대규모급락": {
       "count": 1,
       "high_odds": 0,
-      "recommended_hit": 0,
+      "recommended_hit": 1,
       "high_odds_rate": 0.0,
-      "hit_rate": 0.0
+      "hit_rate": 100.0
     },
     "이상감지동반": {
       "count": 8688,
