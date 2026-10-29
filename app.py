@@ -33005,12 +33005,20 @@ def _keirin_result_backfill_once(date=None, verbose=True):
     스케줄 cycle 에 있을 때만 대상(경마 결과 오학습 방어). 반환 {date,tried,filled,done,failed}."""
     date = date or time.strftime("%Y-%m-%d", time.localtime())
     ymd = date.replace("-", "")
-    # 🔴 [2026-10-29 실사고] _apply_result_learning(rk) 의 rk 에 날짜가 없어 **지난 날짜 결과가 오늘 같은 이름 경주 파일에 저장**됐다
-    #   (10/27 오가키 9R 1-6 → 2026_10_29_오가키_9경주). 날짜를 실어 저장하는 경로가 생기기 전까지 오늘만 학습한다.
-    if date != time.strftime("%Y-%m-%d", time.localtime()):
+    # 🔴 [2026-10-29 실사고 → 수정] _apply_result_learning(rk) 의 rk 에 날짜가 없어 **지난 날짜 결과가 오늘 같은 이름 경주 파일에 저장**됐다
+    #   (10/27 오가키 9R 1-6 → 2026_10_29_오가키_9경주). 저장 경로 함수들(_hist_path·_analysis_log_path·_race_result_id)은
+    #   rk 앞의 'YYYY-MM-DD ' 를 읽어 그 날짜 파일을 쓴다 ⇒ 지난 날짜는 rk 앞에 날짜를 붙여 넘긴다(_past_rk).
+    #   오늘은 종전과 똑같이 날짜 없는 rk 그대로. 🔧 되돌리기 KEIRIN_BACKFILL_PAST_ENABLED = False(지난 날짜 차단)
+    _is_past = date != time.strftime("%Y-%m-%d", time.localtime())
+    if _is_past and not KEIRIN_BACKFILL_PAST_ENABLED:
         _gate_hit("keirin_backfill_past_block", None, date, reach_only=True)
         return {"date": date, "tried": 0, "filled": 0,
-                "error": "지난 날짜 백필 차단 — 결과 저장 키에 날짜가 없어 오늘 같은 이름 경주를 덮어쓴다(2026-10-29 사고)"}
+                "error": "지난 날짜 백필 꺼짐(KEIRIN_BACKFILL_PAST_ENABLED=False)"}
+
+    def _past_rk(_rk):
+        if not _is_past or re.search(r"\d{4}-\d{2}-\d{2}", _rk or ""):
+            return _rk
+        return "%s %s" % (date, _rk)
     try:
         missing = (_missing_results(date) or {}).get("missing", [])
     except Exception as e:
@@ -33050,7 +33058,7 @@ def _keirin_result_backfill_once(date=None, verbose=True):
                 result["flow"] = r["flow"]
             if r.get("winKimarite"):
                 result["winKimarite"] = r["winKimarite"]
-            _apply_result_learning(rk, result, top3)
+            _apply_result_learning(_past_rk(rk), result, top3)   # [2026-10-29] 지난 날짜면 'YYYY-MM-DD ' 를 붙여 그 날 파일에
             filled += 1
             done_list.append({"raceKey": rk, "joCode": jo, "top3": r["top3"],
                               "quinellaOdds": r.get("quinellaOdds")})
@@ -33110,7 +33118,7 @@ def _keirin_result_backfill_once(date=None, verbose=True):
                 result2["payouts"]["quinella"] = rr["quinellaOdds"]
             if rr.get("trifectaOdds") is not None:
                 result2["payouts"]["trifecta"] = rr["trifectaOdds"]
-            _apply_result_learning(rk2, result2, [x for x in rr["top3"] if x is not None])
+            _apply_result_learning(_past_rk(rk2), result2, [x for x in rr["top3"] if x is not None])
             refreshed += 1
         if refreshed and verbose:
             print(f"[경륜 환급 정정] {date}: 공식 확정배당 소급 {refreshed}건")
@@ -39307,6 +39315,7 @@ def _keirinjp_schedule(ymd, have=()):
 #   ⚠ JSJ048 은 **오늘 개최 중인 경륜장만** 준다 — 이미 끝난 개최(지난 경륜장)의 과거 결과는 이 경로로 못 받는다.
 #   계수기 keirinjp_result(reach=시도 · fire=착순 확보) · 🔧 되돌리기 KEIRINJP_RESULT_ENABLED = False
 KEIRINJP_RESULT_ENABLED = True
+KEIRIN_BACKFILL_PAST_ENABLED = True   # [2026-10-29] 지난 날짜 경륜 결과 백필(rk 에 날짜를 붙여 그 날 파일에 저장) · False = 차단
 _KEIRINJP_ENC_CACHE = {}       # (ymd, 경륜장코드) -> {경주번호: encp}
 _KEIRINJP_ENC_MISS = {}        # (ymd, 경륜장코드) -> 못 찾은 시각(20분 재시도 억제)
 
