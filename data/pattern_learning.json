@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 4경주",
-      "horse_no": 8,
-      "recent_avg": 6.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-25"
-    },
-    {
       "race": "카나자와 1경주",
       "horse_no": 2,
       "recent_avg": 10.3,
@@ -5074,26 +5066,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3826,
-    "hit": 2828,
+    "count": 3827,
+    "hit": 2829,
     "cases": [
-      {
-        "race": "나고야 11경주",
-        "date": "2026-10-27",
-        "smart_horses": [
-          10,
-          8,
-          6
-        ],
-        "placed": [
-          10,
-          8
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.8,
-        "high_odds": false
-      },
       {
         "race": "몬베츠 9경주",
         "date": "2026-10-27",
@@ -6569,6 +6544,24 @@
         ],
         "placed": [],
         "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "2026-10-23 오미야 3경주",
+        "date": "2026-10-29",
+        "smart_horses": [
+          7,
+          3,
+          4,
+          6
+        ],
+        "placed": [
+          7,
+          4
+        ],
+        "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
