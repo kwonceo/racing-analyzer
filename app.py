@@ -9358,6 +9358,9 @@ SELFCHK_PAIR_MAX = 2         # 경주당 최대 편입 수(소급 실측 평균 
 SELFCHK_PAIR_EXEMPT = True
 
 
+BASIS_DARK_SKIP_KEY = True   # [2026-10-26] 조합 근거 문장에서 유력마는 「복병」 → 「유력마·복병 신호」(표시 전용 · 순서 판정 글자 유지)
+
+
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
     """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
@@ -9532,6 +9535,11 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     def _mh(no):
         return meta.get(int(no)) or meta.get(str(no)) or {}
 
+    try:
+        _basis_keys = set(int(x) for x in (cp.get("keyHorses") or []))
+    except (TypeError, ValueError):
+        _basis_keys = set()
+
     def _combo_basis(combo):
         """조합 근거 문장 리스트 — 급락%·스마트머니·역배열·복병·집중급락(말별)."""
         out = []
@@ -9546,8 +9554,18 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 out.append("%d번: 역배열 감지" % int(no))
             if m.get("anomaly") and _dp is None:
                 out.append("%d번: 집중급락" % int(no))
+            # 🔴 [2026-10-26 표시 전용 · 대표 승인] 유력마(keyHorses)에는 「복병」을 붙이지 않는다.
+            #   darkHorsePicks 가 유력마를 빼지 않고 만들어져(9월~ 유력마·복병 겹침 87~88%) 「유력마끼리 짝」 옆에
+            #   「2번: 복병 · 6번: 복병」이 같이 뜨던 모순(서울 11R 10/25). 근거 문장만 바뀐다 — 조합·순서·darkHorsePicks 무변경.
+            #   ⚠ 문장을 **빼지 않고** 문구만 바꾼다: _combo_signal_rank(동점 순서)가 basis 의 「복병」 글자와
+            #     basis 유무를 읽는다 → 빼면 동점 조합 순서·판정 명단이 바뀐다. 「복병」 글자를 남겨 순서 판정을 그대로 둔다.
+            #   계수기 basis_dark_key_relabel · 🔧 되돌리기 BASIS_DARK_SKIP_KEY = False
             if m.get("dark"):
-                out.append("%d번: 복병" % int(no))
+                if BASIS_DARK_SKIP_KEY and int(no) in _basis_keys:
+                    _gate_hit("basis_dark_key_relabel", None, "%d번" % int(no), reach_only=True)
+                    out.append("%d번: 유력마·복병 신호" % int(no))
+                else:
+                    out.append("%d번: 복병" % int(no))
         return out
 
     def _combo_score(combo):
@@ -32781,6 +32799,9 @@ def _keirin_jo_today(venue):
         for tr in (_schedule_load() or {}).get("tracks", []):
             if (tr.get("sport") == "cycle") and tr.get("joCode") and _track_norm(tr.get("venue") or "") == std:
                 return str(tr["joCode"]), True
+            # [2026-10-29] keirin.jp 폴백 스케줄은 kjCode(= JKA 코드 = joCode 체계)를 갖는다 — 스케줄 근거로 인정
+            if (tr.get("sport") == "cycle") and tr.get("kjCode") and _track_norm(tr.get("venue") or "") == std:
+                return str(tr["kjCode"]), True
     except Exception:
         pass
     _jo = _keirin_jo_from_venue(venue)
@@ -32944,6 +32965,15 @@ def _keirin_result_top3(jo, ymd, rno, expect_venue=None):
         html = _keirin_fetch("https://www.oddspark.com/keirin/RaceKekka.do?joCode=%s&kaisaiBi=%s&raceNo=%s"
                              % (jo, ymd, rno))
     except Exception as e:
+        # [2026-10-29] oddspark 차단(403·대기) → keirin.jp JSJ012 폴백. 경주 키를 경륜장 코드로 찾으므로 경륜장 오매칭이 없다.
+        if KEIRINJP_RESULT_ENABLED:
+            try:
+                _kr = _keirinjp_result_top3(jo, ymd, rno)
+                if _kr.get("ok"):
+                    return _kr
+                return {"error": "fetch 실패: %s · keirin.jp: %s" % (e, _kr.get("error"))}
+            except Exception as _ke:
+                return {"error": "fetch 실패: %s · keirin.jp 예외: %s" % (e, str(_ke)[:80])}
         return {"error": "fetch 실패: %s" % e}
     if "開催情報がありません" in html:
         return {"error": "개최정보 없음(joCode·날짜 확인)"}
@@ -39253,6 +39283,90 @@ def _keirinjp_schedule(ymd, have=()):
     print("[keirin.jp 스케줄] %s: 경륜장 %d곳 · 경주 %d개(🔴 oddspark 차단 폴백)"
           % (ymd, len(tracks), sum(len(t["races"]) for t in tracks)))
     return tracks
+
+
+# 🔴 [2026-10-29 대표 승인] 경륜 결과 keirin.jp 폴백 — oddspark RaceKekka 가 403(10/22~)이라 10/23 부터 경륜 결과 0건
+#   → 결과 학습·성적 측정이 6일째 정지. keirin.jp JSJ012(競走結果 · 공개 JSON)로 착순·2車複·3連複 확정배당·決まり手를 받는다.
+#   경주 키(encp): 오늘 스케줄 캐시(kjEnc) → 없으면 JSJ048 → JSJ001(경륜장) → C0201kaisai(날짜) → C0201race[rno-1].
+#   ⚠ JSJ048 은 **오늘 개최 중인 경륜장만** 준다 — 이미 끝난 개최(지난 경륜장)의 과거 결과는 이 경로로 못 받는다.
+#   계수기 keirinjp_result(reach=시도 · fire=착순 확보) · 🔧 되돌리기 KEIRINJP_RESULT_ENABLED = False
+KEIRINJP_RESULT_ENABLED = True
+_KEIRINJP_ENC_CACHE = {}       # (ymd, 경륜장코드) -> {경주번호: encp}
+
+
+def _keirinjp_race_enc(jo, ymd, rno):
+    """(JKA 경륜장 코드, YYYYMMDD, 경주번호) → keirin.jp 경주 encp 또는 None."""
+    jo = str(jo or "")
+    try:
+        for _r in ((_KEIRINJP_SCHED_CACHE.get(ymd) or {}).get(jo) or {}).get("races") or []:
+            if int(_r.get("raceNo") or 0) == int(rno) and _r.get("kjEnc"):
+                return _r["kjEnc"]
+    except Exception:
+        pass
+    ck = _KEIRINJP_ENC_CACHE.get((ymd, jo))
+    if ck is None:
+        ck = {}
+        _md = "%s/%s" % (ymd[4:6], ymd[6:8])
+        for v in ((_keirinjp_json("type=JSJ048") or {}).get("RaceList") or []):
+            if str(v.get("naibuKeirinCd") or "") != jo or not v.get("touhyouLivePara"):
+                continue
+            d = (_keirinjp_json("encp=%s&type=JSJ001" % v["touhyouLivePara"]) or {}).get("C0201data") or {}
+            for k in d.get("C0201kaisai") or []:
+                if str(k.get("txtEventDate") or "") != _md or not k.get("encParaK"):
+                    continue
+                dd = (_keirinjp_json("encp=%s&type=JSJ001" % k["encParaK"]) or {}).get("C0201data") or {}
+                for i, r in enumerate(dd.get("C0201race") or []):
+                    if r.get("encParaR"):
+                        ck[i + 1] = r["encParaR"]
+            break
+        if ck:
+            _KEIRINJP_ENC_CACHE[(ymd, jo)] = ck      # 못 찾으면 캐시하지 않는다(다음 주기 재시도)
+    return ck.get(int(rno))
+
+
+def _keirinjp_result_top3(jo, ymd, rno):
+    """keirin.jp JSJ012 → _keirin_result_top3 와 같은 형태 {ok, top3, quinellaOdds, trifectaOdds, flow, winKimarite, src}."""
+    _gate_hit("keirinjp_result", "%s %s %s" % (jo, ymd, rno), "시도", reach_only=True)
+    enc = _keirinjp_race_enc(jo, ymd, rno)
+    if not enc:
+        return {"error": "keirin.jp 경주 키 없음(오늘 개최 목록 밖 · 끝난 개최)"}
+    x = _keirinjp_json("encp=%s&type=JSJ012" % enc) or {}
+    rows = []
+    for t in x.get("tyakujyunItemSubData") or []:
+        _pl, _car = str(t.get("tyaku") or "").strip(), str(t.get("syaban") or "").strip()
+        if _pl.isdigit() and _car.isdigit() and 1 <= int(_pl) <= 9 and 1 <= int(_car) <= 9:
+            rows.append((int(_pl), int(_car), t))
+    rows.sort(key=lambda z: z[0])
+    placed = {}
+    for _pl, _car, _t in rows:
+        placed.setdefault(_pl, _car)
+    if 1 not in placed or 2 not in placed:
+        return {"error": "keirin.jp 결과 미게시"}
+    flow = []
+    for _pl, _car, _t in rows:
+        try:
+            _up = float(_t.get("agari")) if _t.get("agari") else None
+        except (TypeError, ValueError):
+            _up = None
+        flow.append({"placing": _pl, "car": _car, "kimarite": (_t.get("kimarite") or None),
+                     "lastLap": _up, "margin": (_kstrip(str(_t.get("tyakusa") or "")) or None),
+                     "sb": (str(_t.get("BH") or "") or None)})   # keirin.jp 표기 그대로(B=バック · H=ホーム)
+
+    def _pay(key):
+        for it in (((x.get("haraiGakuSubData") or {}).get(key)) or []):
+            try:
+                return round(int(str(it.get("haraiGaku") or "").replace(",", "")) / 100.0, 1)
+            except (TypeError, ValueError):
+                continue
+        return None
+    out = {"ok": True, "top3": [placed.get(1), placed.get(2), placed.get(3)],
+           "quinellaOdds": _pay("SH2HaraiGakuDispItemSubData"),
+           "trifectaOdds": _pay("RH3HaraiGakuDispItemSubData"),
+           "flow": flow or None, "winKimarite": (flow[0].get("kimarite") if flow else None),
+           "venue": None, "src": "keirin.jp"}
+    _gate_hit("keirinjp_result", "%s %s %s" % (jo, ymd, rno), "%s-%s" % (out["top3"][0], out["top3"][1]),
+              once_key="%s %s %s" % (jo, ymd, rno))
+    return out
 
 
 # [한국경마 스케줄] KRA 배당 API로 오늘 개최 경주 감지 → 전체 경주 탭 병합용 트랙 리스트.
