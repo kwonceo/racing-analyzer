@@ -39321,6 +39321,7 @@ _KEIRINJP_ENC_MISS = {}        # (ymd, 경륜장코드) -> 못 찾은 시각(20�
 
 
 _KEIRINJP_MEET_INDEX = {"day": None, "meets": {}}   # (경륜장코드, 'MM/DD' 개최 첫날) -> kkParameter(개최 키)
+KEIRINJP_MEET_EXPAND_MAX = 40   # [2026-10-29] 색인 넓히기 대상 개최 상한(최근 14일)
 
 
 def _keirinjp_meet_index():
@@ -39342,8 +39343,39 @@ def _keirinjp_meet_index():
                 time.sleep(0.15)
     except Exception as e:
         print("[keirin.jp 개최 색인] 실패(무시):", str(e)[:80])
+    # [2026-10-29 · 한 단계 넓히기] 오늘 선수만으로는 그 사이 끝난 개최를 못 찾는다(10/26 52경주 0건).
+    #   최근 14일 안에 시작한 개최마다 날짜별 첫 경주의 선수 기록(JSJ007)을 한 번 더 읽어 그들이 달린 개최를 더한다.
+    #   개최당 약 7요청 · 하루 1회 · 상한 KEIRINJP_MEET_EXPAND_MAX 개최.
+    try:
+        _now = time.time()
+        _seen_exp = 0
+        for (_jo, _first), _kk in list(meets.items()):
+            if _seen_exp >= KEIRINJP_MEET_EXPAND_MAX:
+                break
+            try:
+                _f = time.mktime(time.strptime("%s/%s" % (today[:4], _first), "%Y/%m/%d"))
+            except ValueError:
+                continue
+            if not (0 < (_now - _f) / 86400.0 <= 14):
+                continue
+            _seen_exp += 1
+            d = (_keirinjp_json("encp=%s&type=JSJ001" % _kk) or {}).get("C0201data") or {}
+            for k in d.get("C0201kaisai") or []:
+                if not k.get("encParaK"):
+                    continue
+                dd = (_keirinjp_json("encp=%s&type=JSJ001" % k["encParaK"]) or {}).get("C0201data") or {}
+                _rs = [r for r in (dd.get("C0201race") or []) if r.get("encParaR")]
+                if not _rs:
+                    continue
+                for rr in ((_keirinjp_json("encp=%s&type=JSJ007" % _rs[0]["encParaR"]) or {}).get("sensyuTypeInfo") or []):
+                    for m in [rr.get("konResultInfoSubData")] + list(rr.get("tyoInfoSubData") or []):
+                        if isinstance(m, dict) and m.get("kkParameter") and m.get("bKeirinjyoCd") and m.get("kaisaiFirst"):
+                            meets.setdefault((str(m["bKeirinjyoCd"]), str(m["kaisaiFirst"])), m["kkParameter"])
+                time.sleep(0.15)
+    except Exception as e:
+        print("[keirin.jp 개최 색인·넓히기] 실패(무시):", str(e)[:80])
     _KEIRINJP_MEET_INDEX.update({"day": today, "meets": meets})
-    print("[keirin.jp 개최 색인] %d개 개최(지난 결과 백필용)" % len(meets))
+    print("[keirin.jp 개최 색인] %d개 개최(지난 결과 백필용 · 한 단계 넓힘)" % len(meets))
     return meets
 
 
