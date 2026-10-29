@@ -33005,6 +33005,12 @@ def _keirin_result_backfill_once(date=None, verbose=True):
     스케줄 cycle 에 있을 때만 대상(경마 결과 오학습 방어). 반환 {date,tried,filled,done,failed}."""
     date = date or time.strftime("%Y-%m-%d", time.localtime())
     ymd = date.replace("-", "")
+    # 🔴 [2026-10-29 실사고] _apply_result_learning(rk) 의 rk 에 날짜가 없어 **지난 날짜 결과가 오늘 같은 이름 경주 파일에 저장**됐다
+    #   (10/27 오가키 9R 1-6 → 2026_10_29_오가키_9경주). 날짜를 실어 저장하는 경로가 생기기 전까지 오늘만 학습한다.
+    if date != time.strftime("%Y-%m-%d", time.localtime()):
+        _gate_hit("keirin_backfill_past_block", None, date, reach_only=True)
+        return {"date": date, "tried": 0, "filled": 0,
+                "error": "지난 날짜 백필 차단 — 결과 저장 키에 날짜가 없어 오늘 같은 이름 경주를 덮어쓴다(2026-10-29 사고)"}
     try:
         missing = (_missing_results(date) or {}).get("missing", [])
     except Exception as e:
