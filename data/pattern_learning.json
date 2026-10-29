@@ -1,42 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오비히로 1경주",
-      "horse_no": 8,
-      "recent_avg": 6.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-25"
-    },
-    {
-      "race": "오비히로 1경주",
-      "horse_no": 9,
-      "recent_avg": 8.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-25"
-    },
-    {
-      "race": "오비히로 1경주",
-      "horse_no": 7,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-25"
-    },
-    {
-      "race": "오비히로 2경주",
-      "horse_no": 4,
-      "recent_avg": 5.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-25"
-    },
-    {
       "race": "오비히로 2경주",
       "horse_no": 5,
       "recent_avg": 6.4,
@@ -4668,16 +4632,54 @@
         "복승이상감지"
       ],
       "date": "2026-10-29"
+    },
+    {
+      "race": "오이 5경주",
+      "horse_no": 5,
+      "recent_avg": 7.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-29"
+    },
+    {
+      "race": "오이 5경주",
+      "horse_no": 8,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-10-29"
+    },
+    {
+      "race": "오이 5경주",
+      "horse_no": 9,
+      "recent_avg": 7.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-29"
+    },
+    {
+      "race": "몬베츠 5경주",
+      "horse_no": 5,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14129,
-      "hit": 2080
+      "count": 14143,
+      "hit": 2081
     },
     "전체부진마": {
-      "count": 22864,
-      "hit": 5944
+      "count": 22883,
+      "hit": 5948
     },
     "대규모급락": {
       "count": 2,
@@ -4687,8 +4689,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 8735,
-      "hit": 3864
+      "count": 8740,
+      "hit": 3867
     },
     "급락동반": {
       "count": 848,
@@ -5065,22 +5067,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3833,
-    "hit": 2833,
+    "count": 3834,
+    "hit": 2834,
     "cases": [
-      {
-        "race": "소노다 5경주",
-        "date": "2026-10-28",
-        "smart_horses": [
-          1,
-          9
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 2.1,
-        "high_odds": false
-      },
       {
         "race": "소노다 6경주",
         "date": "2026-10-28",
@@ -6564,6 +6553,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 2.0,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 5경주",
+        "date": "2026-10-29",
+        "smart_horses": [
+          12,
+          3,
+          8
+        ],
+        "placed": [
+          12
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
