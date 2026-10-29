@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "사가 1경주",
-      "horse_no": 10,
-      "recent_avg": 7.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-25"
-    },
-    {
-      "race": "사가 1경주",
-      "horse_no": 7,
-      "recent_avg": 4.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-25"
-    },
-    {
-      "race": "사가 1경주",
-      "horse_no": 5,
-      "recent_avg": 8.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-25"
-    },
-    {
       "race": "모리오카 8경주",
       "horse_no": 7,
       "recent_avg": 5.4,
@@ -4680,16 +4652,44 @@
         "복승이상감지"
       ],
       "date": "2026-10-29"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 3,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-29"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 8,
+      "recent_avg": 7.8,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-10-29"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 6,
+      "recent_avg": 9.4,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14189,
-      "hit": 2084
+      "count": 14193,
+      "hit": 2085
     },
     "전체부진마": {
-      "count": 22959,
-      "hit": 5966
+      "count": 22967,
+      "hit": 5969
     },
     "대규모급락": {
       "count": 2,
@@ -4699,8 +4699,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 8770,
-      "hit": 3882
+      "count": 8774,
+      "hit": 3884
     },
     "급락동반": {
       "count": 848,
@@ -5077,25 +5077,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3841,
+    "count": 3842,
     "hit": 2840,
     "cases": [
-      {
-        "race": "오이 1경주",
-        "date": "2026-10-28",
-        "smart_horses": [
-          5,
-          7,
-          1
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "나고야 7경주",
         "date": "2026-10-28",
@@ -6588,6 +6572,19 @@
           3
         ],
         "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 8경주",
+        "date": "2026-10-29",
+        "smart_horses": [
+          7,
+          2
+        ],
+        "placed": [],
+        "hit": false,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
