@@ -4684,11 +4684,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14247,
+      "count": 14253,
       "hit": 2095
     },
     "전체부진마": {
-      "count": 23045,
+      "count": 23052,
       "hit": 5989
     },
     "대규모급락": {
@@ -4699,7 +4699,7 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 8798,
+      "count": 8799,
       "hit": 3894
     },
     "급락동반": {
@@ -5077,26 +5077,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3854,
+    "count": 3855,
     "hit": 2849,
     "cases": [
-      {
-        "race": "기후 2경주",
-        "date": "2026-10-29",
-        "smart_horses": [
-          3,
-          4,
-          6
-        ],
-        "placed": [
-          4,
-          6
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "벳푸 7경주",
         "date": "2026-10-29",
@@ -6599,6 +6582,20 @@
           6
         ],
         "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.4,
+        "high_odds": false
+      },
+      {
+        "race": "나고야 1경주",
+        "date": "2026-10-30",
+        "smart_horses": [
+          3,
+          5,
+          9
+        ],
+        "placed": [],
+        "hit": false,
         "trifecta_odds": null,
         "quinella_odds": 2.4,
         "high_odds": false
