@@ -1,56 +1,6 @@
 {
   "patterns": [
     {
-      "race": "사가 3경주",
-      "horse_no": 1,
-      "recent_avg": 10.3,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-26"
-    },
-    {
-      "race": "사가 3경주",
-      "horse_no": 4,
-      "recent_avg": 6.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-26"
-    },
-    {
-      "race": "사가 3경주",
-      "horse_no": 7,
-      "recent_avg": 6.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-26"
-    },
-    {
-      "race": "사가 4경주",
-      "horse_no": 1,
-      "recent_avg": 4.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-26"
-    },
-    {
-      "race": "사가 4경주",
-      "horse_no": 8,
-      "recent_avg": 6.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-26"
-    },
-    {
       "race": "모리오카 8경주",
       "horse_no": 1,
       "recent_avg": 7.0,
@@ -4682,16 +4632,62 @@
         "복승이상감지"
       ],
       "date": "2026-10-31"
+    },
+    {
+      "race": "오비히로 7경주",
+      "horse_no": 10,
+      "recent_avg": 7.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-31"
+    },
+    {
+      "race": "오비히로 7경주",
+      "horse_no": 8,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-31"
+    },
+    {
+      "race": "오비히로 7경주",
+      "horse_no": 1,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-31"
+    },
+    {
+      "race": "코치 6경주",
+      "horse_no": 8,
+      "recent_avg": 6.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-10-31"
+    },
+    {
+      "race": "코치 6경주",
+      "horse_no": 9,
+      "recent_avg": 8.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-10-31"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14501,
-      "hit": 2129
+      "count": 14512,
+      "hit": 2131
     },
     "전체부진마": {
-      "count": 23423,
-      "hit": 6090
+      "count": 23441,
+      "hit": 6095
     },
     "대규모급락": {
       "count": 2,
@@ -4701,8 +4697,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 8922,
-      "hit": 3961
+      "count": 8929,
+      "hit": 3964
     },
     "급락동반": {
       "count": 848,
@@ -5079,25 +5075,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3892,
-    "hit": 2874,
+    "count": 3893,
+    "hit": 2875,
     "cases": [
-      {
-        "race": "2026-10-24 오미야 11경주",
-        "date": "2026-10-29",
-        "smart_horses": [
-          1,
-          4
-        ],
-        "placed": [
-          1,
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": 13.0,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "2026-10-24 구마모토 10경주",
         "date": "2026-10-29",
@@ -6600,9 +6580,25 @@
         "trifecta_odds": null,
         "quinella_odds": 1.2,
         "high_odds": false
+      },
+      {
+        "race": "코치 6경주",
+        "date": "2026-10-31",
+        "smart_horses": [
+          4,
+          9
+        ],
+        "placed": [
+          4,
+          9
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 73.8,
+    "rate": 73.9,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
