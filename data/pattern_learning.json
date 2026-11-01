@@ -1,52 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 2경주",
-      "horse_no": 3,
-      "recent_avg": 10.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "카나자와 2경주",
-      "horse_no": 2,
-      "recent_avg": 10.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "카나자와 2경주",
-      "horse_no": 8,
-      "recent_avg": 8.4,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "나고야 2경주",
-      "horse_no": 3,
-      "recent_avg": 11.2,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "나고야 2경주",
-      "horse_no": 9,
-      "recent_avg": 8.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-27"
-    },
-    {
       "race": "나고야 3경주",
       "horse_no": 4,
       "recent_avg": 7.8,
@@ -4693,16 +4647,62 @@
         "복승이상감지"
       ],
       "date": "2026-11-01"
+    },
+    {
+      "race": "코치 5경주",
+      "horse_no": 5,
+      "recent_avg": 6.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-01"
+    },
+    {
+      "race": "코치 5경주",
+      "horse_no": 7,
+      "recent_avg": 8.4,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-11-01"
+    },
+    {
+      "race": "모리오카 10경주",
+      "horse_no": 1,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-01"
+    },
+    {
+      "race": "모리오카 10경주",
+      "horse_no": 9,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-01"
+    },
+    {
+      "race": "모리오카 10경주",
+      "horse_no": 7,
+      "recent_avg": 7.0,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-11-01"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14734,
-      "hit": 2158
+      "count": 14744,
+      "hit": 2160
     },
     "전체부진마": {
-      "count": 23757,
-      "hit": 6172
+      "count": 23774,
+      "hit": 6177
     },
     "대규모급락": {
       "count": 3,
@@ -4712,8 +4712,8 @@
       "hit_rate": 66.7
     },
     "이상감지동반": {
-      "count": 9023,
-      "hit": 4014
+      "count": 9030,
+      "hit": 4017
     },
     "급락동반": {
       "count": 848,
@@ -5090,42 +5090,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3922,
-    "hit": 2893,
+    "count": 3924,
+    "hit": 2895,
     "cases": [
-      {
-        "race": "2026-10-23 마에바시 1경주",
-        "date": "2026-10-29",
-        "smart_horses": [
-          1,
-          4,
-          5
-        ],
-        "placed": [
-          1,
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
-      {
-        "race": "2026-10-23 마쓰사카 1경주",
-        "date": "2026-10-29",
-        "smart_horses": [
-          6,
-          1
-        ],
-        "placed": [
-          6,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "2026-10-23 오미야 10경주",
         "date": "2026-10-29",
@@ -6598,6 +6565,40 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 6.4,
+        "high_odds": false
+      },
+      {
+        "race": "코치 5경주",
+        "date": "2026-11-01",
+        "smart_horses": [
+          1,
+          7,
+          9,
+          4
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 10경주",
+        "date": "2026-11-01",
+        "smart_horses": [
+          7,
+          1,
+          6
+        ],
+        "placed": [
+          7,
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
