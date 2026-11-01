@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오이 12경주",
-      "horse_no": 10,
-      "recent_avg": 4.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-26"
-    },
-    {
-      "race": "사가 12경주",
-      "horse_no": 3,
-      "recent_avg": 6.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-26"
-    },
-    {
-      "race": "사가 12경주",
-      "horse_no": 13,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-26"
-    },
-    {
       "race": "모리오카 1경주",
       "horse_no": 6,
       "recent_avg": 7.2,
@@ -4701,16 +4675,36 @@
       "recommended_hit": true,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1793516824.510666
+    },
+    {
+      "race": "코치 3경주",
+      "horse_no": 1,
+      "recent_avg": 6.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-01"
+    },
+    {
+      "race": "코치 3경주",
+      "horse_no": 8,
+      "recent_avg": 9.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-01"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14697,
+      "count": 14701,
       "hit": 2153
     },
     "전체부진마": {
-      "count": 23698,
-      "hit": 6156
+      "count": 23706,
+      "hit": 6158
     },
     "대규모급락": {
       "count": 3,
@@ -4720,8 +4714,8 @@
       "hit_rate": 66.7
     },
     "이상감지동반": {
-      "count": 9001,
-      "hit": 4003
+      "count": 9005,
+      "hit": 4005
     },
     "급락동반": {
       "count": 848,
@@ -5098,24 +5092,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3916,
-    "hit": 2888,
+    "count": 3917,
+    "hit": 2889,
     "cases": [
-      {
-        "race": "2026-10-23 마에바시 3경주",
-        "date": "2026-10-29",
-        "smart_horses": [
-          5,
-          3
-        ],
-        "placed": [
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "몬베츠 3경주",
         "date": "2026-10-29",
@@ -6602,9 +6581,25 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "코치 3경주",
+        "date": "2026-11-01",
+        "smart_horses": [
+          9,
+          3,
+          5
+        ],
+        "placed": [
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.9,
+        "high_odds": false
       }
     ],
-    "rate": 73.7,
+    "rate": 73.8,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
