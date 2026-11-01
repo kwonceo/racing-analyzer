@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "카나자와 4경주",
-      "horse_no": 4,
-      "recent_avg": 8.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "카나자와 4경주",
       "horse_no": 6,
       "recent_avg": 6.0,
       "win_place": 1,
@@ -4695,16 +4685,24 @@
         "복승이상감지"
       ],
       "date": "2026-11-01"
+    },
+    {
+      "race": "사가 8경주",
+      "horse_no": 1,
+      "recent_avg": 6.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-01"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14797,
-      "hit": 2165
+      "count": 14801,
+      "hit": 2166
     },
     "전체부진마": {
-      "count": 23858,
-      "hit": 6200
+      "count": 23863,
+      "hit": 6201
     },
     "대규모급락": {
       "count": 3,
@@ -4714,7 +4712,7 @@
       "hit_rate": 66.7
     },
     "이상감지동반": {
-      "count": 9061,
+      "count": 9062,
       "hit": 4035
     },
     "급락동반": {
