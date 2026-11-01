@@ -4688,6 +4688,19 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-01"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "호후 11경주",
+      "total_combos_dropped": 14,
+      "drop_ratio": 0.389,
+      "result": "1+9",
+      "result_odds": "저배당",
+      "result_quinella_odds": 1.1,
+      "signal_result_combo": null,
+      "recommended_hit": true,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1793516824.510666
     }
   ],
   "condition_stats": {
@@ -4700,11 +4713,11 @@
       "hit": 6156
     },
     "대규모급락": {
-      "count": 2,
+      "count": 3,
       "high_odds": 0,
-      "recommended_hit": 1,
+      "recommended_hit": 2,
       "high_odds_rate": 0.0,
-      "hit_rate": 50.0
+      "hit_rate": 66.7
     },
     "이상감지동반": {
       "count": 9001,
