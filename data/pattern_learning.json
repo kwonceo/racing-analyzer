@@ -4679,6 +4679,19 @@
         "복승이상감지"
       ],
       "date": "2026-11-02"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "호후 6경주",
+      "total_combos_dropped": 14,
+      "drop_ratio": 0.389,
+      "result": "1+9",
+      "result_odds": "저배당",
+      "result_quinella_odds": 2.7,
+      "signal_result_combo": null,
+      "recommended_hit": true,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1793595126.1674683
     }
   ],
   "condition_stats": {
@@ -4691,11 +4704,11 @@
       "hit": 6252
     },
     "대규모급락": {
-      "count": 3,
+      "count": 4,
       "high_odds": 0,
-      "recommended_hit": 2,
+      "recommended_hit": 3,
       "high_odds_rate": 0.0,
-      "hit_rate": 66.7
+      "hit_rate": 75.0
     },
     "이상감지동반": {
       "count": 9127,
@@ -5076,26 +5089,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3947,
+    "count": 3948,
     "hit": 2916,
     "cases": [
-      {
-        "race": "구루메 3경주",
-        "date": "2026-10-29",
-        "smart_horses": [
-          2,
-          3,
-          6,
-          7
-        ],
-        "placed": [
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "구루메 5경주",
         "date": "2026-10-29",
@@ -6596,6 +6592,20 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "호후 6경주",
+        "date": "2026-11-02",
+        "smart_horses": [
+          8,
+          4,
+          6
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": 5.0,
+        "quinella_odds": 2.7,
         "high_odds": false
       }
     ],
