@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 5경주",
-      "horse_no": 4,
-      "recent_avg": 5.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "몬베츠 5경주",
-      "horse_no": 9,
-      "recent_avg": 6.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "몬베츠 5경주",
-      "horse_no": 8,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-27"
-    },
-    {
       "race": "오이 5경주",
       "horse_no": 5,
       "recent_avg": 7.6,
@@ -4679,16 +4651,46 @@
         "복승이상감지"
       ],
       "date": "2026-11-02"
+    },
+    {
+      "race": "모리오카 2경주",
+      "horse_no": 6,
+      "recent_avg": 10.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-02"
+    },
+    {
+      "race": "모리오카 2경주",
+      "horse_no": 12,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-02"
+    },
+    {
+      "race": "모리오카 2경주",
+      "horse_no": 8,
+      "recent_avg": 7.4,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-02"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14869,
+      "count": 14877,
       "hit": 2180
     },
     "전체부진마": {
-      "count": 23974,
-      "hit": 6235
+      "count": 23986,
+      "hit": 6238
     },
     "대규모급락": {
       "count": 3,
@@ -4698,8 +4700,8 @@
       "hit_rate": 66.7
     },
     "이상감지동반": {
-      "count": 9105,
-      "hit": 4055
+      "count": 9109,
+      "hit": 4058
     },
     "급락동반": {
       "count": 848,
