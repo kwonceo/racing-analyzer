@@ -4687,6 +4687,19 @@
         "복승이상감지"
       ],
       "date": "2026-11-02"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "도요하시 6경주",
+      "total_combos_dropped": 9,
+      "drop_ratio": 0.429,
+      "result": "3+6",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1793610776.1168156
     }
   ],
   "condition_stats": {
@@ -4699,11 +4712,11 @@
       "hit": 6289
     },
     "대규모급락": {
-      "count": 5,
+      "count": 6,
       "high_odds": 1,
       "recommended_hit": 3,
-      "high_odds_rate": 20.0,
-      "hit_rate": 60.0
+      "high_odds_rate": 16.7,
+      "hit_rate": 50.0
     },
     "이상감지동반": {
       "count": 9172,
