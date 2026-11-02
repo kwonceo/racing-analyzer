@@ -4678,6 +4678,19 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-11-02"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "호후 12경주",
+      "total_combos_dropped": 13,
+      "drop_ratio": 0.361,
+      "result": "5+9",
+      "result_odds": "고배당",
+      "result_quinella_odds": 38.7,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1793606043.4213495
     }
   ],
   "condition_stats": {
@@ -4690,11 +4703,11 @@
       "hit": 6278
     },
     "대규모급락": {
-      "count": 4,
-      "high_odds": 0,
+      "count": 5,
+      "high_odds": 1,
       "recommended_hit": 3,
-      "high_odds_rate": 0.0,
-      "hit_rate": 75.0
+      "high_odds_rate": 20.0,
+      "hit_rate": 60.0
     },
     "이상감지동반": {
       "count": 9162,
@@ -5075,23 +5088,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3962,
-    "hit": 2924,
+    "count": 3963,
+    "hit": 2925,
     "cases": [
-      {
-        "race": "야히코 11경주",
-        "date": "2026-10-30",
-        "smart_horses": [
-          4
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "우쓰노미야 1경주",
         "date": "2026-10-30",
@@ -6602,6 +6601,20 @@
         "trifecta_odds": null,
         "quinella_odds": 1.6,
         "high_odds": false
+      },
+      {
+        "race": "호후 12경주",
+        "date": "2026-11-02",
+        "smart_horses": [
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 38.7,
+        "high_odds": true
       }
     ],
     "rate": 73.8,
