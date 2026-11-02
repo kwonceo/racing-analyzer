@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 7경주",
-      "horse_no": 8,
-      "recent_avg": 4.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "몬베츠 7경주",
-      "horse_no": 3,
-      "recent_avg": 7.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-27"
-    },
-    {
-      "race": "나고야 10경주",
-      "horse_no": 7,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-10-27"
-    },
-    {
       "race": "모리오카 11경주",
       "horse_no": 9,
       "recent_avg": 4.2,
@@ -4684,16 +4658,44 @@
       "recommended_hit": true,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1793595126.1674683
+    },
+    {
+      "race": "카사마츠 8경주",
+      "horse_no": 4,
+      "recent_avg": 6.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-02"
+    },
+    {
+      "race": "카사마츠 8경주",
+      "horse_no": 6,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-02"
+    },
+    {
+      "race": "카사마츠 8경주",
+      "horse_no": 5,
+      "recent_avg": 8.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-02"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 14905,
-      "hit": 2186
+      "count": 14910,
+      "hit": 2187
     },
     "전체부진마": {
-      "count": 24032,
-      "hit": 6252
+      "count": 24041,
+      "hit": 6255
     },
     "대규모급락": {
       "count": 4,
@@ -4703,8 +4705,8 @@
       "hit_rate": 75.0
     },
     "이상감지동반": {
-      "count": 9127,
-      "hit": 4066
+      "count": 9131,
+      "hit": 4068
     },
     "급락동반": {
       "count": 848,
