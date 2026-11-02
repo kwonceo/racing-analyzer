@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "나고야 3경주",
-      "horse_no": 12,
-      "recent_avg": 8.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-28"
-    },
-    {
-      "race": "나고야 3경주",
       "horse_no": 9,
       "recent_avg": 8.8,
       "win_place": 1,
@@ -4690,16 +4680,26 @@
         "복승이상감지"
       ],
       "date": "2026-11-02"
+    },
+    {
+      "race": "후나바시 11경주",
+      "horse_no": 8,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-02"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15036,
+      "count": 15044,
       "hit": 2206
     },
     "전체부진마": {
-      "count": 24223,
-      "hit": 6303
+      "count": 24234,
+      "hit": 6304
     },
     "대규모급락": {
       "count": 6,
@@ -4709,8 +4709,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9187,
-      "hit": 4097
+      "count": 9190,
+      "hit": 4098
     },
     "급락동반": {
       "count": 848,
