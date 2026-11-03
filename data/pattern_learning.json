@@ -4688,6 +4688,19 @@
         "복승이상감지"
       ],
       "date": "2026-11-02"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "몬베츠 5경주",
+      "total_combos_dropped": 55,
+      "drop_ratio": 0.833,
+      "result": "1+7",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-55.0%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1793679388.6750762
     }
   ],
   "condition_stats": {
@@ -4700,11 +4713,11 @@
       "hit": 6308
     },
     "대규모급락": {
-      "count": 6,
+      "count": 7,
       "high_odds": 1,
       "recommended_hit": 3,
-      "high_odds_rate": 16.7,
-      "hit_rate": 50.0
+      "high_odds_rate": 14.3,
+      "hit_rate": 42.9
     },
     "이상감지동반": {
       "count": 9194,
@@ -5085,25 +5098,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 3986,
-    "hit": 2939,
+    "count": 3987,
+    "hit": 2940,
     "cases": [
-      {
-        "race": "아오모리 2경주",
-        "date": "2026-10-31",
-        "smart_horses": [
-          7,
-          6,
-          2
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "코치 4경주",
         "date": "2026-10-31",
@@ -6611,6 +6608,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 14.9,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 5경주",
+        "date": "2026-11-03",
+        "smart_horses": [
+          7,
+          9,
+          8
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
