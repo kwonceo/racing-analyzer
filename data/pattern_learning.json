@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 8경주",
-      "horse_no": 7,
-      "recent_avg": 6.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-28"
-    },
-    {
       "race": "나고야 11경주",
       "horse_no": 7,
       "recent_avg": 10.2,
@@ -4698,16 +4688,24 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-11-05"
+    },
+    {
+      "race": "카사마츠 12경주",
+      "horse_no": 7,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-05"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15194,
-      "hit": 2220
+      "count": 15197,
+      "hit": 2221
     },
     "전체부진마": {
-      "count": 24456,
-      "hit": 6356
+      "count": 24460,
+      "hit": 6357
     },
     "대규모급락": {
       "count": 7,
@@ -4717,7 +4715,7 @@
       "hit_rate": 42.9
     },
     "이상감지동반": {
-      "count": 9262,
+      "count": 9263,
       "hit": 4136
     },
     "급락동반": {
@@ -5095,26 +5093,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4076,
-    "hit": 3007,
+    "count": 4077,
+    "hit": 3008,
     "cases": [
-      {
-        "race": "오비히로 11경주",
-        "date": "2026-11-02",
-        "smart_horses": [
-          9,
-          5,
-          7
-        ],
-        "placed": [
-          5,
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 5.5,
-        "high_odds": false
-      },
       {
         "race": "도요하시 11경주",
         "date": "2026-11-02",
@@ -6647,6 +6628,21 @@
         ],
         "placed": [],
         "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카사마츠 12경주",
+        "date": "2026-11-05",
+        "smart_horses": [
+          9,
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
