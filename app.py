@@ -39850,15 +39850,23 @@ def _nar_parse_deba(html, max_no=18):
 _NAR_FORM_DONE = set()          # 경주당 1회만 전적 수집(재시작 시 starters_store 로 재판정)
 
 
+def _nar_dk(rk):
+    """🔴 [2026-11-05 실사고] 「이미 수집」 메모리 집합의 키에 **오늘 날짜**를 붙인다.
+    종전엔 rk(「몬베츠 1경주」)만 넣어, 서버가 재기동 없이 날을 넘기면 어제 같은 이름 경주 때문에 오늘 수집을 건너뛰었다
+    → 10/29 재기동 뒤 지방경마 전적이 날마다 줄어 11/03 2경주 · 11/04 0경주(60경주 중) · 11/05 0경주."""
+    return "%s|%s" % (time.strftime("%Y%m%d"), rk)
+
+
 def _nar_autocollect_form(rk, baba, ymd, rno):
     """[南関東 전적 자동수집] keiba.go.jp DebaTable → starters_store. `_keiba_autocollect_form` 의 NAR판.
     실패해도 배당 수집엔 무영향(완전 격리)."""
     try:
-        if not (rk and baba and rno) or rk in _NAR_FORM_DONE:
+        if not (rk and baba and rno) or _nar_dk(rk) in _NAR_FORM_DONE:
             return
         _ex = _starters_load().get(rk)
-        if _ex and _ex.get("horses") and _ex.get("source") == "keiba_nar":
-            _NAR_FORM_DONE.add(rk)
+        # 🔴 [2026-11-05] 저장분이 오늘 것일 때만 「이미 있음」 — 어제 같은 이름 경주 전적을 오늘 것으로 보지 않는다
+        if _ex and _ex.get("horses") and _ex.get("source") == "keiba_nar" and _form_is_today(_ex):
+            _NAR_FORM_DONE.add(_nar_dk(rk))
             return
         html = _nar_fetch("%sDebaTable?k_raceDate=%s&k_raceNo=%d&k_babaCode=%s"
                           % (NAR_KEIBA_BASE, _nar_date_param(ymd), int(rno), baba))
@@ -39879,7 +39887,7 @@ def _nar_autocollect_form(rk, baba, ymd, rno):
                        "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
                        "trackCond": shutsuba.get("trackCond")}
             _starters_save(sdb)
-            _NAR_FORM_DONE.add(rk)
+            _NAR_FORM_DONE.add(_nar_dk(rk))
             print("[南関東 전적] %s: %d두 저장(keiba.go.jp DebaTable)" % (rk, len(store)))
     except Exception as e:
         print("[南関東 전적] %s 실패(무시):" % rk, e)
@@ -39945,7 +39953,7 @@ def _nar_form_enrich_rows(hs, shutsuba, details):
 def _nar_form_enrich(rk, ymd, rno):
     """[1번 배선] 어느 원천이든 전적이 있는 지방경마 경주에 DebaTable 과거 5전 상세를 덧붙인다(경주당 1회 · 완전 격리)."""
     try:
-        if not NAR_FORM_ENRICH_ENABLED or not rk or not rno or rk in _NAR_ENRICH_DONE:
+        if not NAR_FORM_ENRICH_ENABLED or not rk or not rno or _nar_dk(rk) in _NAR_ENRICH_DONE:
             return False
         _NAR_ENRICH_STAT["reach"] += 1
         try:
@@ -39957,12 +39965,12 @@ def _nar_form_enrich(rk, ymd, rno):
             return False                                   # 전적 자체가 없으면 폴백(_nar_form_fallback) 몫
         if all(h.get("debaPastPops") is not None for h in _hs0):
             _NAR_ENRICH_STAT["skip_have"] += 1
-            _NAR_ENRICH_DONE.add(rk)                       # 재기동 뒤 이미 보강된 경주
+            _NAR_ENRICH_DONE.add(_nar_dk(rk))                       # 재기동 뒤 이미 보강된 경주
             return False
         baba = _jp_baba_code_from_rk(rk)
         if not baba:
             _NAR_ENRICH_STAT["nocode"] += 1
-            _NAR_ENRICH_DONE.add(rk)
+            _NAR_ENRICH_DONE.add(_nar_dk(rk))
             return False
         nar_guard = None
         try:
@@ -39986,7 +39994,7 @@ def _nar_form_enrich(rk, ymd, rno):
             pass
         if not got:
             _NAR_ENRICH_STAT["fail"] += 1
-            _NAR_ENRICH_DONE.add(rk)
+            _NAR_ENRICH_DONE.add(_nar_dk(rk))
             print("[전적보강] %s 출주표 0두 → html=%dB" % (rk, len(html or "")))
             return False
         # fetch·파싱을 끝낸 뒤 **짧게** 읽고-고치고-저장한다(다른 스레드의 갱신과 겹치는 창을 줄인다)
@@ -40002,7 +40010,7 @@ def _nar_form_enrich(rk, ymd, rno):
                 row["distance"] = shutsuba.get("distance")
             sdb[rk] = row
             _starters_save(sdb)
-        _NAR_ENRICH_DONE.add(rk)
+        _NAR_ENRICH_DONE.add(_nar_dk(rk))
         _NAR_ENRICH_STAT["ok"] += 1
         _NAR_ENRICH_STAT["filled_pop"] += filled
         try:
@@ -40040,7 +40048,7 @@ def _nar_form_fallback(rk, ymd, rno, primary_ok):
             return False                                  # 정상 경로가 성공 — 폴백 자체가 안 돈다
         if not rk or not rno:
             return False
-        if rk in _NAR_FORM_DONE:
+        if _nar_dk(rk) in _NAR_FORM_DONE:
             return False
         # ── 오탐 계측 ⓐ: 이미 전적이 있는데 도는가 (있으면 불필요한 요청이다) ──
         try:
