@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "나고야 4경주",
-      "horse_no": 7,
-      "recent_avg": 9.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-28"
-    },
-    {
-      "race": "나고야 4경주",
       "horse_no": 5,
       "recent_avg": 8.5,
       "win_place": 2,
@@ -4691,16 +4681,24 @@
         "복승이상감지"
       ],
       "date": "2026-11-05"
+    },
+    {
+      "race": "카사마츠 4경주",
+      "horse_no": 5,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-05"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15061,
-      "hit": 2208
+      "count": 15066,
+      "hit": 2209
     },
     "전체부진마": {
-      "count": 24260,
-      "hit": 6310
+      "count": 24267,
+      "hit": 6311
     },
     "대규모급락": {
       "count": 7,
@@ -4710,7 +4708,7 @@
       "hit_rate": 42.9
     },
     "이상감지동반": {
-      "count": 9199,
+      "count": 9201,
       "hit": 4102
     },
     "급락동반": {
@@ -5088,23 +5086,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4062,
-    "hit": 2999,
+    "count": 4063,
+    "hit": 3000,
     "cases": [
-      {
-        "race": "호후 12경주",
-        "date": "2026-11-02",
-        "smart_horses": [
-          7
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 38.7,
-        "high_odds": true
-      },
       {
         "race": "모리오카 10경주",
         "date": "2026-11-02",
@@ -6641,6 +6625,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카사마츠 4경주",
+        "date": "2026-11-05",
+        "smart_horses": [
+          9,
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 3.0,
         "high_odds": false
       }
     ],
