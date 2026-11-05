@@ -21,6 +21,7 @@
 - **🧭 전적표 예측 관측 계층(2026-09-09 · 대표 승인)**(`tools/form_forecast.py` 신규 · 별도 프로세스): 출마표 원문을 발주 5~14분 전에 Claude 가 읽어 축·상대·근거를 기록 · 자동 채점 · 시장 상위3두 대조. 추천 경로 무개입.
 
 ### 수정된 버그
+- 지방경마 전적이 날마다 줄어 11/03~05 0경주 — `_NAR_FORM_DONE`·`_NAR_ENRICH_DONE`(메모리 「수집 완료」 집합)이 날짜 없는 rk 키라 재기동 없이 날을 넘기면 어제 같은 이름 경주로 오늘 수집을 건너뜀 → `_nar_dk`(오늘 날짜|rk) 키 · 저장분도 `_form_is_today` 일 때만 「이미 있음」
 - 경륜 전적 0(10/24~ · oddspark 출마표 403 · 경주당 복승 3.69→2.56개) — `_keirin_autocollect_form` 실패 시 keirin.jp JSJ006(득점·決まり手·연대율·각질·급반)·JSJ007(최근 개최 착순)·JSJ005(並び)로 `_keirin_parse_card` 와 같은 card 를 만들어 기존 분석·저장 경로 사용 · keirin.jp 폴백 트랙도 전적 수집 호출 · `KEIRINJP_FORM_ENABLED` · 계수기 `keirinjp_form` · ⚠ gear·착순 분포 없음
 - 경륜 결과 0건(10/23~ · oddspark RaceKekka 403) — 지난 날짜 백필은 rk 앞에 날짜를 붙여 그 날 파일에 저장(10/29 오늘 파일 오염 사고 수정 · `KEIRIN_BACKFILL_PAST_ENABLED`) · 지난 개최는 선수 직전 개최 키(JSJ007 kkParameter)로 만든 색인으로 찾음(계수기 `keirinjp_meet_index`) · `_keirin_result_top3` 실패 시 keirin.jp JSJ012(착순·2車複·3連複 확정배당·決まり手)로 폴백 · `_keirin_jo_today` 가 keirin.jp 스케줄 kjCode 도 인정 · `KEIRINJP_RESULT_ENABLED` · 계수기 `keirinjp_result` · ⚠ 오늘 개최 중인 경륜장만(끝난 개최의 과거 결과는 못 받음)
 - 조합 근거에 유력마가 「N번: 복병」으로 표시되던 모순(「유력마끼리 짝」 옆에 같은 말이 복병 · 9월~ 겹침 87~88%) — 유력마는 「N번: 유력마·복병 신호」로 표기(「복병」 글자 유지 → 동점 순서 판정 무변경 · 표시 전용 · `BASIS_DARK_SKIP_KEY` · 계수기 `basis_dark_key_relabel`)
