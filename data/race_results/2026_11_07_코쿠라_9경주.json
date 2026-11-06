@@ -1,0 +1,69 @@
+{
+ "race_id": "2026_11_07_코쿠라_9경주",
+ "raceKey": "코쿠라 9경주",
+ "date": "2026-11-07",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "코쿠라",
+ "round": 9,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 4,
+  "2nd": 5,
+  "3rd": 7
+ },
+ "payouts": {
+  "trifecta": 40.8
+ },
+ "payouts_approx": false,
+ "payout_source": null,
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "1+2",
+  "recommend_sub": null,
+  "strategy": "BMED_역배열형",
+  "signal_quality": "하",
+  "confidence": 14.7,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": 40.8,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-11-07 00:00:27",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
