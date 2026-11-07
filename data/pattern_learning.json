@@ -2,14 +2,6 @@
   "patterns": [
     {
       "race": "소노다 3경주",
-      "horse_no": 6,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-10-30"
-    },
-    {
-      "race": "소노다 3경주",
       "horse_no": 5,
       "recent_avg": 4.0,
       "win_place": 3,
@@ -4656,16 +4648,24 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-07"
+    },
+    {
+      "race": "오비히로 11경주",
+      "horse_no": 6,
+      "recent_avg": 4.4,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-07"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15652,
-      "hit": 2286
+      "count": 15658,
+      "hit": 2287
     },
     "전체부진마": {
-      "count": 25107,
-      "hit": 6514
+      "count": 25113,
+      "hit": 6515
     },
     "대규모급락": {
       "count": 6,
