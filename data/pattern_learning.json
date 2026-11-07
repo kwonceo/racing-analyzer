@@ -1,26 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 2경주",
-      "horse_no": 4,
-      "recent_avg": 6.3,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-30"
-    },
-    {
-      "race": "소노다 2경주",
-      "horse_no": 5,
-      "recent_avg": 6.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-30"
-    },
-    {
       "race": "카나자와 6경주",
       "horse_no": 6,
       "recent_avg": 12.6,
@@ -4656,16 +4636,36 @@
         "복승이상감지"
       ],
       "date": "2026-11-07"
+    },
+    {
+      "race": "코치 10경주",
+      "horse_no": 9,
+      "recent_avg": 5.4,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-07"
+    },
+    {
+      "race": "코치 10경주",
+      "horse_no": 3,
+      "recent_avg": 6.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-07"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15641,
+      "count": 15646,
       "hit": 2285
     },
     "전체부진마": {
-      "count": 25093,
-      "hit": 6510
+      "count": 25100,
+      "hit": 6512
     },
     "대규모급락": {
       "count": 6,
@@ -4675,8 +4675,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9452,
-      "hit": 4225
+      "count": 9454,
+      "hit": 4227
     },
     "급락동반": {
       "count": 857,
