@@ -3059,6 +3059,7 @@ def triple_ingest():
     #   ⚠ **소급 정규화가 아니다**(2026-07-31 결정 유지) — 과거 파일은 그대로 두고 **앞으로 들어오는 것만** 통일한다.
     #     🔴 그래서 기존 분리가 즉시 해소되지는 않는다. 조회 계층 정규화는 별건으로 남긴다.
     rk = _ingest_normalize_rk(rk, body)
+    rk = _dual_keirin_rk(rk, body)          # 🔴 [2026-11-07] 경륜판(JC)의 「코치 N경주」 → 「코치경륜 N경주」
     # 🔴 [2026-08-12 승인] 확장 2차 대조 — 긁는 동안 경주가 바뀐 전송을 서버에서도 막는다
     #   확장(content.js rkGuard)이 1차로 버리지만, 그것은 **재로드한 확장에서만** 돈다.
     #   ⚠ `rkVerify` 가 **없으면 그대로 받는다** — 옛 확장(재로드 전)을 막으면 수집이 통째로 멎는다.
@@ -3070,6 +3071,7 @@ def triple_ingest():
             _gate_hit("ingest_rk_verify", rk, "확장이 대조값을 보냈다", reach_only=True)
             try:
                 _rkv_n = _ingest_normalize_rk(_canon_rk(_rkv), dict(body))
+                _rkv_n = _dual_keirin_rk(_rkv_n, dict(body))   # 같은 변환 뒤 대조(안 하면 옛 확장 전송이 전부 409)
             except Exception:
                 _rkv_n = ""
             if _rkv_n and _rkv_n != rk:
@@ -3159,6 +3161,39 @@ def _ingest_normalize_rk(rk, body=None):
         _INGEST_NORM_STAT["error"] += 1
         print("[수신 표준화] 실패(원문 유지·무시):", str(e)[:80])
         return rk                                   # 🔴 막지 않는다
+
+
+# ══════════ [2026-11-07 대표 승인 「123 진행해」] 이중소속 지명 — 경륜판에서 온 「코치」는 경륜 키로 ══════════
+#   고치는 경륜장(74)과 경마장(BABA 31)이 둘 다 있다. 둘 다 「코치 N경주」로 저장돼 11/07 코치 경륜 5R 이
+#   고치 경마 5R 전적(말 10두)으로 분석됐고, 밤 경마 5R(17:10)이 경륜 마감 동결을 이어받을 뻔했다.
+#   사설 배당판 경륜 탭 주소는 `PLACE_TYPE=JC`(경마 J · 한국 H)라 그 표식이 있을 때만 바꾼다.
+#   ⚠ 표식이 없으면 원문 그대로(원칙 20 — 확신 없으면 안 바꾼다) · 실패해도 원문 · 계수기 dual_keirin_rk
+#   ⚠ 나고야·카와사키도 같은 이중소속이다 — 승인 범위 밖이라 여기 넣지 않았다(별건).
+_DUAL_KEIRIN_TOKEN = {"코치": "코치경륜", "고치": "코치경륜", "高知": "코치경륜"}
+_DUAL_KEIRIN_RK_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}\s+)?(.+?)\s*(\d+)\s*경주\s*$")
+
+
+def _dual_keirin_rk(rk, body=None):
+    """경륜판(PLACE_TYPE=JC)에서 온 이중소속 지명 키를 경륜 전용 키로. 아니면 **원문 그대로**."""
+    try:
+        m = _DUAL_KEIRIN_RK_RE.match(str(rk or "").strip())
+        if not m:
+            return rk
+        pre, venue, no = (m.group(1) or ""), m.group(2).strip(), m.group(3)
+        to = _DUAL_KEIRIN_TOKEN.get(venue)
+        if not to:
+            return rk
+        src = str((body or {}).get("source") or "") if isinstance(body, dict) else ""
+        if "PLACE_TYPE=JC" not in src:
+            return rk
+        out = "%s%s %d경주" % (pre, to, int(no))
+        if isinstance(body, dict) and not body.get("venueRaw"):
+            body["venueRaw"] = venue                # 원문 보존(추가만)
+        _gate_hit("dual_keirin_rk", out, "%s → %s(경륜판 JC)" % (rk, out), once_key=out)
+        return out
+    except Exception as e:
+        print("[이중소속 경륜 키] 실패(원문 유지·무시):", str(e)[:80])
+        return rk
 
 
 _ARITY_MIN, _ARITY_MAX = 0.4, 1.5
@@ -29624,7 +29659,12 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
              #   22·25 는 '개최정보 없음' 실측). 같은 목록에서 松戸=31·弥彦=21·京王閣=27·岐阜=43·静岡=38 재확인,
              #   豊橋(도요하시)=45 실측(기존 '히라쓰카' 라벨은 미검증 추정이라 교체) · 高知(고치)=74 신규.
              "43": "기후", "38": "시즈오카",
-             "21": "야히코", "26": "세이부엔", "74": "고치",
+             # 🔴 [2026-11-07 대표 승인 「123 진행해」] 74 = 高知 **경륜** → 「코치경륜」(종전 「고치」).
+             #   「고치」는 _TRACK_GROUPS 에서 「코치」(고치 **경마** · BABA 31)로 합쳐져 두 종목이 한 키 「코치 N경주」가 됐다.
+             #   ⇒ keirin.jp 스케줄이 「코치」를 이미 있는 경기장(have)으로 보고 고치 경륜을 통째로 건너뛰고,
+             #     배당판 경륜 틱에 아침 NAR 선수집 경마 전적이 붙었다(11/07 코치 5R · 말 10두로 분석).
+             #   원칙 25 「종목이 섞이는 지명은 합치지 않는다」. 「경륜」 글자가 _KEIRIN_ONLY_RE 에 걸려 sport=cycle.
+             "21": "야히코", "26": "세이부엔", "74": "코치경륜",
              # [joCode 실측 2026-07-21·oddspark 당일 개최 링크] 富山(도야마)=46 · 松阪(마쓰사카)=47 확정
              "46": "도야마", "47": "마쓰사카",
              # [joCode 실측 2026-07-23·당일 스케줄] 青森(아오모리)=12 · いわき平=13 · 伊東=37 확정.
@@ -32476,6 +32516,12 @@ _JP_BABA_CODE = {
 def _jp_baba_code_from_rk(rk):
     """raceKey 문자열에서 NAR 경마장 별칭을 스캔해 k_babaCode 반환(정규화 무관·방어). 미지원=None."""
     s = str(rk or "")
+    # 🔴 [2026-11-07] 경륜 키는 NAR 코드를 주지 않는다 — 부분 일치라 「코치경륜 5경주」가 「코치」(31)에 걸려
+    #   keiba.go.jp 전적·결과 경로로 들어간다. NAR 15장 이름은 _KEIRIN_ONLY_RE 와 안 겹쳐 경마 키는 무변경.
+    if _KEIRIN_ONLY_RE.search(s):
+        if any(key in s for key in _JP_BABA_CODE):
+            _gate_hit("baba_keirin_skip", s, "경륜 키 · NAR 코드 안 줌", once_key=s)
+        return None
     for key, code in _JP_BABA_CODE.items():
         if key in s:
             return code
