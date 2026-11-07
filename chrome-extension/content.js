@@ -191,14 +191,15 @@
     }
     // 🔴 [2026-11-07 대표 승인] 이중소속 지명 — 고치는 경륜장·경마장이 둘 다 있어 「코치 N경주」 하나로 섞였다
     //   (11/07 코치 경륜 5R 이 고치 경마 5R 전적으로 분석됨). 꼬리표 [륜] 또는 경륜 탭(PLACE_TYPE=JC)이면 경륜 키로.
-    //   서버 KEIRIN_JO 74 = 「코치경륜」과 같은 이름 · 나고야·카와사키는 승인 범위 밖(별건).
+    //   서버 KEIRIN_JO 74 = 「코치경륜」과 같은 이름 · 나고야(42 → 나고야경륜)·카와사키(34 → 카와사키경륜)도 같은 날 추가.
     track = kbDualKeirinTrack(track, navTag, location.href);
     return [date, track, raceNo].filter(Boolean).join(' ').trim();
   }
 
   // [2026-11-07] 이중소속 지명 → 경륜 전용 키(꼬리표 「륜」 또는 경륜 탭 주소일 때만 · 아니면 그대로)
   function kbDualKeirinTrack(track, tag, href) {
-    const DUAL = { '코치': '코치경륜', '고치': '코치경륜' };
+    const DUAL = { '코치': '코치경륜', '고치': '코치경륜', '나고야': '나고야경륜',
+                   '카와사키': '카와사키경륜', '가와사키': '카와사키경륜' };   // 서버 _DUAL_KEIRIN_TOKEN 과 같게
     if (!DUAL[track]) return track;
     if (tag === '륜' || /PLACE_TYPE=JC(?:&|$)/.test(String(href || ''))) return DUAL[track];
     return track;
