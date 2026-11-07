@@ -453,8 +453,14 @@
       var res = null;
       try {
         var txt = ((document.body && document.body.innerText) || '').slice(0, 30000);
-        var m = /이전\s*([가-힣]{2,8})(?:\s*\[[^\]\s]{1,3}\])?\s*(\d{1,2})\s*경주/.exec(txt);   // [2026-09-09] 「코치[륜] 2경주」 꼬리표 허용 — 못 읽으면 이전 경주 분석이 그대로 남는다
-        if (m) res = { v: m[1], n: +m[2] };
+        var m = /이전\s*([가-힣]{2,8})(?:\s*\[([^\]\s]{1,3})\])?\s*(\d{1,2})\s*경주/.exec(txt);   // [2026-09-09] 「코치[륜] 2경주」 꼬리표 허용 — 못 읽으면 이전 경주 분석이 그대로 남는다
+        if (m) {
+          // 🔴 [2026-11-07] 이중소속 지명(고치 = 경륜장·경마장) — 꼬리표 「륜」 또는 경륜 탭(PLACE_TYPE=JC)이면 경륜 키
+          //   content.js kbDualKeirinTrack · 서버 KEIRIN_JO 74 「코치경륜」과 같은 규칙(안 맞추면 패널이 안 뜬다)
+          var _v = m[1], _dual = { '코치': '코치경륜', '고치': '코치경륜' };
+          if (_dual[_v] && (m[2] === '륜' || /PLACE_TYPE=JC(?:&|$)/.test(String(location.href || '')))) _v = _dual[_v];
+          res = { v: _v, n: +m[3] };
+        }
       } catch (_) { /* */ }
       _brdCache = { t: Date.now(), v: res };
       return res;
