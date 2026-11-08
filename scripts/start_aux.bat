@@ -4,8 +4,8 @@ REM ============================================================
 REM  보조 프로세스 4개를 띄운다 (8011 서버와 별개 · 없을 때만).
 REM   . 8012 tools\forecast_ui.py        전적표 분석 화면
 REM   . 8013 tools\review_ui.py          대표 복기 화면(3층)
-REM   .      tools\form_forecast.py --daemon   경마 자동 예측(대표 승인 2026-09-25)
-REM   .      tools\keirin_forecast.py --daemon 경륜 자동 예측(대표 승인 2026-09-25)
+REM   .      tools\form_forecast.py --daemon   경마 자동 예측 - 2026-11-08 자동시작 제외(대표 「원할 때만」 · opus 하루 약 10달러)
+REM   .      tools\keirin_forecast.py --daemon 경륜 자동 예측 - 2026-11-08 자동시작 제외(필요하면 8012 화면에서 누를 때만)
 REM  2026-09-25 신설 - 재부팅·다운 뒤 넷 다 꺼진 채 남아 있던 것(9/09 이후 예측 12건뿐).
 REM  start_server_only.bat 이 부팅 때 이것을 부른다. 사람이 직접 실행해도 된다.
 REM  중복 기동 방지: 포트(8012·8013)는 LISTENING, 데몬은 명령줄로 확인한다.
@@ -21,9 +21,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$procs = Get-CimInstance Win32_Process -Filter \"name='python.exe'\" | ForEach-Object { $_.CommandLine };" ^
   "$jobs = @(" ^
   "  @{tag='8012'; args='-u tools/forecast_ui.py';           key='forecast_ui.py';   out='forecast_ui'}," ^
-  "  @{tag='8013'; args='-u tools/review_ui.py';             key='review_ui.py';     out='review_ui'}," ^
-  "  @{tag='form'; args='-u tools/form_forecast.py --daemon'; key='form_forecast.py'; out='form_forecast_daemon'}," ^
-  "  @{tag='keirin'; args='-u tools/keirin_forecast.py --daemon'; key='keirin_forecast.py'; out='keirin_forecast_daemon'}" ^
+  "  @{tag='8013'; args='-u tools/review_ui.py';             key='review_ui.py';     out='review_ui'}" ^
   ");" ^
   "foreach ($j in $jobs) {" ^
   "  $running = $procs | Where-Object { $_ -and $_ -match [regex]::Escape($j.key) };" ^
