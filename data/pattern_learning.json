@@ -1,22 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 11경주",
-      "horse_no": 2,
-      "recent_avg": 4.6,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-10-31"
-    },
-    {
-      "race": "코치 12경주",
-      "horse_no": 9,
-      "recent_avg": 8.2,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-10-31"
-    },
-    {
       "race": "코치 12경주",
       "horse_no": 7,
       "recent_avg": 7.0,
@@ -4666,16 +4650,36 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-08"
+    },
+    {
+      "race": "코치 11경주",
+      "horse_no": 7,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-08"
+    },
+    {
+      "race": "코치 11경주",
+      "horse_no": 2,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-08"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15896,
+      "count": 15899,
       "hit": 2314
     },
     "전체부진마": {
-      "count": 25469,
-      "hit": 6612
+      "count": 25474,
+      "hit": 6614
     },
     "대규모급락": {
       "count": 6,
@@ -4685,8 +4689,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9573,
-      "hit": 4298
+      "count": 9575,
+      "hit": 4300
     },
     "급락동반": {
       "count": 857,
@@ -5063,25 +5067,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4235,
-    "hit": 3122,
+    "count": 4236,
+    "hit": 3123,
     "cases": [
-      {
-        "race": "오비히로 8경주",
-        "date": "2026-11-06",
-        "smart_horses": [
-          9,
-          3,
-          7
-        ],
-        "placed": [
-          9
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "후나바시 9경주",
         "date": "2026-11-06",
@@ -6583,6 +6571,23 @@
         "placed": [
           4,
           6
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "코치 11경주",
+        "date": "2026-11-08",
+        "smart_horses": [
+          7,
+          4,
+          5
+        ],
+        "placed": [
+          7,
+          5
         ],
         "hit": true,
         "trifecta_odds": null,
