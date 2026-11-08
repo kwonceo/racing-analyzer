@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 10경주",
-      "horse_no": 7,
-      "recent_avg": 10.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-10-30"
-    },
-    {
-      "race": "소노다 11경주",
-      "horse_no": 11,
-      "recent_avg": 5.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-30"
-    },
-    {
       "race": "소노다 11경주",
       "horse_no": 1,
       "recent_avg": 4.2,
@@ -4650,16 +4632,34 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-08"
+    },
+    {
+      "race": "모리오카 7경주",
+      "horse_no": 9,
+      "recent_avg": 4.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-08"
+    },
+    {
+      "race": "모리오카 7경주",
+      "horse_no": 10,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-08"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15727,
-      "hit": 2298
+      "count": 15731,
+      "hit": 2299
     },
     "전체부진마": {
-      "count": 25216,
-      "hit": 6544
+      "count": 25226,
+      "hit": 6546
     },
     "대규모급락": {
       "count": 6,
@@ -4669,8 +4669,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9489,
-      "hit": 4246
+      "count": 9495,
+      "hit": 4247
     },
     "급락동반": {
       "count": 857,
@@ -5047,24 +5047,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4203,
-    "hit": 3099,
+    "count": 4204,
+    "hit": 3100,
     "cases": [
-      {
-        "race": "소노다 5경주",
-        "date": "2026-11-06",
-        "smart_horses": [
-          2,
-          12,
-          7,
-          8
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 11.2,
-        "high_odds": false
-      },
       {
         "race": "구마모토 4경주",
         "date": "2026-11-06",
@@ -6572,6 +6557,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 1.4,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 7경주",
+        "date": "2026-11-08",
+        "smart_horses": [
+          6,
+          11,
+          10
+        ],
+        "placed": [
+          10
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
