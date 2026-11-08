@@ -2112,6 +2112,9 @@ _KEIRIN_ONLY_RE = re.compile(
     #   ⚠ 이 한 줄로는 오늘 사고가 안 막힌다 — **확장이 japan_central 로 판정한 뒤엔 전적·삼복승을 이미 안 걷었다.**
     #     서버 정정은 저장 태그만 고칠 뿐 못 걷은 데이터를 되살리지 못한다. 근본 수정은 확장 쪽(resolveSport)이다.
     r"타케오|"
+    # [2026-11-08 대표 「전부 진행」] 福井(후쿠이) — 경륜 전용(경마장·경정장 없음 · 경정 三国는 「미쿠니」) · KEIRIN_JO 51
+    #   저장 토큰 11/07 「福井」 7경주 · 다른 지명과 겹침 없음(후쿠시마·福島 와 글자가 다르다)
+    r"후쿠이|福井|"
     r"경륜|競輪|keirin)")
 
 
@@ -3171,7 +3174,10 @@ def _ingest_normalize_rk(rk, body=None):
 #   ✅ [2026-11-07 대표 「나고야 카와사키도 진행」] 나고야(42)·카와사키(34)도 같은 이중소속 — 함께 넣었다.
 _DUAL_KEIRIN_TOKEN = {"코치": "코치경륜", "고치": "코치경륜", "高知": "코치경륜",
                       "나고야": "나고야경륜", "名古屋": "나고야경륜",
-                      "카와사키": "카와사키경륜", "가와사키": "카와사키경륜", "川崎": "카와사키경륜"}
+                      "카와사키": "카와사키경륜", "가와사키": "카와사키경륜", "川崎": "카와사키경륜",
+                      # [2026-11-08 대표 「전부 진행」] 중앙(JRA) 경마장과 이름이 같은 경륜장 둘
+                      "고쿠라": "코쿠라경륜", "코쿠라": "코쿠라경륜", "小倉": "코쿠라경륜",
+                      "하코다테": "하코다테경륜", "히코다테": "하코다테경륜", "函館": "하코다테경륜"}
 _DUAL_KEIRIN_RK_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}\s+)?(.+?)\s*(\d+)\s*경주\s*$")
 
 
@@ -3196,6 +3202,78 @@ def _dual_keirin_rk(rk, body=None):
     except Exception as e:
         print("[이중소속 경륜 키] 실패(원문 유지·무시):", str(e)[:80])
         return rk
+
+
+# ══════════ [2026-11-08 대표 「지금 고쳐도된다 · 전부 진행」] 배당판 마감 시각 ↔ 서버 일정표 ══════════
+#   배당판(확장)은 자기 화면에서 읽은 마감 시각을 보내고, `_history_append` 는 그 값으로 틱마다
+#   「마감 몇 분 전 / 마감 후」를 정한다(받을 때마다 deadline_epoch 를 덮는다 · 마지막 값이 이김).
+#   실사고 11/07 교토 10R: 배당판 15:13:30 ↔ 실제 발주 15:10 → 15:10~15:13 틱(발주 뒤 확정 직전 배당)이 「마감 1~3분 전」이 돼
+#     오버레이에 「마감급락 1+10 −27%」·「고배당 유력마 13번(17.1배)」이 떴다. 같은 날 구마모토 6R(13:40 ↔ 13:21) · 야히코 4R(12:40 ↔ 12:36),
+#     서로 다른 경주 6개에 같은 값 13:56:30(낡은 타이머 값으로 추정).
+#   소급 11/01~07 배당판 틱 있는 222경주 중 서버 틱과 대조 가능 156: 늦게 들어옴 11(7%) · 이르게 들어옴 11(7%).
+#   서버 수집 틱(netkeiba·oddspark·keirin.jp)은 이미 이 일정표 시각을 쓰고 마감 처리가 맞았다 ⇒ 같은 시각으로 맞춘다.
+#   ⚠ 서버 출처·한국(한국 일정표는 배당판·PDF 에서 온다)·일정표 없음·차이 60초 이하 = 원래 값 그대로(원칙 20)
+#   ⚠ 발주 지연이 일정표에 안 실리면 지연 구간 틱이 「마감 후」로 갈 수 있다 — 그 대가는 계수기로 본다.
+#   계수기 deadline_sched_check(도달) / deadline_sched_fix(발동 · 차이 초) · 🔧 되돌리기 DEADLINE_SCHED_PREFER = False
+DEADLINE_SCHED_PREFER = True
+DEADLINE_SCHED_TOL_SEC = 60
+DEADLINE_SCHED_FAR_SEC = 3600
+_DEADLINE_SERVER_SRC = ("oddspark", "oddspark_bg", "netkeiba", "kra_api", "korea", "kra_detail")
+_DEADLINE_FIX_LOGGED = set()
+
+
+def _jra_cached_post_epoch(rk):
+    """중앙(JRA) 발주시각 — `_JRA_POST_CACHE`(netkeiba 출마표에서 받은 값)에서 **오늘 날짜 것만**.
+    ⚠ 캐시 키 race_id 에 날짜가 없고 재기동 없이 날을 넘기면 어제 값이 남는다 → 날짜를 대조한다. 네트워크 요청 없음."""
+    try:
+        v, num = _area_num(rk)
+        if not (v and num):
+            return None
+        vn = _track_norm(v)
+        today = time.strftime("%Y%m%d")
+        for _ep, _venue, _rno in list(_JRA_POST_CACHE.values()):
+            if int(_rno) == int(num) and _track_norm(_venue) == vn \
+                    and time.strftime("%Y%m%d", time.localtime(_ep)) == today:
+                return _ep
+    except Exception:
+        return None
+    return None
+
+
+def _deadline_sched_fix(rk, deadline, source=None, category=None):
+    """배당판이 보낸 deadline 이 서버 일정표 발주시각과 60초 넘게 다르면 일정표 값(같은 단위)으로. 아니면 그대로."""
+    try:
+        if not DEADLINE_SCHED_PREFER or not deadline:
+            return deadline
+        if str(source or "") in _DEADLINE_SERVER_SRC:
+            return deadline
+        if str(category or "") == "korea" or _KRA_TRACK_RE.search(str(rk)):
+            return deadline
+        pe = _sched_post_epoch(rk) or _jra_cached_post_epoch(rk)
+        if not pe:
+            return deadline
+        dl = float(deadline)
+        ms = dl > 1e12
+        dl_s = dl / 1000.0 if ms else dl
+        pe = float(pe)
+        diff = dl_s - pe
+        _gate_hit("deadline_sched_check", rk, "배당판 마감 시각 대조", reach_only=True)
+        if abs(diff) <= DEADLINE_SCHED_TOL_SEC:
+            return deadline
+        if abs(diff) > DEADLINE_SCHED_FAR_SEC:      # 60분 넘게 다르면 짝을 잘못 지은 것 — 안 바꾼다
+            _gate_hit("deadline_sched_far", rk, "차이 %+d초 · 그대로" % int(diff), once_key=rk)
+            return deadline
+        _gate_hit("deadline_sched_fix", rk, "배당판 %+d초 → 일정표 %s"
+                  % (int(diff), time.strftime("%H:%M", time.localtime(pe))), once_key=rk)
+        if rk not in _DEADLINE_FIX_LOGGED:
+            _DEADLINE_FIX_LOGGED.add(rk)
+            print("[마감 시각 대조] %s: 배당판 %s ↔ 일정표 %s (%+d초) → 일정표 사용"
+                  % (rk, time.strftime("%H:%M:%S", time.localtime(dl_s)),
+                     time.strftime("%H:%M:%S", time.localtime(pe)), int(diff)))
+        return pe * 1000.0 if ms else pe
+    except Exception as e:
+        print("[마감 시각 대조] 실패(원래 값 유지·무시):", str(e)[:80])
+        return deadline
 
 
 _ARITY_MIN, _ARITY_MAX = 0.4, 1.5
@@ -3588,6 +3666,10 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                         break
     except Exception as _pe2:
         print("[한국 발주시각·PDF] 실패(무시):", str(_pe2)[:80])
+
+    # 🔴 [2026-11-08 대표 「지금 고쳐도된다 · 전부 진행」] 배당판이 보낸 마감 시각이 서버 일정표와 1분+ 다르면 일정표를 쓴다
+    #   (_deadline_sched_fix 주석 · 교토 10R 15:13:30 ↔ 실제 15:10 · 발주 뒤 배당이 「마감급락」·「고배당 유력마」로 표시됨)
+    deadline = _deadline_sched_fix(rk, deadline, source, category)
 
     # 🔴 [죽은 값 감지 · 관찰 모드] 같은 값이 4분 이상 이어지면 기록만 한다(_dead_odds_suspect 주석).
     #   ⚠ 폐기하지 않는다 — 배당은 그대로 저장된다. 계수기와 로그만 남긴다.
@@ -28745,6 +28827,9 @@ _TRACK_GROUPS = {
     "소노다": ["園田", "sonoda", "sono"],
     "히메지": ["姫路", "himeji", "hime"],
     "코치": ["高知", "kochi", "고치"],   # [오류5] 高知/코치/고치 3중 중복 통합 → '코치' 하나로
+    #   ⚠ [2026-11-07] 고치 **경륜**은 「코치경륜」(KEIRIN_JO 74)이다 — 이 묶음은 경마 전용으로 남긴다(원칙 25)
+    # [2026-11-08] 福井 경륜(51) — 11/07 「福井」 한자 토큰과 새 「후쿠이」를 한 곳으로. 영문 별칭은 접두 대조가 fuku(후쿠시마)와 엉킬 수 있어 안 넣는다
+    "후쿠이": ["福井"],
     "사가": ["佐賀", "saga"],
     "몬베츠": ["門別", "monbetsu", "mombetsu", "monb"],
     "도쿄": ["東京", "tokyo"],
@@ -29640,7 +29725,11 @@ KEIRIN_STYLE_LABEL = {"逃": "도주(선행)", "捲": "젖히기", "追": "추�
 #   여기 없는 joCode도 '기타 경륜장 자동 탐색'으로 정상 표시됨(_keirin_parse_card 가 title 우선).
 #   [확정·live fetch 검증] 36=오다와라(小田原) · 62=히로시마(広島). 그 외 라벨은 미검증(참고만).
 KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
-             "85": "사세보", "83": "구루메", "81": "고쿠라", "31": "마쓰도",
+             # 🔴 [2026-11-08 대표 「전부 진행」] 81 = 「코쿠라경륜」(종전 「고쿠라」 → _track_norm 으로 중앙 「코쿠라」와 같은 키) — 74·42·34 와 같은 이중소속 분리
+             "85": "사세보", "83": "구루메", "81": "코쿠라경륜", "31": "마쓰도",
+             # [2026-11-08] 51 = 福井(후쿠이) — keirin.jp 개최 목록 실측(JSJ048 naibuKeirinCd 51 · keirinjoName 福井).
+             #   미등록이라 11/07 7경주가 한자 토큰 「福井」로 저장됐다 · 경륜 전용(경마장 없음) → _KEIRIN_ONLY_RE 에도 추가
+             "51": "후쿠이",
              # 🔴 [2026-08-10 실측 정정] 48 은 「가와사키」가 아니라 **四日市(욧카이치)** 다.
              #   oddspark RaceKekka.do 의 <title> 로 08-10·08-09 두 날 확인(추정 아님):
              #     joCode 34 → 川崎競輪 · joCode 48 → **四日市競輪**
@@ -29654,7 +29743,8 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
              # [2026-10-23] 25 = 大宮(keirin.jp naibuKeirinCd · JKA 코드) — 확장 저장 토큰 「오미야」와 맞춘다(원칙 25)
              "25": "오미야",
              # [joCode 업데이트 2026-07-14·라이브 확인] 기시와다 73→56 교정 + 신규 4곳 추가
-             "11": "하코다테", "61": "다마노", "27": "케이오카쿠", "87": "구마모토",
+             # 🔴 [2026-11-08 대표 「전부 진행」] 11 = 「하코다테경륜」 — 중앙 하코다테(函館)와 같은 이름(이중소속 분리)
+             "11": "하코다테경륜", "61": "다마노", "27": "케이오카쿠", "87": "구마모토",
              # [joCode 실측 교정 2026-07-19·백필 라이브 확인]
              #   기후 04→43 (04는 '개최정보 없음'·43 결과 페이지 실측 성공) · 시즈오카 38 신규(실측 성공)
              #   21=야히코 (결과 페이지 실측 — 기존 '세이부엔' 오매핑 정정)
