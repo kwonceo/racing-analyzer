@@ -21,6 +21,7 @@
 - **🧭 전적표 예측 관측 계층(2026-09-09 · 대표 승인)**(`tools/form_forecast.py` 신규 · 별도 프로세스): 출마표 원문을 발주 5~14분 전에 Claude 가 읽어 축·상대·근거를 기록 · 자동 채점 · 시장 상위3두 대조. 추천 경로 무개입.
 
 ### 수정된 버그
+- Claude API 하루 약 10달러 — 자동 예측 데몬 두 개(tools/form_forecast.py·keirin_forecast.py --daemon)가 경주마다 claude-opus-5 호출(하루 경마 33~54 · 경륜 56~82경주 · 경륜은 10/29 출주표 복구 뒤 급증) · 추천에 안 쓰이고 경륜은 장당 시장보다 못함 → 대표가 「조원」 키 비활성화 · scripts/start_aux.bat 자동시작에서 두 데몬 제외(8012·8013 유지) · 「원할 때만」
 - 한국 영천 경마가 9/13~ 28경주 일본 지방경마(sport=horse·japan_local · 일부 cycle)로 저장 — 한국 경마장 목록에 영천이 없었다 → `_KRA_TRACK_RE`·`_rk_venue_num`·대시보드 한국 그룹·PDF 사전분석 판정·확장 `KRA_TRACK_RE`(2.1.186)에 영천 · 저장 토큰 108종 중 「영천」 포함은 영천 하나(오탐 0) · ⚠ KRA meet 코드·PDF 경주명 정규식은 영천 코드 미확인으로 보류
 - 배당판(확장)이 보낸 마감 시각이 실제와 달라 발주 뒤 배당이 신호로 표시(11/07 교토 10R 15:13:30 ↔ 15:10 · 「마감급락 1+10」·「고배당 유력마 13번」) — 서버 일정표(today_schedule · 중앙은 `_JRA_POST_CACHE` 오늘 것만)와 60초 넘게 다르면 일정표 시각 사용(`_deadline_sched_fix` · 서버 출처·한국·60분 초과 차이는 그대로 · 계수기 `deadline_sched_check`/`deadline_sched_fix`/`deadline_sched_far` · 되돌리기 `DEADLINE_SCHED_PREFER=False`) · 소급 11/01~07 대조 가능 156경주 중 늦게 11 · 이르게 11
 - 고쿠라(81)·하코다테(11) 경륜도 중앙 경마장과 같은 이름 → 「코쿠라경륜」·「하코다테경륜」 · 확장 2.1.185 `_isJRACentral`·`_horseTrackStrong` 이 「경륜」 붙은 키를 중앙·경마로 안 봄(종전 「고쿠라 N경주」 경륜도 확장에서 중앙으로 분류됐다) · 福井 경륜 51 = 「후쿠이」 등록(`_KEIRIN_ONLY_RE`·`_TRACK_GROUPS` · 11/07 한자 토큰 7경주)
