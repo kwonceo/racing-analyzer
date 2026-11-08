@@ -2062,7 +2062,10 @@ CROSS_PAIR_LABEL = "교차 짝"
 CROSS_PAIR_NOTE = ("자주 맞지는 않고 맞으면 배당이 큽니다. "
                    "우리가 짚은 말끼리 묶은 자리입니다.")
 # [종목 오분석 근본수정] 한국 경마장명 → sport=horse·category=korea 강제 판정용(확장 KRA_TRACK_RE 와 동일 커버).
-_KRA_TRACK_RE = re.compile(r"(서울|부산경남|부경|부산|제주|과천|렛츠런|한국마사회|경마공원|KRA)")
+# 🔴 [2026-11-08 대표 「영천 한국경마장이야」] 영천(永川) 추가 — 목록에 없어 9/13~ 「영천 N경주」 28경주가
+#   sport=horse·japan_local(일부 cycle)로 저장돼 일본 규칙(복승+쌍승 수집·지방 상한)으로 분석됐다(원칙 25).
+#   ⚠ KRA API meet 코드(KRA_MEET_*)·PDF 경주명 정규식((부산|제주|서울)경마)에는 아직 없다 — 영천 코드 미확인
+_KRA_TRACK_RE = re.compile(r"(서울|부산경남|부경|부산|제주|과천|영천|렛츠런|한국마사회|경마공원|KRA)")
 # [경륜 전용 지명] 경정장이 없는 '경륜 전용' 경마장명 → sport=cycle 강제(boat 오분석 차단).
 #   ⚠ 경정장과 겹치는 지명(가와사키·다마노·구루메 등)은 제외 — 경륜 전용만 넣어 경정 오정정 방지.
 #   세이부엔(西武園)이 KEIRIN_JO 미등록이라 boat 로 오분석되던 문제(2026-07-17 세이부엔 3경주).
@@ -16720,7 +16723,7 @@ def _rk_venue_num(k):
     m = re.search(r"(\d+)\s*(?:R\b|경주|레이스)", k or "", re.IGNORECASE)
     num = int(m.group(1)) if m else None
     venue = None
-    for v in ("부산경남", "부경", "부산", "서울", "제주"):
+    for v in ("부산경남", "부경", "부산", "서울", "제주", "영천"):   # 영천 2026-11-08
         if v in (k or ""):
             venue = "부경" if v in ("부산경남", "부산", "부경") else v
             break
@@ -19445,7 +19448,7 @@ def _prerace_report_for(rk):
         if not mv:
             return None
         venue, rno = mv.group(1), int(mv.group(2))
-        if not re.search(r"서울|부산|부경|제주|과천", venue):
+        if not re.search(r"서울|부산|부경|제주|과천|영천", venue):   # 영천 2026-11-08
             return None                      # 🔴 한국만 — 일본은 PDF 사전분석이 없다
         p = os.path.join(KOREA_PRERACE_DIR, "%s_%s_%d.json" % (date, venue, rno))
         if not os.path.exists(p):
@@ -41109,7 +41112,7 @@ def _multi_sport_of(rec):
         return "boat"
     _venue = rec.get("venue") or ""
     _area = _area_num(_venue)[0] or _area_num(rec.get("raceKey") or "")[0] or ""
-    if cat == "korea" or _area in ("서울", "부산", "부경", "제주", "과천"):
+    if cat == "korea" or _area in ("서울", "부산", "부경", "제주", "과천", "영천"):   # 영천 2026-11-08
         return "korea"
     if cat == "japan_central" or _area in _JRA_TRACKS or _venue in _JRA_TRACKS:
         return "central"                        # [중앙경마·JRA] 지방경마와 별도 그룹
