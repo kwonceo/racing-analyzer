@@ -4664,11 +4664,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15801,
+      "count": 15804,
       "hit": 2307
     },
     "전체부진마": {
-      "count": 25335,
+      "count": 25339,
       "hit": 6578
     },
     "대규모급락": {
@@ -4679,7 +4679,7 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9534,
+      "count": 9535,
       "hit": 4271
     },
     "급락동반": {
@@ -5057,26 +5057,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4218,
+    "count": 4219,
     "hit": 3111,
     "cases": [
-      {
-        "race": "후나바시 3경주",
-        "date": "2026-11-06",
-        "smart_horses": [
-          2,
-          8,
-          7
-        ],
-        "placed": [
-          2,
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.4,
-        "high_odds": false
-      },
       {
         "race": "소노다 10경주",
         "date": "2026-11-06",
@@ -6586,9 +6569,22 @@
         "trifecta_odds": null,
         "quinella_odds": 3.2,
         "high_odds": false
+      },
+      {
+        "race": "오비히로 6경주",
+        "date": "2026-11-08",
+        "smart_horses": [
+          7,
+          5
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 73.8,
+    "rate": 73.7,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
