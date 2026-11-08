@@ -199,7 +199,8 @@
   // [2026-11-07] 이중소속 지명 → 경륜 전용 키(꼬리표 「륜」 또는 경륜 탭 주소일 때만 · 아니면 그대로)
   function kbDualKeirinTrack(track, tag, href) {
     const DUAL = { '코치': '코치경륜', '고치': '코치경륜', '나고야': '나고야경륜',
-                   '카와사키': '카와사키경륜', '가와사키': '카와사키경륜' };   // 서버 _DUAL_KEIRIN_TOKEN 과 같게
+                   '카와사키': '카와사키경륜', '가와사키': '카와사키경륜',
+                   '고쿠라': '코쿠라경륜', '코쿠라': '코쿠라경륜', '하코다테': '하코다테경륜', '히코다테': '하코다테경륜' };   // 서버 _DUAL_KEIRIN_TOKEN 과 같게
     if (!DUAL[track]) return track;
     if (tag === '륜' || /PLACE_TYPE=JC(?:&|$)/.test(String(href || ''))) return DUAL[track];
     return track;
@@ -1052,6 +1053,7 @@
   //   경마장명이 남아야만 '경마 확정 강신호'로 인정(그 외엔 본문 일본어 마커 등 기존 후순위 신호로 판정).
   const AMBIG_TRACKS = /(高知|名古屋|川崎|고치|코치|나고야|카와사키|가와사키)/g;
   function _horseTrackStrong(rk) {
+    if (/경륜/.test(String(rk || ''))) return false;   // [2026-11-08] 「하코다테경륜」 등 경륜 키는 경마 확정 근거가 아니다
     try { return HORSE_TRACKS.test(String(rk || '').replace(AMBIG_TRACKS, '')); } catch (_) { return HORSE_TRACKS.test(rk || ''); }
   }
   // [v2.1.146 경정 오감지 수정] URL/제목 종목어 강신호 판정 — 여러 종목어가 동시에 있으면(사이트 공용 타이틀에
@@ -1152,6 +1154,8 @@
   //   기존 함수명 유지(호출부 무변경). 페이지 body 스캔 완전 제거.
   const _JRA_VENUES = /삿포로|하코다테|후쿠시마|니가타|도쿄|나카야마|주쿄|쿄토|교토|한신|고쿠라|코쿠라|札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉/;
   function _isJRACentral(rk) {
+    // [2026-11-08] 「코쿠라경륜」·「하코다테경륜」은 경륜이다 — 부분 일치로 중앙이 되지 않게(종전 「고쿠라 N경주」 경륜도 중앙으로 갔다)
+    if (/경륜/.test(rk || '')) return false;
     if (_JRA_VENUES.test(rk || '')) return true;
     try { return /jra\.go\.jp/.test(location.href); } catch (_) { return false; }
   }
