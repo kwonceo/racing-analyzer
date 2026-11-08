@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "오비히로 12경주",
-      "horse_no": 4,
-      "recent_avg": 6.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-31"
-    },
-    {
-      "race": "오비히로 12경주",
       "horse_no": 1,
       "recent_avg": 5.0,
       "win_place": 3,
@@ -4670,16 +4660,26 @@
         "복승이상감지"
       ],
       "date": "2026-11-08"
+    },
+    {
+      "race": "사가 10경주",
+      "horse_no": 3,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-08"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15885,
+      "count": 15890,
       "hit": 2312
     },
     "전체부진마": {
-      "count": 25456,
-      "hit": 6609
+      "count": 25462,
+      "hit": 6610
     },
     "대규모급락": {
       "count": 6,
@@ -4689,8 +4689,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9571,
-      "hit": 4297
+      "count": 9572,
+      "hit": 4298
     },
     "급락동반": {
       "count": 857,
@@ -5067,25 +5067,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4233,
-    "hit": 3120,
+    "count": 4234,
+    "hit": 3121,
     "cases": [
-      {
-        "race": "후나바시 7경주",
-        "date": "2026-11-06",
-        "smart_horses": [
-          10,
-          12,
-          1
-        ],
-        "placed": [
-          12
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "벳푸 6경주",
         "date": "2026-11-06",
@@ -6586,6 +6570,24 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "사가 10경주",
+        "date": "2026-11-08",
+        "smart_horses": [
+          3,
+          4,
+          5,
+          7
+        ],
+        "placed": [
+          3,
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.9,
         "high_odds": false
       }
     ],
