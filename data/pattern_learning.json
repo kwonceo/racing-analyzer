@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "코치 9경주",
-      "horse_no": 3,
-      "recent_avg": 5.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-10-31"
-    },
-    {
-      "race": "코치 9경주",
       "horse_no": 1,
       "recent_avg": 5.0,
       "win_place": 3,
@@ -4668,16 +4658,24 @@
         "복승이상감지"
       ],
       "date": "2026-11-08"
+    },
+    {
+      "race": "사가 8경주",
+      "horse_no": 10,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-08"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15866,
-      "hit": 2311
+      "count": 15873,
+      "hit": 2312
     },
     "전체부진마": {
-      "count": 25430,
-      "hit": 6603
+      "count": 25439,
+      "hit": 6604
     },
     "대규모급락": {
       "count": 6,
@@ -4687,7 +4685,7 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9564,
+      "count": 9566,
       "hit": 4292
     },
     "급락동반": {
@@ -5065,23 +5063,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4229,
-    "hit": 3117,
+    "count": 4230,
+    "hit": 3118,
     "cases": [
-      {
-        "race": "욧카이치 3경주",
-        "date": "2026-11-06",
-        "smart_horses": [
-          1
-        ],
-        "placed": [
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.8,
-        "high_odds": false
-      },
       {
         "race": "구마모토 12경주",
         "date": "2026-11-06",
@@ -6581,6 +6565,22 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": 3.0,
+        "high_odds": false
+      },
+      {
+        "race": "사가 8경주",
+        "date": "2026-11-08",
+        "smart_horses": [
+          10,
+          4,
+          7
+        ],
+        "placed": [
+          10
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
