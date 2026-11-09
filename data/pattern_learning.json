@@ -1,19 +1,6 @@
 {
   "patterns": [
     {
-      "pattern": "대규모급락",
-      "raceKey": "호후 11경주",
-      "total_combos_dropped": 14,
-      "drop_ratio": 0.389,
-      "result": "1+9",
-      "result_odds": "저배당",
-      "result_quinella_odds": 1.1,
-      "signal_result_combo": null,
-      "recommended_hit": true,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1793516824.510666
-    },
-    {
       "race": "코치 3경주",
       "horse_no": 1,
       "recent_avg": 6.8,
@@ -4670,16 +4657,24 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-11-09"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 11,
+      "recent_avg": 6.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-09"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16011,
-      "hit": 2328
+      "count": 16019,
+      "hit": 2329
     },
     "전체부진마": {
-      "count": 25637,
-      "hit": 6650
+      "count": 25645,
+      "hit": 6651
     },
     "대규모급락": {
       "count": 6,
@@ -5067,25 +5062,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4290,
-    "hit": 3164,
+    "count": 4291,
+    "hit": 3165,
     "cases": [
-      {
-        "race": "야히코 5경주",
-        "date": "2026-11-08",
-        "smart_horses": [
-          4,
-          2,
-          3
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.3,
-        "high_odds": false
-      },
       {
         "race": "모리오카 4경주",
         "date": "2026-11-08",
@@ -6621,6 +6600,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 3.5,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 11경주",
+        "date": "2026-11-09",
+        "smart_horses": [
+          4,
+          11,
+          8
+        ],
+        "placed": [
+          11
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 3.8,
         "high_odds": false
       }
     ],
