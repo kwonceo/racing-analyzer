@@ -1,36 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 3경주",
-      "horse_no": 11,
-      "recent_avg": 11.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-01"
-    },
-    {
-      "race": "모리오카 3경주",
-      "horse_no": 6,
-      "recent_avg": 8.5,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-01"
-    },
-    {
-      "race": "모리오카 3경주",
-      "horse_no": 2,
-      "recent_avg": 10.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-01"
-    },
-    {
       "race": "모리오카 4경주",
       "horse_no": 7,
       "recent_avg": 7.0,
@@ -4672,16 +4642,44 @@
         "복승이상감지"
       ],
       "date": "2026-11-08"
+    },
+    {
+      "race": "모리오카 4경주",
+      "horse_no": 7,
+      "recent_avg": 7.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-09"
+    },
+    {
+      "race": "모리오카 4경주",
+      "horse_no": 2,
+      "recent_avg": 7.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-09"
+    },
+    {
+      "race": "모리오카 4경주",
+      "horse_no": 6,
+      "recent_avg": 5.4,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-09"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 15922,
-      "hit": 2315
+      "count": 15929,
+      "hit": 2316
     },
     "전체부진마": {
-      "count": 25507,
-      "hit": 6621
+      "count": 25518,
+      "hit": 6624
     },
     "대규모급락": {
       "count": 6,
@@ -4691,8 +4689,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9585,
-      "hit": 4306
+      "count": 9589,
+      "hit": 4308
     },
     "급락동반": {
       "count": 857,
