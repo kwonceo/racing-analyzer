@@ -4667,11 +4667,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16034,
+      "count": 16039,
       "hit": 2330
     },
     "전체부진마": {
-      "count": 25667,
+      "count": 25672,
       "hit": 6655
     },
     "대규모급락": {
@@ -5060,26 +5060,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4300,
-    "hit": 3173,
+    "count": 4301,
+    "hit": 3174,
     "cases": [
-      {
-        "race": "코치 1경주",
-        "date": "2026-11-08",
-        "smart_horses": [
-          10,
-          6,
-          7,
-          4
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.0,
-        "high_odds": false
-      },
       {
         "race": "코치경륜 10경주",
         "date": "2026-11-08",
@@ -6615,6 +6598,20 @@
         ],
         "placed": [
           1,
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "나고야 11경주",
+        "date": "2026-11-09",
+        "smart_horses": [
+          7
+        ],
+        "placed": [
           7
         ],
         "hit": true,
