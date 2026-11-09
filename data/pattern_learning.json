@@ -5065,25 +5065,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4268,
+    "count": 4269,
     "hit": 3148,
     "cases": [
-      {
-        "race": "사가 5경주",
-        "date": "2026-11-07",
-        "smart_horses": [
-          5,
-          10,
-          8
-        ],
-        "placed": [
-          8
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.3,
-        "high_odds": false
-      },
       {
         "race": "욧카이치 6경주",
         "date": "2026-11-07",
@@ -6612,9 +6596,21 @@
         "trifecta_odds": null,
         "quinella_odds": 3.3,
         "high_odds": false
+      },
+      {
+        "race": "야히코 10경주",
+        "date": "2026-11-09",
+        "smart_horses": [
+          1
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": 2.5,
+        "high_odds": false
       }
     ],
-    "rate": 73.8,
+    "rate": 73.7,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
