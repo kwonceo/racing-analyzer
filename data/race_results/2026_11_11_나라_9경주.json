@@ -1,0 +1,70 @@
+{
+ "race_id": "2026_11_11_나라_9경주",
+ "raceKey": "나라 9경주",
+ "date": "2026-11-11",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "나라",
+ "round": 9,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 5,
+  "2nd": 3,
+  "3rd": 1
+ },
+ "payouts": {
+  "quinella": 19.5,
+  "trifecta": 15.0
+ },
+ "payouts_approx": false,
+ "payout_source": "market_est",
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   6
+  ],
+  "eliminated": [],
+  "recommend_main": "1+5",
+  "recommend_sub": null,
+  "strategy": "BMED_역배열형",
+  "signal_quality": "하",
+  "confidence": 51.0,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중 · 역배열 감지말 5번 입상",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 19.5,
+  "trifecta_odds": 15.0,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-11-11 00:00:11",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
