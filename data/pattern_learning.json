@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오비히로 12경주",
-      "horse_no": 8,
-      "recent_avg": 7.4,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-01"
-    },
-    {
-      "race": "오비히로 12경주",
-      "horse_no": 10,
-      "recent_avg": 8.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-11-01"
-    },
-    {
-      "race": "카사마츠 1경주",
-      "horse_no": 8,
-      "recent_avg": 4.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-02"
-    },
-    {
       "race": "카사마츠 1경주",
       "horse_no": 5,
       "recent_avg": 6.6,
@@ -4672,16 +4644,46 @@
         "복승이상감지"
       ],
       "date": "2026-11-11"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 3,
+      "recent_avg": 9.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-11"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 5,
+      "recent_avg": 7.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-11"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 10,
+      "recent_avg": 6.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16195,
+      "count": 16201,
       "hit": 2347
     },
     "전체부진마": {
-      "count": 25919,
-      "hit": 6713
+      "count": 25929,
+      "hit": 6716
     },
     "대규모급락": {
       "count": 6,
@@ -4691,8 +4693,8 @@
       "hit_rate": 50.0
     },
     "이상감지동반": {
-      "count": 9724,
-      "hit": 4366
+      "count": 9728,
+      "hit": 4369
     },
     "급락동반": {
       "count": 860,
@@ -5069,27 +5071,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4389,
+    "count": 4390,
     "hit": 3237,
     "cases": [
-      {
-        "race": "마쓰도 3경주",
-        "date": "2026-11-09",
-        "smart_horses": [
-          7,
-          3,
-          5,
-          6
-        ],
-        "placed": [
-          7,
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.5,
-        "high_odds": false
-      },
       {
         "race": "모리오카 11경주",
         "date": "2026-11-09",
@@ -6607,9 +6591,22 @@
         "trifecta_odds": null,
         "quinella_odds": 1.7,
         "high_odds": false
+      },
+      {
+        "race": "나고야 1경주",
+        "date": "2026-11-11",
+        "smart_horses": [
+          9,
+          1
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 73.8,
+    "rate": 73.7,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
