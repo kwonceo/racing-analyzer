@@ -4668,6 +4668,19 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-11"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "욧카이치 6경주",
+      "total_combos_dropped": 8,
+      "drop_ratio": 0.381,
+      "result": "3+7",
+      "result_odds": "저배당",
+      "result_quinella_odds": 1.4,
+      "signal_result_combo": null,
+      "recommended_hit": true,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1794408859.0919108
     }
   ],
   "condition_stats": {
@@ -4680,11 +4693,11 @@
       "hit": 6761
     },
     "대규모급락": {
-      "count": 6,
+      "count": 5,
       "high_odds": 1,
-      "recommended_hit": 3,
-      "high_odds_rate": 16.7,
-      "hit_rate": 50.0
+      "recommended_hit": 2,
+      "high_odds_rate": 20.0,
+      "hit_rate": 40.0
     },
     "이상감지동반": {
       "count": 9794,
@@ -5065,24 +5078,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4447,
-    "hit": 3282,
+    "count": 4448,
+    "hit": 3283,
     "cases": [
-      {
-        "race": "나고야 11경주",
-        "date": "2026-11-10",
-        "smart_horses": [
-          4,
-          6,
-          1,
-          3
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 2.7,
-        "high_odds": false
-      },
       {
         "race": "모리오카 12경주",
         "date": "2026-11-10",
@@ -6601,6 +6599,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "욧카이치 6경주",
+        "date": "2026-11-11",
+        "smart_horses": [
+          1,
+          5
+        ],
+        "placed": [
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 1.4,
         "high_odds": false
       }
     ],
