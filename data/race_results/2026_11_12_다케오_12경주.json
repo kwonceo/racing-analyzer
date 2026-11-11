@@ -1,0 +1,71 @@
+{
+ "race_id": "2026_11_12_다케오_12경주",
+ "raceKey": "다케오 12경주",
+ "date": "2026-11-12",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "다케오",
+ "round": 12,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 5
+ },
+ "payouts": {
+  "quinella": 9.2,
+  "trifecta": 60.6
+ },
+ "payouts_approx": false,
+ "payout_source": "official",
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7
+  ],
+  "eliminated": [
+   6
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 9.2,
+  "trifecta_odds": 60.6,
+  "actual_return": null,
+  "profit": 8200
+ },
+ "memo": null,
+ "saved_at": "2026-11-12 00:03:34",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
