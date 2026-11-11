@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 2경주",
-      "horse_no": 10,
-      "recent_avg": 5.5,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-11-02"
-    },
-    {
       "race": "카사마츠 10경주",
       "horse_no": 6,
       "recent_avg": 6.0,
@@ -5078,26 +5070,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4448,
-    "hit": 3283,
+    "count": 4449,
+    "hit": 3284,
     "cases": [
-      {
-        "race": "모리오카 12경주",
-        "date": "2026-11-10",
-        "smart_horses": [
-          2,
-          1,
-          7
-        ],
-        "placed": [
-          2,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 10.3,
-        "high_odds": false
-      },
       {
         "race": "카와사키 7경주",
         "date": "2026-11-10",
@@ -6614,6 +6589,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 1.4,
+        "high_odds": false
+      },
+      {
+        "race": "마쓰도 5경주",
+        "date": "2026-11-11",
+        "smart_horses": [
+          6,
+          4
+        ],
+        "placed": [
+          6
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 5.7,
         "high_odds": false
       }
     ],
