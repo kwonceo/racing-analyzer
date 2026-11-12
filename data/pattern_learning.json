@@ -1,22 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 5경주",
-      "horse_no": 4,
-      "recent_avg": 5.8,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-05"
-    },
-    {
-      "race": "카사마츠 12경주",
-      "horse_no": 7,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-05"
-    },
-    {
       "race": "후나바시 4경주",
       "horse_no": 12,
       "recent_avg": 5.0,
@@ -4657,16 +4641,34 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-11-12"
+    },
+    {
+      "race": "몬베츠 12경주",
+      "horse_no": 4,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-12"
+    },
+    {
+      "race": "몬베츠 12경주",
+      "horse_no": 14,
+      "recent_avg": 6.4,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-11-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16600,
-      "hit": 2394
+      "count": 16610,
+      "hit": 2395
     },
     "전체부진마": {
-      "count": 26504,
-      "hit": 6853
+      "count": 26516,
+      "hit": 6855
     },
     "대규모급락": {
       "count": 5,
@@ -4676,8 +4678,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 9904,
-      "hit": 4459
+      "count": 9906,
+      "hit": 4460
     },
     "급락동반": {
       "count": 863,
@@ -5054,25 +5056,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4507,
+    "count": 4508,
     "hit": 3326,
     "cases": [
-      {
-        "race": "카와사키 8경주",
-        "date": "2026-11-11",
-        "smart_horses": [
-          6,
-          11,
-          9
-        ],
-        "placed": [
-          11
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "몬베츠 8경주",
         "date": "2026-11-11",
@@ -6612,6 +6598,19 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 3.3,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 12경주",
+        "date": "2026-11-12",
+        "smart_horses": [
+          1,
+          10
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
