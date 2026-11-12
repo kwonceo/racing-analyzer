@@ -4663,11 +4663,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16578,
+      "count": 16586,
       "hit": 2393
     },
     "전체부진마": {
-      "count": 26479,
+      "count": 26488,
       "hit": 6851
     },
     "대규모급락": {
@@ -4678,7 +4678,7 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 9901,
+      "count": 9902,
       "hit": 4458
     },
     "급락동반": {
@@ -5056,26 +5056,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4503,
-    "hit": 3323,
+    "count": 4504,
+    "hit": 3324,
     "cases": [
-      {
-        "race": "도야마 7경주",
-        "date": "2026-11-11",
-        "smart_horses": [
-          5,
-          6,
-          1
-        ],
-        "placed": [
-          6,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "다케오 7경주",
         "date": "2026-11-11",
@@ -6614,6 +6597,22 @@
         "placed": [],
         "hit": false,
         "trifecta_odds": 10.6,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카와사키 10경주",
+        "date": "2026-11-12",
+        "smart_horses": [
+          9,
+          3,
+          1
+        ],
+        "placed": [
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
       }
