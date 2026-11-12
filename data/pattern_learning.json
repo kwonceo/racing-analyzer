@@ -1,37 +1,6 @@
 {
   "patterns": [
     {
-      "pattern": "대규모급락",
-      "raceKey": "호후 12경주",
-      "total_combos_dropped": 13,
-      "drop_ratio": 0.361,
-      "result": "5+9",
-      "result_odds": "고배당",
-      "result_quinella_odds": 38.7,
-      "signal_result_combo": null,
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1793606043.4213495
-    },
-    {
-      "race": "후나바시 5경주",
-      "horse_no": 6,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-11-02"
-    },
-    {
-      "race": "후나바시 6경주",
-      "horse_no": 6,
-      "recent_avg": 6.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-02"
-    },
-    {
       "race": "후나바시 6경주",
       "horse_no": 4,
       "recent_avg": 7.0,
@@ -4683,16 +4652,46 @@
         "복승이상감지"
       ],
       "date": "2026-11-12"
+    },
+    {
+      "race": "나고야 2경주",
+      "horse_no": 8,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-12"
+    },
+    {
+      "race": "나고야 2경주",
+      "horse_no": 2,
+      "recent_avg": 8.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-12"
+    },
+    {
+      "race": "나고야 2경주",
+      "horse_no": 4,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16328,
+      "count": 16335,
       "hit": 2366
     },
     "전체부진마": {
-      "count": 26138,
-      "hit": 6773
+      "count": 26149,
+      "hit": 6776
     },
     "대규모급락": {
       "count": 5,
@@ -4702,8 +4701,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 9810,
-      "hit": 4407
+      "count": 9814,
+      "hit": 4410
     },
     "급락동반": {
       "count": 863,
