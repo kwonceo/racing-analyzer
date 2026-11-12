@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 8경주",
-      "horse_no": 7,
-      "recent_avg": 5.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-02"
-    },
-    {
-      "race": "후나바시 8경주",
-      "horse_no": 4,
-      "recent_avg": 5.8,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-11-02"
-    },
-    {
       "race": "후나바시 9경주",
       "horse_no": 11,
       "recent_avg": 10.4,
@@ -4679,16 +4661,34 @@
         "복승이상감지"
       ],
       "date": "2026-11-12"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 4,
+      "recent_avg": 4.4,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-11-12"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 1,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16369,
-      "hit": 2368
+      "count": 16377,
+      "hit": 2369
     },
     "전체부진마": {
-      "count": 26196,
-      "hit": 6787
+      "count": 26206,
+      "hit": 6789
     },
     "대규모급락": {
       "count": 5,
@@ -4698,8 +4698,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 9827,
-      "hit": 4419
+      "count": 9829,
+      "hit": 4420
     },
     "급락동반": {
       "count": 863,
@@ -5076,24 +5076,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4474,
-    "hit": 3301,
+    "count": 4475,
+    "hit": 3302,
     "cases": [
-      {
-        "race": "마쓰도 12경주",
-        "date": "2026-11-10",
-        "smart_horses": [
-          5,
-          2
-        ],
-        "placed": [
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.1,
-        "high_odds": false
-      },
       {
         "race": "마쓰도 11경주",
         "date": "2026-11-10",
@@ -6616,6 +6601,22 @@
         ],
         "placed": [
           13
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "소노다 8경주",
+        "date": "2026-11-12",
+        "smart_horses": [
+          2,
+          1,
+          12
+        ],
+        "placed": [
+          1
         ],
         "hit": true,
         "trifecta_odds": null,
