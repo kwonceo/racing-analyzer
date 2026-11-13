@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 8경주",
-      "horse_no": 6,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-05"
-    },
-    {
       "race": "후나바시 8경주",
       "horse_no": 7,
       "recent_avg": 5.6,
@@ -4667,16 +4659,26 @@
         "복승이상감지"
       ],
       "date": "2026-11-13"
+    },
+    {
+      "race": "소노다 7경주",
+      "horse_no": 1,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16671,
+      "count": 16674,
       "hit": 2398
     },
     "전체부진마": {
-      "count": 26602,
-      "hit": 6872
+      "count": 26606,
+      "hit": 6873
     },
     "대규모급락": {
       "count": 5,
@@ -4686,8 +4688,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 9931,
-      "hit": 4474
+      "count": 9932,
+      "hit": 4475
     },
     "급락동반": {
       "count": 863,
@@ -5064,27 +5066,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4522,
-    "hit": 3336,
+    "count": 4523,
+    "hit": 3337,
     "cases": [
-      {
-        "race": "나고야 7경주",
-        "date": "2026-11-11",
-        "smart_horses": [
-          6,
-          8,
-          11,
-          1
-        ],
-        "placed": [
-          11,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "소노다 10경주",
         "date": "2026-11-11",
@@ -6606,6 +6590,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 8.0,
+        "high_odds": false
+      },
+      {
+        "race": "소노다 7경주",
+        "date": "2026-11-13",
+        "smart_horses": [
+          7,
+          4
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 3.0,
         "high_odds": false
       }
     ],
