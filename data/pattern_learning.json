@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "카사마츠 4경주",
-      "horse_no": 8,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-06"
-    },
-    {
-      "race": "카사마츠 4경주",
       "horse_no": 4,
       "recent_avg": 4.6,
       "win_place": 3,
@@ -4681,16 +4671,26 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-13"
+    },
+    {
+      "race": "나고야 7경주",
+      "horse_no": 12,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16714,
+      "count": 16721,
       "hit": 2401
     },
     "전체부진마": {
-      "count": 26665,
-      "hit": 6889
+      "count": 26674,
+      "hit": 6890
     },
     "대규모급락": {
       "count": 5,
@@ -4700,8 +4700,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 9951,
-      "hit": 4488
+      "count": 9953,
+      "hit": 4489
     },
     "급락동반": {
       "count": 863,
@@ -5078,27 +5078,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4528,
-    "hit": 3341,
+    "count": 4529,
+    "hit": 3342,
     "cases": [
-      {
-        "race": "몬베츠 1경주",
-        "date": "2026-11-11",
-        "smart_horses": [
-          6,
-          7,
-          5,
-          1
-        ],
-        "placed": [
-          5,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "사세보 6경주",
         "date": "2026-11-11",
@@ -6615,6 +6597,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 3.2,
+        "high_odds": false
+      },
+      {
+        "race": "나고야 7경주",
+        "date": "2026-11-13",
+        "smart_horses": [
+          12,
+          11,
+          7,
+          5
+        ],
+        "placed": [
+          12
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
