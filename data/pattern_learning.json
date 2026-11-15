@@ -1,44 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 5경주",
-      "horse_no": 7,
-      "recent_avg": 5.5,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-07"
-    },
-    {
-      "race": "코치 5경주",
-      "horse_no": 10,
-      "recent_avg": 10.4,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-07"
-    },
-    {
-      "race": "사가 4경주",
-      "horse_no": 1,
-      "recent_avg": 10.4,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-07"
-    },
-    {
-      "race": "오비히로 6경주",
-      "horse_no": 2,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-07"
-    },
-    {
       "race": "오비히로 6경주",
       "horse_no": 9,
       "recent_avg": 9.0,
@@ -4691,16 +4653,54 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-15"
+    },
+    {
+      "race": "사가 10경주",
+      "horse_no": 11,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-15"
+    },
+    {
+      "race": "사가 10경주",
+      "horse_no": 5,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-15"
+    },
+    {
+      "race": "오비히로 11경주",
+      "horse_no": 9,
+      "recent_avg": 5.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-15"
+    },
+    {
+      "race": "오비히로 11경주",
+      "horse_no": 1,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-15"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 16978,
-      "hit": 2430
+      "count": 16989,
+      "hit": 2431
     },
     "전체부진마": {
-      "count": 27070,
-      "hit": 6981
+      "count": 27087,
+      "hit": 6985
     },
     "대규모급락": {
       "count": 5,
@@ -4710,8 +4710,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10092,
-      "hit": 4551
+      "count": 10098,
+      "hit": 4554
     },
     "급락동반": {
       "count": 868,
