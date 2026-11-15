@@ -3218,6 +3218,7 @@ def _dual_keirin_rk(rk, body=None):
 #   ⚠ 서버 출처·한국(한국 일정표는 배당판·PDF 에서 온다)·일정표 없음·차이 60초 이하 = 원래 값 그대로(원칙 20)
 #   ⚠ 발주 지연이 일정표에 안 실리면 지연 구간 틱이 「마감 후」로 갈 수 있다 — 그 대가는 계수기로 본다.
 #   계수기 deadline_sched_check(도달) / deadline_sched_fix(발동 · 차이 초) · 🔧 되돌리기 DEADLINE_SCHED_PREFER = False
+BOAT_FIX_NAR_HORSE = True      # [2026-11-15] boat 오분류 + 지방경마장 이름 → 경마(경륜 추정 대신) · 계수기 boat_fix_nar_horse · 되돌리기 False
 DEADLINE_SCHED_PREFER = True
 DEADLINE_SCHED_TOL_SEC = 60
 DEADLINE_SCHED_FAR_SEC = 3600
@@ -3874,10 +3875,16 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                     _ns, _nc = "horse", (category if category not in (None, "boat") else "japan_local")  # 경륜(≤9)도 초과 → 경마
                 elif _KEIRIN_ONLY_RE.search(str(rk)):
                     _ns, _nc = "cycle", "cycle"                  # 경륜 전용 지명 → 경륜
+                elif BOAT_FIX_NAR_HORSE and _jp_baba_code_from_rk(rk):
+                    # 🔴 [2026-11-15 대표 「진행해」] 지방경마장 이름(NAR 코드 있음)이면 경륜이 아니라 경마다.
+                    #   실사고 11/15 코치 7경주(경마 9두): boat 수신 → 이 가지가 없어 아래 「경륜 추정」→ horse↔cycle 4번씩 오가며
+                    #   배당·전적 초기화 · 경륜 전용 「삼복승 짝」이 경마 명단에 들어감. 경륜 키는 _KEIRIN_ONLY_RE(「…경륜」)가 위에서 먼저 잡는다.
+                    _ns, _nc = "horse", "japan_local"
+                    _gate_hit("boat_fix_nar_horse", rk, "boat → 경마(NAR) · src=%s" % str(source or "")[:60])
                 else:
                     _ns, _nc = "cycle", "cycle"                  # 7~9두·근거부족: 경정만은 확실히 아님 → 경륜 추정
-                print("[종목 정정·증거기반] %s: 조합 최대마번=%d → 경정(6정) 불가 → sport=%s·cat=%s (기존 boat)"
-                      % (rk, _mx, _ns, _nc))
+                print("[종목 정정·증거기반] %s: 조합 최대마번=%d → 경정(6정) 불가 → sport=%s·cat=%s (기존 boat · src=%s)"
+                      % (rk, _mx, _ns, _nc, str(source or "")[:60]))
                 sport, category = _ns, _nc
     except Exception as _be:
         print("[종목 정정·증거기반] 실패(무시):", _be)
