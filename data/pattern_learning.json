@@ -2,26 +2,6 @@
   "patterns": [
     {
       "race": "오비히로 3경주",
-      "horse_no": 10,
-      "recent_avg": 4.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-08"
-    },
-    {
-      "race": "오비히로 3경주",
-      "horse_no": 6,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-08"
-    },
-    {
-      "race": "오비히로 3경주",
       "horse_no": 4,
       "recent_avg": 5.5,
       "win_place": 3,
@@ -4702,16 +4682,36 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-16"
+    },
+    {
+      "race": "오비히로 7경주",
+      "horse_no": 8,
+      "recent_avg": 5.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-16"
+    },
+    {
+      "race": "오비히로 7경주",
+      "horse_no": 5,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-16"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17142,
+      "count": 17148,
       "hit": 2451
     },
     "전체부진마": {
-      "count": 27345,
-      "hit": 7052
+      "count": 27354,
+      "hit": 7054
     },
     "대규모급락": {
       "count": 5,
@@ -4721,8 +4721,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10203,
-      "hit": 4601
+      "count": 10206,
+      "hit": 4603
     },
     "급락동반": {
       "count": 873,
@@ -5099,28 +5099,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4570,
+    "count": 4571,
     "hit": 3368,
     "cases": [
-      {
-        "race": "소노다 7경주",
-        "date": "2026-11-12",
-        "smart_horses": [
-          3,
-          6,
-          9,
-          8
-        ],
-        "placed": [
-          6,
-          9,
-          8
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "도야마 7경주",
         "date": "2026-11-12",
@@ -6618,6 +6599,18 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": 4.0,
+        "high_odds": false
+      },
+      {
+        "race": "오비히로 7경주",
+        "date": "2026-11-16",
+        "smart_horses": [
+          4
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": 8.7,
         "high_odds": false
       }
     ],
