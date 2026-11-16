@@ -2,24 +2,6 @@
   "patterns": [
     {
       "race": "사가 3경주",
-      "horse_no": 1,
-      "recent_avg": 8.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-08"
-    },
-    {
-      "race": "사가 3경주",
-      "horse_no": 11,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-08"
-    },
-    {
-      "race": "사가 3경주",
       "horse_no": 2,
       "recent_avg": 6.0,
       "win_place": 3,
@@ -4697,16 +4679,32 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-11-16"
+    },
+    {
+      "race": "오비히로 6경주",
+      "horse_no": 2,
+      "recent_avg": 4.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-16"
+    },
+    {
+      "race": "오비히로 6경주",
+      "horse_no": 1,
+      "recent_avg": 5.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-11-16"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17177,
-      "hit": 2456
+      "count": 17181,
+      "hit": 2458
     },
     "전체부진마": {
-      "count": 27394,
-      "hit": 7061
+      "count": 27398,
+      "hit": 7063
     },
     "대규모급락": {
       "count": 5,
