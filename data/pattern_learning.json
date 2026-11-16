@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오비히로 4경주",
-      "horse_no": 8,
-      "recent_avg": 5.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-11-08"
-    },
-    {
       "race": "모리오카 10경주",
       "horse_no": 10,
       "recent_avg": 6.2,
@@ -4695,16 +4687,27 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-16"
+    },
+    {
+      "race": "카나자와 9경주",
+      "horse_no": 10,
+      "recent_avg": 5.0,
+      "win_place": 1,
+      "conditions": [
+        "급락71%",
+        "복승이상감지"
+      ],
+      "date": "2026-11-16"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17195,
+      "count": 17197,
       "hit": 2460
     },
     "전체부진마": {
-      "count": 27415,
-      "hit": 7066
+      "count": 27423,
+      "hit": 7067
     },
     "대규모급락": {
       "count": 5,
@@ -4714,12 +4717,12 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10220,
-      "hit": 4606
+      "count": 10226,
+      "hit": 4607
     },
     "급락동반": {
-      "count": 878,
-      "hit": 241
+      "count": 883,
+      "hit": 242
     }
   },
   "bokbyeong_patterns": [
@@ -5092,26 +5095,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4577,
-    "hit": 3372,
+    "count": 4578,
+    "hit": 3373,
     "cases": [
-      {
-        "race": "후쿠이 8경주",
-        "date": "2026-11-12",
-        "smart_horses": [
-          5,
-          7,
-          6,
-          4
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "몬베츠 2경주",
         "date": "2026-11-12",
@@ -6592,6 +6578,22 @@
         "placed": [
           2,
           1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카나자와 9경주",
+        "date": "2026-11-16",
+        "smart_horses": [
+          10,
+          9,
+          1
+        ],
+        "placed": [
+          10
         ],
         "hit": true,
         "trifecta_odds": null,
