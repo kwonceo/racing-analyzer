@@ -1,0 +1,175 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_11_17_카와사키경륜_12경주",
+ "race_info": {
+  "date": "2026-11-17",
+  "track": "카와사키경륜",
+  "round": 12,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 4,
+   "name": "山形 一気",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 137.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "中川 誠一郎",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 101.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "桑名 僚也",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 126.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "内藤 宣彦",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 120.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "堀江 省吾",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 102.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "原口 昌平",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 97.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "坂本 貴史",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 95.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7
+  ],
+  "eliminated": [
+   6
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 7,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 2,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-11-17 00:29:36",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
