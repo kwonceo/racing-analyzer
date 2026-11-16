@@ -4700,11 +4700,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17203,
+      "count": 17207,
       "hit": 2461
     },
     "전체부진마": {
-      "count": 27431,
+      "count": 27436,
       "hit": 7069
     },
     "대규모급락": {
@@ -4715,7 +4715,7 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10228,
+      "count": 10229,
       "hit": 4608
     },
     "급락동반": {
@@ -5093,25 +5093,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4578,
-    "hit": 3373,
+    "count": 4579,
+    "hit": 3374,
     "cases": [
-      {
-        "race": "몬베츠 2경주",
-        "date": "2026-11-12",
-        "smart_horses": [
-          2,
-          4,
-          8
-        ],
-        "placed": [
-          8
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "카와사키 1경주",
         "date": "2026-11-12",
@@ -6596,6 +6580,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "오이 5경주",
+        "date": "2026-11-16",
+        "smart_horses": [
+          7,
+          8
+        ],
+        "placed": [
+          7,
+          8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 5.2,
         "high_odds": false
       }
     ],
