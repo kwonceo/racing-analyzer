@@ -1,0 +1,70 @@
+{
+ "race_id": "2026_11_17_나고야경륜_3경주",
+ "raceKey": "나고야경륜 3경주",
+ "date": "2026-11-17",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "나고야경륜",
+ "round": 3,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 3,
+  "2nd": 2,
+  "3rd": 6
+ },
+ "payouts": {
+  "quinella": 2.2,
+  "trifecta": 1.7
+ },
+ "payouts_approx": false,
+ "payout_source": "official",
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "2+3",
+  "recommend_sub": null,
+  "strategy": "BMED_역배열형",
+  "signal_quality": "하",
+  "confidence": 66.9,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "역배열 감지말 2·3번 입상",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 2.2,
+  "trifecta_odds": 1.7,
+  "actual_return": null,
+  "profit": 1200
+ },
+ "memo": null,
+ "saved_at": "2026-11-17 00:00:49",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
