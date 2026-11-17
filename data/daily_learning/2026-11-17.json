@@ -1,0 +1,170 @@
+{
+ "date": "2026-11-17",
+ "results_summary": {
+  "total_races": 95,
+  "hits": 75,
+  "hit_rate": 78.9,
+  "profit": {
+   "net": 165300,
+   "settled": 96
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 13240,
+  "quality_score": 65,
+  "ai_ready_races": 42,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "도야마": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "미즈사와": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "벳푸": {
+    "n": 12,
+    "hits": 12,
+    "hit_rate": 100.0
+   },
+   "小松島": {
+    "n": 11,
+    "hits": 8,
+    "hit_rate": 72.7
+   },
+   "카나자와": {
+    "n": 11,
+    "hits": 7,
+    "hit_rate": 63.6
+   },
+   "오이": {
+    "n": 10,
+    "hits": 7,
+    "hit_rate": 70.0
+   },
+   "시즈오카": {
+    "n": 8,
+    "hits": 8,
+    "hit_rate": 100.0
+   },
+   "카와사키경륜": {
+    "n": 8,
+    "hits": 6,
+    "hit_rate": 75.0
+   },
+   "마쓰야마": {
+    "n": 7,
+    "hits": 5,
+    "hit_rate": 71.4
+   },
+   "나고야경륜": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   },
+   "우쓰노미야": {
+    "n": 1,
+    "hits": 1,
+    "hit_rate": 100.0
+   },
+   "코치경륜": {
+    "n": 1,
+    "hits": 1,
+    "hit_rate": 100.0
+   }
+  },
+  "by_field_size": {
+   "소두수(≤8)": {
+    "n": 66,
+    "hits": 57,
+    "hit_rate": 86.4
+   },
+   "중두수(9~12)": {
+    "n": 25,
+    "hits": 17,
+    "hit_rate": 68.0
+   },
+   "다두수(13+)": {
+    "n": 5,
+    "hits": 2,
+    "hit_rate": 40.0
+   }
+  },
+  "by_time_zone": {
+   "저녁": {
+    "n": 36,
+    "hits": 31,
+    "hit_rate": 86.1
+   },
+   "오후": {
+    "n": 32,
+    "hits": 21,
+    "hit_rate": 65.6
+   },
+   "오전": {
+    "n": 28,
+    "hits": 24,
+    "hit_rate": 85.7
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 96,
+    "hits": 76,
+    "hit_rate": 79.2
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 96,
+    "hits": 76,
+    "hit_rate": 79.2
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 96,
+    "hits": 76,
+    "hit_rate": 79.2
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 64,
+   "n": 78,
+   "rate": 82.1
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 7,
+   "n": 25,
+   "rate": 28.0
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 429,
+   "n": 711,
+   "rate": 60.3
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 1021,
+   "n": 2028,
+   "rate": 50.3
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-11-17 22:09:48"
+}
