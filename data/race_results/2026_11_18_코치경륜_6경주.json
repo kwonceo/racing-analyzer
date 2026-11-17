@@ -1,0 +1,71 @@
+{
+ "race_id": "2026_11_18_코치경륜_6경주",
+ "raceKey": "코치경륜 6경주",
+ "date": "2026-11-18",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "코치경륜",
+ "round": 6,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 6,
+  "2nd": 5,
+  "3rd": 2
+ },
+ "payouts": {
+  "quinella": 195.9,
+  "trifecta": 150.7
+ },
+ "payouts_approx": false,
+ "payout_source": "market_est",
+ "payouts_suspect": null,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "eliminated": [
+   7
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 195.9,
+  "trifecta_odds": 150.7,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-11-18 00:13:45",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
