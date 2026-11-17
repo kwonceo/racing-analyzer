@@ -1,26 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 10경주",
-      "horse_no": 2,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-08"
-    },
-    {
-      "race": "사가 4경주",
-      "horse_no": 10,
-      "recent_avg": 6.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-08"
-    },
-    {
       "race": "사가 4경주",
       "horse_no": 9,
       "recent_avg": 7.4,
@@ -4696,16 +4676,34 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-11-16"
+    },
+    {
+      "race": "미즈사와 1경주",
+      "horse_no": 2,
+      "recent_avg": 7.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-17"
+    },
+    {
+      "race": "미즈사와 1경주",
+      "horse_no": 7,
+      "recent_avg": 6.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17207,
-      "hit": 2461
+      "count": 17215,
+      "hit": 2462
     },
     "전체부진마": {
-      "count": 27436,
-      "hit": 7069
+      "count": 27447,
+      "hit": 7071
     },
     "대규모급락": {
       "count": 5,
@@ -4715,8 +4713,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10229,
-      "hit": 4608
+      "count": 10232,
+      "hit": 4609
     },
     "급락동반": {
       "count": 883,
