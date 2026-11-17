@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "모리오카 5경주",
-      "horse_no": 7,
-      "recent_avg": 5.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-09"
-    },
-    {
-      "race": "모리오카 5경주",
       "horse_no": 2,
       "recent_avg": 6.0,
       "win_place": 2,
@@ -4685,16 +4675,26 @@
         "복승이상감지"
       ],
       "date": "2026-11-17"
+    },
+    {
+      "race": "카나자와 9경주",
+      "horse_no": 6,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17347,
+      "count": 17351,
       "hit": 2481
     },
     "전체부진마": {
-      "count": 27663,
-      "hit": 7123
+      "count": 27669,
+      "hit": 7124
     },
     "대규모급락": {
       "count": 5,
@@ -4704,8 +4704,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10316,
-      "hit": 4642
+      "count": 10318,
+      "hit": 4643
     },
     "급락동반": {
       "count": 901,
@@ -5082,24 +5082,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4619,
-    "hit": 3401,
+    "count": 4620,
+    "hit": 3402,
     "cases": [
-      {
-        "race": "소노다 6경주",
-        "date": "2026-11-13",
-        "smart_horses": [
-          8,
-          11
-        ],
-        "placed": [
-          11
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 5.3,
-        "high_odds": false
-      },
       {
         "race": "나고야 3경주",
         "date": "2026-11-13",
@@ -6584,6 +6569,23 @@
         ],
         "placed": [],
         "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카나자와 9경주",
+        "date": "2026-11-17",
+        "smart_horses": [
+          4,
+          9,
+          3
+        ],
+        "placed": [
+          9,
+          3
+        ],
+        "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
