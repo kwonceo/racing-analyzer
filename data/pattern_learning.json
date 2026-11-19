@@ -2,26 +2,6 @@
   "patterns": [
     {
       "race": "몬베츠 5경주",
-      "horse_no": 2,
-      "recent_avg": 9.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-11"
-    },
-    {
-      "race": "몬베츠 5경주",
-      "horse_no": 3,
-      "recent_avg": 7.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-11"
-    },
-    {
-      "race": "몬베츠 5경주",
       "horse_no": 8,
       "recent_avg": 8.2,
       "win_place": 2,
@@ -4697,16 +4677,34 @@
         "복승이상감지"
       ],
       "date": "2026-11-19"
+    },
+    {
+      "race": "카사마츠 7경주",
+      "horse_no": 10,
+      "recent_avg": 4.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-19"
+    },
+    {
+      "race": "카사마츠 7경주",
+      "horse_no": 8,
+      "recent_avg": 4.4,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17630,
-      "hit": 2520
+      "count": 17636,
+      "hit": 2521
     },
     "전체부진마": {
-      "count": 28135,
-      "hit": 7238
+      "count": 28144,
+      "hit": 7240
     },
     "대규모급락": {
       "count": 5,
@@ -4716,8 +4714,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10505,
-      "hit": 4718
+      "count": 10508,
+      "hit": 4719
     },
     "급락동반": {
       "count": 926,
@@ -5094,24 +5092,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4708,
+    "count": 4709,
     "hit": 3468,
     "cases": [
-      {
-        "race": "도야마 11경주",
-        "date": "2026-11-17",
-        "smart_horses": [
-          2,
-          6
-        ],
-        "placed": [
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 37.9,
-        "high_odds": true
-      },
       {
         "race": "小松島 10경주",
         "date": "2026-11-17",
@@ -6658,9 +6641,23 @@
         "trifecta_odds": null,
         "quinella_odds": 2.9,
         "high_odds": false
+      },
+      {
+        "race": "카사마츠 7경주",
+        "date": "2026-11-19",
+        "smart_horses": [
+          2,
+          5,
+          6
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 73.7,
+    "rate": 73.6,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
