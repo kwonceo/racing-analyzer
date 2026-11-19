@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 5경주",
-      "horse_no": 8,
-      "recent_avg": 8.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-11"
-    },
-    {
       "race": "나고야 8경주",
       "horse_no": 9,
       "recent_avg": 5.4,
@@ -4695,16 +4687,26 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-11-19"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 1,
+      "recent_avg": 5.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17640,
+      "count": 17642,
       "hit": 2521
     },
     "전체부진마": {
-      "count": 28148,
-      "hit": 7240
+      "count": 28152,
+      "hit": 7241
     },
     "대규모급락": {
       "count": 5,
@@ -4714,8 +4716,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10508,
-      "hit": 4719
+      "count": 10510,
+      "hit": 4720
     },
     "급락동반": {
       "count": 926,
@@ -5092,24 +5094,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4710,
-    "hit": 3469,
+    "count": 4711,
+    "hit": 3470,
     "cases": [
-      {
-        "race": "도야마 10경주",
-        "date": "2026-11-17",
-        "smart_horses": [
-          2,
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 8.7,
-        "high_odds": false
-      },
       {
         "race": "미즈사와 11경주",
         "date": "2026-11-17",
@@ -6650,6 +6637,23 @@
         ],
         "placed": [
           8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "소노다 8경주",
+        "date": "2026-11-19",
+        "smart_horses": [
+          8,
+          4,
+          7,
+          5
+        ],
+        "placed": [
+          4
         ],
         "hit": true,
         "trifecta_odds": null,
