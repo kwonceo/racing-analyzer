@@ -2,14 +2,6 @@
   "patterns": [
     {
       "race": "카와사키 5경주",
-      "horse_no": 9,
-      "recent_avg": 5.5,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-12"
-    },
-    {
-      "race": "카와사키 5경주",
       "horse_no": 12,
       "recent_avg": 5.8,
       "win_place": 3,
@@ -4670,16 +4662,24 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-11-20"
+    },
+    {
+      "race": "오이 11경주",
+      "horse_no": 2,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 17953,
-      "hit": 2561
+      "count": 17962,
+      "hit": 2562
     },
     "전체부진마": {
-      "count": 28569,
-      "hit": 7330
+      "count": 28578,
+      "hit": 7331
     },
     "대규모급락": {
       "count": 5,
