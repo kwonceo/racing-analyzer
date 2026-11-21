@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "카와사키 12경주",
-      "horse_no": 7,
-      "recent_avg": 5.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-12"
-    },
-    {
-      "race": "카와사키 12경주",
       "horse_no": 10,
       "recent_avg": 7.0,
       "win_place": 2,
@@ -4668,16 +4658,26 @@
         "복승이상감지"
       ],
       "date": "2026-11-21"
+    },
+    {
+      "race": "코치 4경주",
+      "horse_no": 9,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-21"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18019,
+      "count": 18023,
       "hit": 2571
     },
     "전체부진마": {
-      "count": 28670,
-      "hit": 7356
+      "count": 28675,
+      "hit": 7357
     },
     "대규모급락": {
       "count": 5,
@@ -4687,8 +4687,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10651,
-      "hit": 4785
+      "count": 10652,
+      "hit": 4786
     },
     "급락동반": {
       "count": 927,
