@@ -57,6 +57,8 @@ LAST_BLOCKED = {"corrob": 0, "confirm": 0, "late": 0}   # 직전 picks() 호출�
 #   ⚠ 「더 빨리」는 구조적으로 불가(급락 직전 드리프트 +1.1% · 전조 5% · oddspark 갱신 35초) — 남는 것은 살 수 없는 알림을 빼는 것.
 #   deadline 을 못 받으면(None) 종전과 완전히 같다(원칙 20 — 확실히 아는 것만 막는다). 🔧 되돌리기: MIN_SEC_BEFORE = 0
 MIN_SEC_BEFORE = 30.0
+# [2026-11-22] 「💰 돈 몰린 말」을 카톡·팝업 첫 줄로(실적 줄 포함) · 되돌리기 False
+MONEY_HEADLINE = True
 
 
 def _f(v):
@@ -260,7 +262,10 @@ def lines(ps, left_sec=None):
     """
     if not ps:
         return []
-    out = ["🚨 마감 2분 급락 — 방금 돈이 몰렸습니다 🚨"]
+    # [2026-11-22 대표 「니가 판단해서 진행해」] 「💰 돈 몰린 말」을 첫 줄로 올리고 실적을 붙인다.
+    #   실측(9/06~11/22 · 경마 253경주): 그 말 3착내 55.3% ↔ 같은 마지막 시장순위 38.9%(+16.5pp) ·
+    #   2착내 42.7 ↔ 27.0. 급락 조합에 든 말 전부는 +9.7pp — 「몰린 말」이 더 강하다. 조합 판정·선정은 무변경(문구만).
+    money = None
     try:
         cnt = {}
         for c, o, d, mb in ps:
@@ -269,10 +274,20 @@ def lines(ps, left_sec=None):
         if len(ps) >= 2:
             h, n = max(cnt.items(), key=lambda kv: kv[1])
             if n >= 2:
-                out.append("💰 %d번에 돈이 몰렸습니다 (신호 %d개 %s %d번)"
-                           % (h, len(ps), "모두" if n == len(ps) else "중 %d개가" % n, h))
+                money = (h, n)
     except Exception:
-        pass
+        money = None
+    if money and MONEY_HEADLINE:
+        h, n = money
+        out = ["🚨 마감 2분 — %d번에 돈이 몰렸습니다 🚨" % h,
+               "💰 %d번 · 급락 신호 %d개 %s %d번" % (h, len(ps), "모두" if n == len(ps) else "중 %d개가" % n, h),
+               "📊 이런 말은 3착 안 55% (같은 인기 말 평균 39%)"]
+    else:
+        out = ["🚨 마감 2분 급락 — 방금 돈이 몰렸습니다 🚨"]
+        if money:
+            h, n = money
+            out.append("💰 %d번에 돈이 몰렸습니다 (신호 %d개 %s %d번)"
+                       % (h, len(ps), "모두" if n == len(ps) else "중 %d개가" % n, h))
     for c, o, d, mb in ps:
         out.append("⚡ 복승 %s · %.1f배 · ▼%.0f%%" % ("+".join(map(str, c)), o, abs(d)))
     try:
