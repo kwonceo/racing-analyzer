@@ -7526,8 +7526,10 @@
     //   회원이 결정한다." 서버 _bet_grade 가 실측 회수율로 매긴 등급을 그대로 노출한다.
     //   ⚠ 추천을 빼는 용도가 아니다 — 조건 미달 경주도 추천은 나오고 등급만 낮게 표기된다.
     const _bg = a.betGrade || '';
+    // [2026-11-22] 경마 등급 이름이 배당형(🎯 고배당형 · 📊 중배당형)으로 바뀌었다 — 색만 이어 붙인다
     const _bgColor = _bg.indexOf('강력') >= 0 ? '#22c55e'
-      : (_bg.indexOf('추천') >= 0 ? '#38bdf8' : (_bg.indexOf('관찰') >= 0 ? '#fbbf24' : '#f87171'));
+      : (_bg.indexOf('추천') >= 0 ? '#38bdf8' : (_bg.indexOf('관찰') >= 0 ? '#fbbf24'
+      : (_bg.indexOf('고배당') >= 0 ? '#a78bfa' : (_bg.indexOf('중배당') >= 0 ? '#38bdf8' : '#f87171'))));
     const betGradeBanner = _bg ? `<div style="margin:4px 0 8px;padding:9px 11px;border:2px solid ${_bgColor};border-radius:9px;background:${_bgColor}22">
       <div style="font-size:14.5px;font-weight:900;color:${_bgColor}">${esc(_bg)} <span class="hint" style="font-weight:700;font-size:11.5px">· 추천도</span></div>
       ${a.betReason ? `<div class="hint" style="font-size:12px;margin-top:2px">${esc(a.betReason)}</div>` : ''}
