@@ -1,36 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오비히로 5경주",
-      "horse_no": 5,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-15"
-    },
-    {
-      "race": "코치 5경주",
-      "horse_no": 5,
-      "recent_avg": 5.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-15"
-    },
-    {
-      "race": "코치 5경주",
-      "horse_no": 6,
-      "recent_avg": 5.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-15"
-    },
-    {
       "race": "카나자와 6경주",
       "horse_no": 2,
       "recent_avg": 7.0,
@@ -4650,16 +4620,44 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-11-22"
+    },
+    {
+      "race": "미즈사와 8경주",
+      "horse_no": 12,
+      "recent_avg": 4.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-22"
+    },
+    {
+      "race": "미즈사와 8경주",
+      "horse_no": 2,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-22"
+    },
+    {
+      "race": "미즈사와 8경주",
+      "horse_no": 4,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-22"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18235,
-      "hit": 2601
+      "count": 18243,
+      "hit": 2602
     },
     "전체부진마": {
-      "count": 28984,
-      "hit": 7438
+      "count": 28996,
+      "hit": 7441
     },
     "대규모급락": {
       "count": 5,
@@ -4669,8 +4667,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 10749,
-      "hit": 4837
+      "count": 10753,
+      "hit": 4839
     },
     "급락동반": {
       "count": 927,
