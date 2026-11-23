@@ -4635,6 +4635,19 @@
         "복승이상감지"
       ],
       "date": "2026-11-23"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "나라 9경주",
+      "total_combos_dropped": 13,
+      "drop_ratio": 0.619,
+      "result": "4+5",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-33.2%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1795413734.2868726
     }
   ],
   "condition_stats": {
@@ -4647,11 +4660,11 @@
       "hit": 7516
     },
     "대규모급락": {
-      "count": 5,
-      "high_odds": 1,
-      "recommended_hit": 2,
-      "high_odds_rate": 20.0,
-      "hit_rate": 40.0
+      "count": 1,
+      "high_odds": 0,
+      "recommended_hit": 0,
+      "high_odds_rate": 0.0,
+      "hit_rate": 0.0
     },
     "이상감지동반": {
       "count": 10859,
@@ -5032,23 +5045,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4857,
-    "hit": 3576,
+    "count": 4858,
+    "hit": 3577,
     "cases": [
-      {
-        "race": "소노다 11경주",
-        "date": "2026-11-20",
-        "smart_horses": [
-          7,
-          3,
-          9
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 10.6,
-        "high_odds": false
-      },
       {
         "race": "카사마츠 11경주",
         "date": "2026-11-20",
@@ -6555,6 +6554,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 5.2,
+        "high_odds": false
+      },
+      {
+        "race": "나라 9경주",
+        "date": "2026-11-23",
+        "smart_horses": [
+          2,
+          4,
+          1
+        ],
+        "placed": [
+          4,
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
