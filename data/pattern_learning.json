@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 5경주",
-      "horse_no": 8,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-16"
-    },
-    {
-      "race": "카나자와 5경주",
-      "horse_no": 6,
-      "recent_avg": 7.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-16"
-    },
-    {
-      "race": "카나자와 6경주",
-      "horse_no": 8,
-      "recent_avg": 6.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-16"
-    },
-    {
       "race": "카나자와 6경주",
       "horse_no": 3,
       "recent_avg": 6.8,
@@ -4638,16 +4610,42 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1795413734.2868726
+    },
+    {
+      "race": "오비히로 3경주",
+      "horse_no": 8,
+      "recent_avg": 6.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-23"
+    },
+    {
+      "race": "오비히로 3경주",
+      "horse_no": 10,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-23"
+    },
+    {
+      "race": "오비히로 3경주",
+      "horse_no": 3,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-23"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18449,
-      "hit": 2633
+      "count": 18455,
+      "hit": 2635
     },
     "전체부진마": {
-      "count": 29308,
-      "hit": 7516
+      "count": 29317,
+      "hit": 7519
     },
     "대규모급락": {
       "count": 1,
@@ -4657,8 +4655,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 10859,
-      "hit": 4883
+      "count": 10862,
+      "hit": 4884
     },
     "급락동반": {
       "count": 944,
@@ -5035,22 +5033,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4858,
-    "hit": 3577,
+    "count": 4859,
+    "hit": 3578,
     "cases": [
-      {
-        "race": "카사마츠 11경주",
-        "date": "2026-11-20",
-        "smart_horses": [
-          8,
-          9
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 1.9,
-        "high_odds": false
-      },
       {
         "race": "카사마츠 12경주",
         "date": "2026-11-20",
@@ -6557,6 +6542,22 @@
         "placed": [
           4,
           1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "오비히로 3경주",
+        "date": "2026-11-23",
+        "smart_horses": [
+          9,
+          10,
+          2
+        ],
+        "placed": [
+          10
         ],
         "hit": true,
         "trifecta_odds": null,
