@@ -4634,11 +4634,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18562,
+      "count": 18568,
       "hit": 2653
     },
     "전체부진마": {
-      "count": 29474,
+      "count": 29481,
       "hit": 7561
     },
     "대규모급락": {
@@ -4649,7 +4649,7 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 10912,
+      "count": 10913,
       "hit": 4908
     },
     "급락동반": {
@@ -5027,25 +5027,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4885,
-    "hit": 3595,
+    "count": 4886,
+    "hit": 3596,
     "cases": [
-      {
-        "race": "사가 6경주",
-        "date": "2026-11-21",
-        "smart_horses": [
-          2,
-          3,
-          6
-        ],
-        "placed": [
-          6
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.7,
-        "high_odds": false
-      },
       {
         "race": "오비히로 8경주",
         "date": "2026-11-21",
@@ -6559,6 +6543,22 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": 10.5,
+        "high_odds": false
+      },
+      {
+        "race": "사가 8경주",
+        "date": "2026-11-23",
+        "smart_horses": [
+          3,
+          5,
+          8
+        ],
+        "placed": [
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 8.0,
         "high_odds": false
       }
     ],
