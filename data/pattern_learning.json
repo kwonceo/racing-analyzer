@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "미즈사와 9경주",
-      "horse_no": 7,
-      "recent_avg": 6.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-17"
-    },
-    {
       "race": "카나자와 4경주",
       "horse_no": 2,
       "recent_avg": 10.0,
@@ -4627,16 +4617,26 @@
         "복승이상감지"
       ],
       "date": "2026-11-24"
+    },
+    {
+      "race": "우라와 9경주",
+      "horse_no": 7,
+      "recent_avg": 4.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18712,
+      "count": 18719,
       "hit": 2672
     },
     "전체부진마": {
-      "count": 29694,
-      "hit": 7612
+      "count": 29704,
+      "hit": 7613
     },
     "대규모급락": {
       "count": 1,
@@ -4646,8 +4646,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 10982,
-      "hit": 4940
+      "count": 10985,
+      "hit": 4941
     },
     "급락동반": {
       "count": 949,
@@ -5024,26 +5024,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4919,
-    "hit": 3624,
+    "count": 4920,
+    "hit": 3625,
     "cases": [
-      {
-        "race": "코치 2경주",
-        "date": "2026-11-22",
-        "smart_horses": [
-          8,
-          9,
-          3,
-          2
-        ],
-        "placed": [
-          9
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.3,
-        "high_odds": false
-      },
       {
         "race": "사가 2경주",
         "date": "2026-11-22",
@@ -6569,6 +6552,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 9.3,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 9경주",
+        "date": "2026-11-24",
+        "smart_horses": [
+          11,
+          6,
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
