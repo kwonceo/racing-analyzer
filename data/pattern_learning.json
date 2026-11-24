@@ -1,28 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오이 9경주",
-      "horse_no": 3,
-      "recent_avg": 8.8,
-      "win_place": 1,
-      "conditions": [
-        "급락55%",
-        "복승이상감지"
-      ],
-      "date": "2026-11-17"
-    },
-    {
-      "race": "오이 9경주",
-      "horse_no": 5,
-      "recent_avg": 10.4,
-      "win_place": 2,
-      "conditions": [
-        "급락49%",
-        "복승이상감지"
-      ],
-      "date": "2026-11-17"
-    },
-    {
       "race": "카나자와 9경주",
       "horse_no": 6,
       "recent_avg": 6.0,
@@ -4631,16 +4609,34 @@
         "복승이상감지"
       ],
       "date": "2026-11-24"
+    },
+    {
+      "race": "우라와 10경주",
+      "horse_no": 3,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-24"
+    },
+    {
+      "race": "우라와 10경주",
+      "horse_no": 1,
+      "recent_avg": 6.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18738,
-      "hit": 2674
+      "count": 18745,
+      "hit": 2675
     },
     "전체부진마": {
-      "count": 29731,
-      "hit": 7620
+      "count": 29741,
+      "hit": 7622
     },
     "대규모급락": {
       "count": 1,
@@ -4650,8 +4646,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 10993,
-      "hit": 4946
+      "count": 10996,
+      "hit": 4947
     },
     "급락동반": {
       "count": 949,
@@ -5028,24 +5024,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4925,
-    "hit": 3629,
+    "count": 4926,
+    "hit": 3630,
     "cases": [
-      {
-        "race": "코쿠라경륜 7경주",
-        "date": "2026-11-22",
-        "smart_horses": [
-          9,
-          7
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "사가 7경주",
         "date": "2026-11-22",
@@ -6574,6 +6555,22 @@
         "hit": true,
         "trifecta_odds": 3.9,
         "quinella_odds": 5.2,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 10경주",
+        "date": "2026-11-24",
+        "smart_horses": [
+          3,
+          4,
+          5
+        ],
+        "placed": [
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 3.6,
         "high_odds": false
       }
     ],
