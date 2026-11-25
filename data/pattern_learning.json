@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카사마츠 3경주",
-      "horse_no": 1,
-      "recent_avg": 11.3,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-18"
-    },
-    {
-      "race": "카사마츠 3경주",
-      "horse_no": 7,
-      "recent_avg": 6.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-11-18"
-    },
-    {
       "race": "소노다 2경주",
       "horse_no": 6,
       "recent_avg": 4.4,
@@ -4629,16 +4611,32 @@
         "복승이상감지"
       ],
       "date": "2026-11-25"
+    },
+    {
+      "race": "우라와 3경주",
+      "horse_no": 11,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-25"
+    },
+    {
+      "race": "우라와 3경주",
+      "horse_no": 8,
+      "recent_avg": 7.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18835,
-      "hit": 2687
+      "count": 18841,
+      "hit": 2689
     },
     "전체부진마": {
-      "count": 29879,
-      "hit": 7653
+      "count": 29885,
+      "hit": 7655
     },
     "대규모급락": {
       "count": 1,
@@ -5026,23 +5024,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 4951,
+    "count": 4952,
     "hit": 3648,
     "cases": [
-      {
-        "race": "오비히로 1경주",
-        "date": "2026-11-23",
-        "smart_horses": [
-          10,
-          8,
-          6
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "나라 7경주",
         "date": "2026-11-23",
@@ -6582,6 +6566,19 @@
           6
         ],
         "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 3경주",
+        "date": "2026-11-25",
+        "smart_horses": [
+          12,
+          6
+        ],
+        "placed": [],
+        "hit": false,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
