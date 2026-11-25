@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "소노다 2경주",
-      "horse_no": 6,
-      "recent_avg": 4.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-18"
-    },
-    {
-      "race": "소노다 2경주",
       "horse_no": 4,
       "recent_avg": 7.8,
       "win_place": 3,
@@ -4627,16 +4617,26 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-11-25"
+    },
+    {
+      "race": "우라와 4경주",
+      "horse_no": 8,
+      "recent_avg": 7.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18841,
+      "count": 18848,
       "hit": 2689
     },
     "전체부진마": {
-      "count": 29885,
-      "hit": 7655
+      "count": 29893,
+      "hit": 7656
     },
     "대규모급락": {
       "count": 1,
@@ -4646,8 +4646,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 11044,
-      "hit": 4966
+      "count": 11045,
+      "hit": 4967
     },
     "급락동반": {
       "count": 956,
