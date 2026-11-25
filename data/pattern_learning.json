@@ -1,38 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오이 8경주",
-      "horse_no": 1,
-      "recent_avg": 5.6,
-      "win_place": 3,
-      "conditions": [
-        "급락64%",
-        "복승이상감지"
-      ],
-      "date": "2026-11-18"
-    },
-    {
-      "race": "오이 7경주",
-      "horse_no": 9,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-18"
-    },
-    {
-      "race": "오이 6경주",
-      "horse_no": 6,
-      "recent_avg": 4.4,
-      "win_place": 1,
-      "conditions": [
-        "급락60%",
-        "복승이상감지"
-      ],
-      "date": "2026-11-18"
-    },
-    {
       "race": "오이 6경주",
       "horse_no": 3,
       "recent_avg": 8.6,
@@ -4630,16 +4598,44 @@
         "복승이상감지"
       ],
       "date": "2026-11-25"
+    },
+    {
+      "race": "나고야 6경주",
+      "horse_no": 12,
+      "recent_avg": 8.3,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-25"
+    },
+    {
+      "race": "나고야 6경주",
+      "horse_no": 6,
+      "recent_avg": 9.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-25"
+    },
+    {
+      "race": "나고야 6경주",
+      "horse_no": 3,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18920,
-      "hit": 2697
+      "count": 18928,
+      "hit": 2698
     },
     "전체부진마": {
-      "count": 30018,
-      "hit": 7683
+      "count": 30030,
+      "hit": 7686
     },
     "대규모급락": {
       "count": 1,
@@ -4649,8 +4645,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 11098,
-      "hit": 4986
+      "count": 11102,
+      "hit": 4988
     },
     "급락동반": {
       "count": 969,
