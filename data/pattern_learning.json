@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 7경주",
-      "horse_no": 1,
-      "recent_avg": 4.4,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-18"
-    },
-    {
-      "race": "카사마츠 7경주",
-      "horse_no": 6,
-      "recent_avg": 8.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-11-18"
-    },
-    {
-      "race": "카사마츠 7경주",
-      "horse_no": 10,
-      "recent_avg": 7.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-18"
-    },
-    {
       "race": "카사마츠 7경주",
       "horse_no": 2,
       "recent_avg": 5.6,
@@ -4623,6 +4597,38 @@
         "복승이상감지"
       ],
       "date": "2026-11-25"
+    },
+    {
+      "race": "우라와 7경주",
+      "horse_no": 5,
+      "recent_avg": 5.4,
+      "win_place": 2,
+      "conditions": [
+        "급락56%",
+        "복승이상감지"
+      ],
+      "date": "2026-11-25"
+    },
+    {
+      "race": "우라와 7경주",
+      "horse_no": 7,
+      "recent_avg": 6.2,
+      "win_place": 1,
+      "conditions": [
+        "급락41%",
+        "복승이상감지"
+      ],
+      "date": "2026-11-25"
+    },
+    {
+      "race": "우라와 7경주",
+      "horse_no": 4,
+      "recent_avg": 9.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-25"
     }
   ],
   "condition_stats": {
@@ -4631,8 +4637,8 @@
       "hit": 2693
     },
     "전체부진마": {
-      "count": 29940,
-      "hit": 7666
+      "count": 29952,
+      "hit": 7669
     },
     "대규모급락": {
       "count": 1,
@@ -4642,12 +4648,12 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 11059,
-      "hit": 4973
+      "count": 11071,
+      "hit": 4976
     },
     "급락동반": {
-      "count": 956,
-      "hit": 264
+      "count": 960,
+      "hit": 266
     }
   },
   "bokbyeong_patterns": [
