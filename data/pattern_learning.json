@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 10경주",
-      "horse_no": 7,
-      "recent_avg": 5.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-19"
-    },
-    {
-      "race": "소노다 11경주",
-      "horse_no": 4,
-      "recent_avg": 9.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-19"
-    },
-    {
-      "race": "소노다 11경주",
-      "horse_no": 9,
-      "recent_avg": 8.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-11-19"
-    },
-    {
       "race": "카사마츠 11경주",
       "horse_no": 10,
       "recent_avg": 7.4,
@@ -4644,16 +4616,42 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-11-26"
+    },
+    {
+      "race": "우라와 11경주",
+      "horse_no": 13,
+      "recent_avg": 4.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-26"
+    },
+    {
+      "race": "우라와 11경주",
+      "horse_no": 2,
+      "recent_avg": 6.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-11-26"
+    },
+    {
+      "race": "우라와 11경주",
+      "horse_no": 5,
+      "recent_avg": 8.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-11-26"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 19118,
-      "hit": 2713
+      "count": 19126,
+      "hit": 2715
     },
     "전체부진마": {
-      "count": 30335,
-      "hit": 7754
+      "count": 30345,
+      "hit": 7757
     },
     "대규모급락": {
       "count": 2,
@@ -4663,8 +4661,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 11217,
-      "hit": 5041
+      "count": 11219,
+      "hit": 5042
     },
     "급락동반": {
       "count": 986,
