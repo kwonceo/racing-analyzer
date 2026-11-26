@@ -4629,6 +4629,19 @@
         "복승이상감지"
       ],
       "date": "2026-11-26"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "도야마 8경주",
+      "total_combos_dropped": 11,
+      "drop_ratio": 0.524,
+      "result": "2+6",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-67.5%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1795673241.8315074
     }
   ],
   "condition_stats": {
@@ -4641,7 +4654,7 @@
       "hit": 7730
     },
     "대규모급락": {
-      "count": 1,
+      "count": 2,
       "high_odds": 0,
       "recommended_hit": 0,
       "high_odds_rate": 0.0,
@@ -5026,26 +5039,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 5009,
-    "hit": 3696,
+    "count": 5010,
+    "hit": 3697,
     "cases": [
-      {
-        "race": "나고야 1경주",
-        "date": "2026-11-24",
-        "smart_horses": [
-          10,
-          1,
-          8,
-          11
-        ],
-        "placed": [
-          10
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "나라 9경주",
         "date": "2026-11-24",
@@ -6605,6 +6601,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 4.3,
+        "high_odds": false
+      },
+      {
+        "race": "도야마 8경주",
+        "date": "2026-11-26",
+        "smart_horses": [
+          6,
+          2
+        ],
+        "placed": [
+          6,
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
