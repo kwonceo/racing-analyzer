@@ -4652,11 +4652,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 19272,
+      "count": 19274,
       "hit": 2730
     },
     "전체부진마": {
-      "count": 30548,
+      "count": 30550,
       "hit": 7803
     },
     "대규모급락": {
@@ -5045,27 +5045,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 5064,
-    "hit": 3741,
+    "count": 5065,
+    "hit": 3742,
     "cases": [
-      {
-        "race": "시즈오카 10경주",
-        "date": "2026-11-25",
-        "smart_horses": [
-          5,
-          7,
-          3
-        ],
-        "placed": [
-          5,
-          7,
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.2,
-        "high_odds": false
-      },
       {
         "race": "소노다 10경주",
         "date": "2026-11-25",
@@ -6622,6 +6604,23 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "소노다 8경주",
+        "date": "2026-11-27",
+        "smart_horses": [
+          3,
+          5,
+          7,
+          1
+        ],
+        "placed": [
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 4.2,
         "high_odds": false
       }
     ],
