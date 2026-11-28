@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "사가 1경주",
-      "horse_no": 4,
-      "recent_avg": 4.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-11-21"
-    },
-    {
-      "race": "사가 1경주",
-      "horse_no": 7,
-      "recent_avg": 4.5,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-21"
-    },
-    {
-      "race": "사가 2경주",
-      "horse_no": 6,
-      "recent_avg": 6.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-21"
-    },
-    {
       "race": "사가 2경주",
       "horse_no": 12,
       "recent_avg": 6.4,
@@ -4656,16 +4628,46 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-11-28"
+    },
+    {
+      "race": "코치 5경주",
+      "horse_no": 3,
+      "recent_avg": 8.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-28"
+    },
+    {
+      "race": "코치 5경주",
+      "horse_no": 8,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-28"
+    },
+    {
+      "race": "코치 5경주",
+      "horse_no": 4,
+      "recent_avg": 9.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 19389,
+      "count": 19395,
       "hit": 2748
     },
     "전체부진마": {
-      "count": 30715,
-      "hit": 7841
+      "count": 30725,
+      "hit": 7844
     },
     "대규모급락": {
       "count": 2,
@@ -4675,8 +4677,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 11326,
-      "hit": 5093
+      "count": 11330,
+      "hit": 5096
     },
     "급락동반": {
       "count": 986,
