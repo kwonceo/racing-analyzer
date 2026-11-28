@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "오비히로 6경주",
-      "horse_no": 4,
-      "recent_avg": 4.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-11-21"
-    },
-    {
-      "race": "오비히로 6경주",
       "horse_no": 2,
       "recent_avg": 6.2,
       "win_place": 1,
@@ -4657,16 +4647,26 @@
         "복승이상감지"
       ],
       "date": "2026-11-28"
+    },
+    {
+      "race": "코치 7경주",
+      "horse_no": 3,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-11-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 19426,
+      "count": 19431,
       "hit": 2753
     },
     "전체부진마": {
-      "count": 30778,
-      "hit": 7859
+      "count": 30785,
+      "hit": 7860
     },
     "대규모급락": {
       "count": 2,
@@ -4676,8 +4676,8 @@
       "hit_rate": 0.0
     },
     "이상감지동반": {
-      "count": 11352,
-      "hit": 5106
+      "count": 11354,
+      "hit": 5107
     },
     "급락동반": {
       "count": 993,
